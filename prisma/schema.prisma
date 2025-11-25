@@ -1,0 +1,159 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  image         String?
+  emailVerified DateTime?
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  sessions      Session[]
+  accounts      Account[]
+
+  ownedSpaces   Space[]   @relation("SpaceOwner")
+  memberships   SpaceMember[]
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  expiresAt DateTime
+  token     String
+  createdAt DateTime
+  updatedAt DateTime
+  ipAddress String?
+  userAgent String?
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime
+  updatedAt             DateTime
+
+  @@map("account")
+}
+
+model Verification {
+  id         String    @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime?
+  updatedAt  DateTime?
+
+  @@map("verification")
+}
+
+model Space {
+  id          String    @id @default(cuid())
+  ownerId     String
+  slug        String    @unique
+  name        String
+  description String?
+  accessType  AccessType @default(PUBLIC)
+  passwordHash String?
+  discordGuildId String?
+  discordRoleId String?
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  owner       User      @relation("SpaceOwner", fields: [ownerId], references: [id])
+  members     SpaceMember[]
+  categories  Category[]
+  settings    SpaceSettings?
+
+  @@map("space")
+}
+
+enum AccessType {
+  PUBLIC
+  PASSWORD
+  DISCORD_GATED
+}
+
+model SpaceMember {
+  id        String    @id @default(cuid())
+  spaceId   String
+  userId    String
+  role      SpaceRole @default(MEMBER)
+  joinedAt  DateTime  @default(now())
+
+  space     Space     @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([spaceId, userId])
+  @@map("space_member")
+}
+
+enum SpaceRole {
+  OWNER
+  MEMBER
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  spaceId   String
+  name      String
+  order     Int       @default(0)
+  createdAt DateTime  @default(now())
+
+  space     Space     @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  bookmarks Bookmark[]
+
+  @@map("category")
+}
+
+model Bookmark {
+  id          String    @id @default(cuid())
+  categoryId  String
+  url         String
+  title       String?
+  description String?
+  image       String?
+  aiSummary   String?
+  metadata    Json?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  category    Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@map("bookmark")
+}
+
+model SpaceSettings {
+  id            String    @id @default(cuid())
+  spaceId       String    @unique
+  theme         String?   @default("light")
+  allowComments Boolean   @default(false)
+
+  space         Space     @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+
+  @@map("space_settings")
+}
