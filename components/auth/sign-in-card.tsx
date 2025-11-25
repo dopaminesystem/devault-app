@@ -1,5 +1,6 @@
 "use client";
 
+import { signInAction, AuthActionState } from "@/app/actions/auth";
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -15,30 +16,22 @@ import { authClient } from "@/lib/auth-client";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useActionState, useEffect } from "react";
+
+const initialState: AuthActionState = {
+    error: "",
+    success: false,
+};
 
 export function SignInCard() {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [loading, setLoading] = useState(false);
+    const [state, formAction, pending] = useActionState(signInAction, initialState);
     const router = useRouter();
 
-    const handleSignIn = async () => {
-        setLoading(true);
-        await authClient.signIn.email({
-            email,
-            password,
-            fetchOptions: {
-                onSuccess: () => {
-                    router.push("/dashboard");
-                },
-                onError: (ctx) => {
-                    alert(ctx.error.message);
-                    setLoading(false);
-                },
-            },
-        });
-    };
+    useEffect(() => {
+        if (state?.success) {
+            router.push("/dashboard");
+        }
+    }, [state?.success, router]);
 
     const handleDiscordSignIn = async () => {
         await authClient.signIn.social({
@@ -54,29 +47,40 @@ export function SignInCard() {
                 <CardDescription>Sign in to your account to continue</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-                <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                        id="email"
-                        type="email"
-                        placeholder="m@example.com"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                    />
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="password">Password</Label>
-                    <Input
-                        id="password"
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
-                </div>
-                <Button className="w-full" onClick={handleSignIn} disabled={loading}>
-                    {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                    Sign In
-                </Button>
+                <form action={formAction} className="space-y-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="email">Email</Label>
+                        <Input
+                            id="email"
+                            name="email"
+                            type="email"
+                            placeholder="m@example.com"
+                            required
+                        />
+                        {state?.fieldErrors?.email && (
+                            <p className="text-sm text-red-500">{state.fieldErrors.email[0]}</p>
+                        )}
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="password">Password</Label>
+                        <Input
+                            id="password"
+                            name="password"
+                            type="password"
+                            required
+                        />
+                        {state?.fieldErrors?.password && (
+                            <p className="text-sm text-red-500">{state.fieldErrors.password[0]}</p>
+                        )}
+                    </div>
+                    {state?.error && (
+                        <p className="text-sm text-red-500">{state.error}</p>
+                    )}
+                    <Button className="w-full" type="submit" disabled={pending}>
+                        {pending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                        Sign In
+                    </Button>
+                </form>
                 <div className="relative">
                     <div className="absolute inset-0 flex items-center">
                         <span className="w-full border-t" />
@@ -91,6 +95,7 @@ export function SignInCard() {
                     variant="outline"
                     className="w-full"
                     onClick={handleDiscordSignIn}
+                    type="button"
                 >
                     Discord
                 </Button>
@@ -106,3 +111,4 @@ export function SignInCard() {
         </Card>
     );
 }
+

@@ -1,5 +1,7 @@
 "use client";
 
+import { signUpAction, AuthActionState } from "@/app/actions/auth";
+
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -15,32 +17,22 @@ import { authClient } from "@/lib/auth-client";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useActionState, useEffect } from "react";
+
+const initialState: AuthActionState = {
+    error: "",
+    success: false,
+};
 
 export function SignUpCard() {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [name, setName] = useState("");
-    const [loading, setLoading] = useState(false);
+    const [state, formAction, pending] = useActionState(signUpAction, initialState);
     const router = useRouter();
 
-    const handleSignUp = async () => {
-        setLoading(true);
-        await authClient.signUp.email({
-            email,
-            password,
-            name,
-            fetchOptions: {
-                onSuccess: () => {
-                    router.push("/dashboard");
-                },
-                onError: (ctx) => {
-                    alert(ctx.error.message);
-                    setLoading(false);
-                },
-            },
-        });
-    };
+    useEffect(() => {
+        if (state?.success) {
+            router.push("/dashboard");
+        }
+    }, [state?.success, router]);
 
     const handleDiscordSignUp = async () => {
         await authClient.signIn.social({
@@ -58,38 +50,53 @@ export function SignUpCard() {
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-                <div className="space-y-2">
-                    <Label htmlFor="name">Name</Label>
-                    <Input
-                        id="name"
-                        placeholder="John Doe"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                    />
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                        id="email"
-                        type="email"
-                        placeholder="m@example.com"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                    />
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="password">Password</Label>
-                    <Input
-                        id="password"
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
-                </div>
-                <Button className="w-full" onClick={handleSignUp} disabled={loading}>
-                    {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                    Sign Up
-                </Button>
+                <form action={formAction} className="space-y-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="name">Name</Label>
+                        <Input
+                            id="name"
+                            name="name"
+                            placeholder="John Doe"
+                            required
+                        />
+                        {state?.fieldErrors?.name && (
+                            <p className="text-sm text-red-500">{state.fieldErrors.name[0]}</p>
+                        )}
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="email">Email</Label>
+                        <Input
+                            id="email"
+                            name="email"
+                            type="email"
+                            placeholder="m@example.com"
+                            required
+                        />
+                        {state?.fieldErrors?.email && (
+                            <p className="text-sm text-red-500">{state.fieldErrors.email[0]}</p>
+                        )}
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="password">Password</Label>
+                        <Input
+                            id="password"
+                            name="password"
+                            type="password"
+                            required
+                        />
+                        {state?.fieldErrors?.password && (
+                            <p className="text-sm text-red-500">{state.fieldErrors.password[0]}</p>
+                        )}
+                    </div>
+                    {state?.error && (
+                        <p className="text-sm text-red-500">{state.error}</p>
+                    )}
+                    <Button className="w-full" type="submit" disabled={pending}>
+                        {pending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                        Sign Up
+                    </Button>
+                </form>
+
                 <div className="relative">
                     <div className="absolute inset-0 flex items-center">
                         <span className="w-full border-t" />
@@ -104,6 +111,7 @@ export function SignUpCard() {
                     variant="outline"
                     className="w-full"
                     onClick={handleDiscordSignUp}
+                    type="button"
                 >
                     Discord
                 </Button>

@@ -34,25 +34,26 @@ export async function createSafeAction<TInput extends z.ZodType, TOutput>(
 // Better Pattern: Action Client
 export const actionClient = {
     // Wrapper for public actions
-    action: async <TInput, TOutput>(
+    action: <TInput, TOutput>(
         schema: z.ZodType<TInput>,
-        input: TInput,
         handler: (data: TInput) => Promise<TOutput>
-    ): Promise<ActionState<TOutput>> => {
-        const validation = schema.safeParse(input);
-        if (!validation.success) {
-            return {
-                error: "Validation failed",
-                fieldErrors: validation.error.flatten().fieldErrors as Record<string, string[]>,
-            };
-        }
+    ) => {
+        return async (input: TInput): Promise<ActionState<TOutput>> => {
+            const validation = schema.safeParse(input);
+            if (!validation.success) {
+                return {
+                    error: "Validation failed",
+                    fieldErrors: validation.error.flatten().fieldErrors as Record<string, string[]>,
+                };
+            }
 
-        try {
-            const data = await handler(validation.data);
-            return { data };
-        } catch (error) {
-            console.error("Action error:", error);
-            return { error: (error as Error).message || "Something went wrong" };
-        }
+            try {
+                const data = await handler(validation.data);
+                return { data };
+            } catch (error) {
+                console.error("Action error:", error);
+                return { error: (error as Error).message || "Something went wrong" };
+            }
+        };
     },
 };
