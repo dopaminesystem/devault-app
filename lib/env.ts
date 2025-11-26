@@ -30,7 +30,7 @@ const processEnv = {
 // Only validate server vars on server
 const serverEnv = typeof window === 'undefined'
     ? serverSchema.safeParse(processEnv)
-    : { success: true, data: {} as z.infer<typeof serverSchema> }; // Skip server validation on client
+    : { success: true as const, data: {} as z.infer<typeof serverSchema> }; // Skip server validation on client
 
 const clientEnv = clientSchema.safeParse(processEnv);
 
