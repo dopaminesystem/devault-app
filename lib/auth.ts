@@ -2,6 +2,7 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "./prisma";
 import { env } from "./env";
+import { headers } from "next/headers";
 
 export const auth = betterAuth({
     database: prismaAdapter(prisma, {
@@ -17,3 +18,10 @@ export const auth = betterAuth({
         },
     },
 });
+
+export async function getSession() {
+    return await auth.api.getSession({
+        headers: await headers(),
+    });
+}
+

@@ -1,26 +1,44 @@
 "use server";
 
-import { auth } from "@/lib/auth";
+import { auth, getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { checkDiscordMembership } from "@/lib/discord";
-import { headers } from "next/headers";
+import { isDiscordMember } from "@/lib/discord";
+
 import { z } from "zod";
 
 const createSpaceSchema = z.object({
-    name: z.string().min(1),
-    slug: z.string().min(1),
+    name: z.string().min(1, "Name is required"),
+    slug: z.string().min(1, "Slug is required").regex(/^[a-z0-9-]+$/, "Slug must be lowercase, numbers, and hyphens only"),
     accessType: z.enum(["PUBLIC", "PASSWORD", "DISCORD_GATED"]),
     discordGuildId: z.string().optional(),
     discordRoleId: z.string().optional(),
+}).refine((data) => {
+    if (data.accessType === "DISCORD_GATED" && !data.discordGuildId) {
+        return false;
+    }
+    return true;
+}, {
+    message: "Discord Guild ID is required for Discord Gated spaces",
+    path: ["discordGuildId"],
 });
 
-export async function createSpace(formData: FormData) {
-    const session = await auth.api.getSession({
-        headers: await headers(),
-    });
+export type State = {
+    errors?: {
+        name?: string[];
+        slug?: string[];
+        accessType?: string[];
+        discordGuildId?: string[];
+        discordRoleId?: string[];
+    };
+    message?: string | null;
+    success?: boolean;
+};
+
+export async function createSpace(prevState: State, formData: FormData): Promise<State> {
+    const session = await getSession();
 
     if (!session) {
-        return { error: "Unauthorized" };
+        return { message: "Unauthorized" };
     }
 
     const name = formData.get("name") as string;
@@ -29,7 +47,7 @@ export async function createSpace(formData: FormData) {
     const discordGuildId = formData.get("discordGuildId") as string;
     const discordRoleId = formData.get("discordRoleId") as string;
 
-    const validation = createSpaceSchema.safeParse({
+    const validatedFields = createSpaceSchema.safeParse({
         name,
         slug,
         accessType,
@@ -37,19 +55,24 @@ export async function createSpace(formData: FormData) {
         discordRoleId,
     });
 
-    if (!validation.success) {
-        return { error: "Validation failed" };
+    if (!validatedFields.success) {
+        return {
+            errors: validatedFields.error.flatten().fieldErrors,
+            message: "Missing Fields. Failed to Create Space.",
+        };
     }
+
+    const { data } = validatedFields;
 
     try {
         const space = await prisma.space.create({
             data: {
-                name,
-                slug,
+                name: data.name,
+                slug: data.slug,
                 ownerId: session.user.id,
-                accessType,
-                discordGuildId: accessType === "DISCORD_GATED" ? discordGuildId : undefined,
-                discordRoleId: accessType === "DISCORD_GATED" ? discordRoleId : undefined,
+                accessType: data.accessType,
+                discordGuildId: data.accessType === "DISCORD_GATED" ? data.discordGuildId : undefined,
+                discordRoleId: data.accessType === "DISCORD_GATED" ? data.discordRoleId : undefined,
                 members: {
                     create: {
                         userId: session.user.id,
@@ -58,17 +81,24 @@ export async function createSpace(formData: FormData) {
                 },
             },
         });
-        return { success: true, space };
+        return { success: true, message: "Space created successfully" };
     } catch (error) {
         console.error(error);
-        return { error: "Failed to create space" };
+        // Check for unique constraint violation on slug
+        if ((error as any).code === 'P2002') {
+            return {
+                errors: {
+                    slug: ["Slug already exists"]
+                },
+                message: "Failed to create space"
+            }
+        }
+        return { message: "Failed to create space" };
     }
 }
 
 export async function getSpace(slug: string) {
-    const session = await auth.api.getSession({
-        headers: await headers(),
-    });
+    const session = await getSession();
 
     const space = await prisma.space.findUnique({
         where: { slug },
@@ -113,7 +143,7 @@ export async function getSpace(slug: string) {
         if (!space.discordGuildId) {
             return { error: "Access denied" };
         }
-        const hasAccess = await checkDiscordMembership(
+        const hasAccess = await isDiscordMember(
             session.user.id,
             space.discordGuildId,
             space.discordRoleId || undefined

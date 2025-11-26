@@ -1,6 +1,6 @@
 "use client";
 
-import { createSpace } from "@/app/actions/space";
+import { createSpace, State } from "@/app/actions/space";
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -21,29 +21,24 @@ import {
 } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useActionState, useEffect, useState } from "react";
+
+const initialState: State = {
+    message: null,
+    errors: {},
+};
 
 export function CreateSpaceForm() {
-    const [isLoading, setIsLoading] = useState(false);
+    const [state, formAction, isPending] = useActionState(createSpace, initialState);
     const [accessType, setAccessType] = useState("PUBLIC");
     const router = useRouter();
 
-    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        setIsLoading(true);
-
-        const formData = new FormData(event.currentTarget);
-        const res = await createSpace(formData);
-
-        setIsLoading(false);
-
-        if (res.success) {
+    useEffect(() => {
+        if (state?.success) {
             router.refresh();
             // Optionally redirect or show success message
-        } else {
-            alert(res.error);
         }
-    };
+    }, [state, router]);
 
     return (
         <Card className="w-full max-w-md">
@@ -51,15 +46,36 @@ export function CreateSpaceForm() {
                 <CardTitle>Create New Space</CardTitle>
                 <CardDescription>Create a space to share your bookmarks.</CardDescription>
             </CardHeader>
-            <form onSubmit={handleSubmit}>
+            <form action={formAction}>
                 <CardContent className="space-y-4">
+                    {state?.message && !state.success && (
+                        <div className="text-sm text-red-500 font-medium">
+                            {state.message}
+                        </div>
+                    )}
                     <div className="space-y-2">
                         <Label htmlFor="name">Name</Label>
-                        <Input id="name" name="name" placeholder="My Awesome Space" required />
+                        <Input id="name" name="name" placeholder="My Awesome Space" required aria-describedby="name-error" />
+                        <div id="name-error" aria-live="polite" aria-atomic="true">
+                            {state?.errors?.name &&
+                                state.errors.name.map((error: string) => (
+                                    <p className="mt-2 text-sm text-red-500" key={error}>
+                                        {error}
+                                    </p>
+                                ))}
+                        </div>
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="slug">Slug</Label>
-                        <Input id="slug" name="slug" placeholder="my-awesome-space" required />
+                        <Input id="slug" name="slug" placeholder="my-awesome-space" required aria-describedby="slug-error" />
+                        <div id="slug-error" aria-live="polite" aria-atomic="true">
+                            {state?.errors?.slug &&
+                                state.errors.slug.map((error: string) => (
+                                    <p className="mt-2 text-sm text-red-500" key={error}>
+                                        {error}
+                                    </p>
+                                ))}
+                        </div>
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="accessType">Access Type</Label>
@@ -84,7 +100,16 @@ export function CreateSpaceForm() {
                                     name="discordGuildId"
                                     placeholder="123456789012345678"
                                     required
+                                    aria-describedby="discordGuildId-error"
                                 />
+                                <div id="discordGuildId-error" aria-live="polite" aria-atomic="true">
+                                    {state?.errors?.discordGuildId &&
+                                        state.errors.discordGuildId.map((error: string) => (
+                                            <p className="mt-2 text-sm text-red-500" key={error}>
+                                                {error}
+                                            </p>
+                                        ))}
+                                </div>
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="discordRoleId">Discord Role ID (Optional)</Label>
@@ -98,8 +123,8 @@ export function CreateSpaceForm() {
                     )}
                 </CardContent>
                 <CardFooter>
-                    <Button className="w-full" type="submit" disabled={isLoading}>
-                        {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                    <Button className="w-full" type="submit" disabled={isPending}>
+                        {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                         Create Space
                     </Button>
                 </CardFooter>
