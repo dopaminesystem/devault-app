@@ -2,7 +2,7 @@
 
 import { auth, getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { isDiscordMember } from "@/lib/discord";
+import { isDiscordMembership } from "@/lib/discord";
 
 import { z } from "zod";
 
@@ -143,7 +143,7 @@ export async function getSpace(slug: string) {
         if (!space.discordGuildId) {
             return { error: "Access denied" };
         }
-        const hasAccess = await isDiscordMember(
+        const hasAccess = await isDiscordMembership(
             session.user.id,
             space.discordGuildId,
             space.discordRoleId || undefined

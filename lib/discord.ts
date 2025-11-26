@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 
-export async function checkDiscordMembership(userId: string, guildId: string, roleId?: string) {
+export async function isDiscordMembership(userId: string, guildId: string, roleId?: string) {
     const account = await prisma.account.findFirst({
         where: {
             userId,
