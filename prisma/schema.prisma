@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client-js"
-  previewFeatures = ["driverAdapters"]
+  // previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
@@ -8,20 +8,20 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
+  id            String  @id @default(cuid())
+  email         String  @unique
   name          String?
   image         String?
-  emailVerified Boolean   @default(false)
-  
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  emailVerified Boolean @default(false)
 
-  sessions      Session[]
-  accounts      Account[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  ownedSpaces   Space[]   @relation("SpaceOwner")
-  memberships   SpaceMember[]
+  sessions Session[]
+  accounts Account[]
+
+  ownedSpaces Space[]       @relation("SpaceOwner")
+  memberships SpaceMember[]
 
   @@map("user")
 }
@@ -72,23 +72,23 @@ model Verification {
 }
 
 model Space {
-  id          String    @id @default(cuid())
-  ownerId     String
-  slug        String    @unique
-  name        String
-  description String?
-  accessType  AccessType @default(PUBLIC)
-  passwordHash String?
+  id             String     @id @default(cuid())
+  ownerId        String
+  slug           String     @unique
+  name           String
+  description    String?
+  accessType     AccessType @default(PUBLIC)
+  passwordHash   String?
   discordGuildId String?
-  discordRoleId String?
-  
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  discordRoleId  String?
 
-  owner       User      @relation("SpaceOwner", fields: [ownerId], references: [id])
-  members     SpaceMember[]
-  categories  Category[]
-  settings    SpaceSettings?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  owner      User           @relation("SpaceOwner", fields: [ownerId], references: [id])
+  members    SpaceMember[]
+  categories Category[]
+  settings   SpaceSettings?
 
   @@map("space")
 }
@@ -100,14 +100,14 @@ enum AccessType {
 }
 
 model SpaceMember {
-  id        String    @id @default(cuid())
-  spaceId   String
-  userId    String
-  role      SpaceRole @default(MEMBER)
-  joinedAt  DateTime  @default(now())
+  id       String    @id @default(cuid())
+  spaceId  String
+  userId   String
+  role     SpaceRole @default(MEMBER)
+  joinedAt DateTime  @default(now())
 
-  space     Space     @relation(fields: [spaceId], references: [id], onDelete: Cascade)
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  space Space @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([spaceId, userId])
   @@map("space_member")
@@ -119,20 +119,20 @@ enum SpaceRole {
 }
 
 model Category {
-  id        String    @id @default(cuid())
+  id        String   @id @default(cuid())
   spaceId   String
   name      String
-  order     Int       @default(0)
-  createdAt DateTime  @default(now())
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
 
-  space     Space     @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  space     Space      @relation(fields: [spaceId], references: [id], onDelete: Cascade)
   bookmarks Bookmark[]
 
   @@map("category")
 }
 
 model Bookmark {
-  id          String    @id @default(cuid())
+  id          String   @id @default(cuid())
   categoryId  String
   url         String
   title       String?
@@ -140,21 +140,21 @@ model Bookmark {
   image       String?
   aiSummary   String?
   metadata    Json?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  category    Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   @@map("bookmark")
 }
 
 model SpaceSettings {
-  id            String    @id @default(cuid())
-  spaceId       String    @unique
-  theme         String?   @default("light")
-  allowComments Boolean   @default(false)
+  id            String  @id @default(cuid())
+  spaceId       String  @unique
+  theme         String? @default("light")
+  allowComments Boolean @default(false)
 
-  space         Space     @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  space Space @relation(fields: [spaceId], references: [id], onDelete: Cascade)
 
   @@map("space_settings")
 }
