@@ -1,6 +1,7 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "./prisma";
+import { env } from "./env";
 
 export const auth = betterAuth({
     database: prismaAdapter(prisma, {
@@ -11,8 +12,8 @@ export const auth = betterAuth({
     },
     socialProviders: {
         discord: {
-            clientId: process.env.DISCORD_CLIENT_ID!,
-            clientSecret: process.env.DISCORD_CLIENT_SECRET!,
+            clientId: env.DISCORD_CLIENT_ID,
+            clientSecret: env.DISCORD_CLIENT_SECRET,
         },
     },
 });

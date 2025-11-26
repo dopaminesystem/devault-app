@@ -46,14 +46,28 @@ A powerful, community-focused bookmark manager app where users can create spaces
     ```
 
 3.  Set up environment variables:
-    Create a `.env` file in the root directory and add the following:
-    ```env
-    DATABASE_URL="postgresql://..."
-    BETTER_AUTH_SECRET="..."
-    DISCORD_CLIENT_ID="..."
-    DISCORD_CLIENT_SECRET="..."
-    NEXT_PUBLIC_APP_URL="http://localhost:3000"
+    Create a `.env.local` file in the root directory (this file is gitignored and safe for secrets).
+    You can copy the example:
+    ```bash
+    cp .env.example .env.local
     ```
+    
+    Then fill in your values in `.env.local`:
+    ```env
+    # App
+    NEXT_PUBLIC_APP_URL="http://localhost:3000"
+    BETTER_AUTH_URL="http://localhost:3000"
+    
+    # Database
+    DATABASE_URL="postgresql://..."
+    
+    # Auth
+    BETTER_AUTH_SECRET="your-secret"
+    DISCORD_CLIENT_ID="your-local-client-id"
+    DISCORD_CLIENT_SECRET="your-local-client-secret"
+    ```
+
+    > **Note**: For production, set these variables in your deployment platform (e.g., Vercel, Railway). Use your production domain for `NEXT_PUBLIC_APP_URL` and `BETTER_AUTH_URL`.
 
 4.  Run database migrations:
     ```bash
