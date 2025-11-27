@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { FeatureCard } from "@/components/feature-card";
 import { Shield, Layers, Globe, ArrowRight, Vault, Zap, Lock, Share2, Code, Terminal } from "lucide-react";
 
 export default function Home() {
@@ -75,70 +76,55 @@ export default function Home() {
           </Card>
 
           {/* Medium Feature 2 - Organization */}
-          <Card className="md:col-span-1 lg:col-span-2 bg-card border-border/40 hover:border-primary/50 transition-colors group rounded-none">
-            <CardHeader className="p-8">
-              <Layers className="h-8 w-8 mb-4 text-foreground stroke-1" />
-              <CardTitle className="text-2xl font-bold tracking-tighter">Smart Organization</CardTitle>
-            </CardHeader>
-            <CardContent className="px-8 pb-8">
-              <p className="text-muted-foreground text-lg">
-                Tag, categorize, and filter your assets with a powerful, flexible system designed for speed.
-              </p>
-            </CardContent>
-          </Card>
+          <FeatureCard
+            className="md:col-span-1 lg:col-span-2"
+            headerClassName="p-8"
+            icon={Layers}
+            iconClassName="h-8 w-8"
+            title="Smart Organization"
+            titleClassName="text-2xl"
+            description="Tag, categorize, and filter your assets with a powerful, flexible system designed for speed."
+            descriptionClassName="text-lg"
+          />
 
           {/* Small Feature 3 - Speed */}
-          <Card className="bg-card border-border/40 hover:border-primary/50 transition-colors group rounded-none">
-            <CardHeader className="p-6">
-              <Zap className="h-6 w-6 mb-4 text-foreground stroke-1" />
-              <CardTitle className="text-xl font-bold tracking-tighter">Lightning Fast</CardTitle>
-            </CardHeader>
-            <CardContent className="px-6 pb-6">
-              <p className="text-sm text-muted-foreground">
-                Instant page loads and seamless interactions.
-              </p>
-            </CardContent>
-          </Card>
+          <FeatureCard
+            icon={Zap}
+            title="Lightning Fast"
+            description="Instant page loads and seamless interactions."
+          />
 
           {/* Small Feature 4 - Access */}
-          <Card className="bg-card border-border/40 hover:border-primary/50 transition-colors group rounded-none">
-            <CardHeader className="p-6">
-              <Globe className="h-6 w-6 mb-4 text-foreground stroke-1" />
-              <CardTitle className="text-xl font-bold tracking-tighter">Accessible Anywhere</CardTitle>
-            </CardHeader>
-            <CardContent className="px-6 pb-6">
-              <p className="text-sm text-muted-foreground">
-                Your vault travels with you. Access your bookmarks from any device, anytime.
-              </p>
-            </CardContent>
-          </Card>
+          <FeatureCard
+            icon={Globe}
+            title="Accessible Anywhere"
+            description="Your vault travels with you. Access your bookmarks from any device, anytime."
+          />
 
           {/* Medium Feature 5 - Sharing */}
-          <Card className="md:col-span-3 lg:col-span-2 bg-card border-border/40 hover:border-primary/50 transition-colors group rounded-none">
-            <CardHeader className="p-8">
-              <Share2 className="h-8 w-8 mb-4 text-foreground stroke-1" />
-              <CardTitle className="text-2xl font-bold tracking-tighter">Selective Sharing</CardTitle>
-            </CardHeader>
-            <CardContent className="px-8 pb-8">
-              <p className="text-muted-foreground text-lg">
-                Keep your personal items private, but share curated collections with the world via public links.
-              </p>
-            </CardContent>
-          </Card>
+          <FeatureCard
+            className="md:col-span-3 lg:col-span-2"
+            headerClassName="p-8"
+            icon={Share2}
+            iconClassName="h-8 w-8"
+            title="Selective Sharing"
+            titleClassName="text-2xl"
+            description="Keep your personal items private, but share curated collections with the world via public links."
+            descriptionClassName="text-lg"
+          />
 
           {/* Small Feature 6 - Developer First */}
-          <Card className="md:col-span-1 lg:col-span-2 bg-card border-border/40 hover:border-primary/50 transition-colors group rounded-none flex flex-col justify-center items-center text-center p-8">
-            <div className="space-y-4">
-              <div className="flex justify-center gap-4 text-muted-foreground">
+          <FeatureCard
+            className="md:col-span-1 lg:col-span-2 flex flex-col justify-center items-center text-center p-8"
+            customIcon={
+              <div className="flex justify-center gap-4 text-muted-foreground mb-4">
                 <Code className="h-8 w-8" />
                 <Terminal className="h-8 w-8" />
               </div>
-              <CardTitle className="text-xl font-bold tracking-tighter">Developer First</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Open source and ready for you to extend.
-              </p>
-            </div>
-          </Card>
+            }
+            title="Developer First"
+            description="Open source and ready for you to extend."
+          />
 
         </section>
       </main>
