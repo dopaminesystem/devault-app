@@ -140,6 +140,7 @@ model Bookmark {
   image       String?
   aiSummary   String?
   metadata    Json?
+  tags        String[] @default([])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

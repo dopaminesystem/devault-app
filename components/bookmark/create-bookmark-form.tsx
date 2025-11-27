@@ -92,6 +92,14 @@ export function CreateBookmarkForm({ vaultId }: CreateBookmarkFormProps) {
                                 placeholder="A short description..."
                             />
                         </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="tags">Tags (Optional)</Label>
+                            <Input
+                                id="tags"
+                                name="tags"
+                                placeholder="react, nextjs, ui (comma separated)"
+                            />
+                        </div>
                     </div>
                     {state.message && !state.success && (
                         <p className="text-sm text-red-500 mb-4">{state.message}</p>

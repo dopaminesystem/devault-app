@@ -34,6 +34,7 @@ const createBookmarkSchema = z.object({
     url: z.string().url("Please enter a valid URL"),
     title: z.string().optional(),
     description: z.string().optional(),
+    tags: z.string().optional(),
 });
 
 export async function createBookmark(prevState: any, formData: FormData) {
@@ -50,13 +51,19 @@ export async function createBookmark(prevState: any, formData: FormData) {
         url: formData.get("url"),
         title: formData.get("title"),
         description: formData.get("description"),
+        tags: formData.get("tags"),
     });
 
     if (!validatedFields.success) {
         return { success: false, message: "Invalid fields", errors: validatedFields.error.flatten().fieldErrors };
     }
 
-    const { vaultId, url, title, description } = validatedFields.data;
+    const { vaultId, url, title, description, tags } = validatedFields.data;
+
+    // Parse tags
+    const tagsArray = tags
+        ? tags.split(",").map((tag) => tag.trim()).filter((tag) => tag.length > 0)
+        : [];
 
     // Check access
     const vault = await prisma.vault.findUnique({
@@ -100,6 +107,7 @@ export async function createBookmark(prevState: any, formData: FormData) {
                 url,
                 title: title || url, // Default title to URL if empty
                 description,
+                tags: tagsArray,
             },
         });
 
