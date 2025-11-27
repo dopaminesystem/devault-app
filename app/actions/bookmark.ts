@@ -2,12 +2,12 @@
 
 import { prisma } from "@/lib/prisma";
 
-export async function getBookmarks(spaceId: string) {
+export async function getBookmarks(vaultId: string) {
     try {
         const bookmarks = await prisma.bookmark.findMany({
             where: {
                 category: {
-                    spaceId: spaceId,
+                    vaultId: vaultId,
                 },
             },
             include: {

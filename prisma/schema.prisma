@@ -20,8 +20,8 @@ model User {
   sessions Session[]
   accounts Account[]
 
-  ownedSpaces Space[]       @relation("SpaceOwner")
-  memberships SpaceMember[]
+  ownedVaults Vault[]       @relation("VaultOwner")
+  memberships VaultMember[]
 
   @@map("user")
 }
@@ -71,7 +71,7 @@ model Verification {
   @@map("verification")
 }
 
-model Space {
+model Vault {
   id             String     @id @default(cuid())
   ownerId        String
   slug           String     @unique
@@ -85,12 +85,12 @@ model Space {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  owner      User           @relation("SpaceOwner", fields: [ownerId], references: [id])
-  members    SpaceMember[]
+  owner      User           @relation("VaultOwner", fields: [ownerId], references: [id])
+  members    VaultMember[]
   categories Category[]
-  settings   SpaceSettings?
+  settings   VaultSettings?
 
-  @@map("space")
+  @@map("vault")
 }
 
 enum AccessType {
@@ -99,33 +99,33 @@ enum AccessType {
   DISCORD_GATED
 }
 
-model SpaceMember {
+model VaultMember {
   id       String    @id @default(cuid())
-  spaceId  String
+  vaultId  String
   userId   String
-  role     SpaceRole @default(MEMBER)
+  role     VaultRole @default(MEMBER)
   joinedAt DateTime  @default(now())
 
-  space Space @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  vault Vault @relation(fields: [vaultId], references: [id], onDelete: Cascade)
   user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([spaceId, userId])
-  @@map("space_member")
+  @@unique([vaultId, userId])
+  @@map("vault_member")
 }
 
-enum SpaceRole {
+enum VaultRole {
   OWNER
   MEMBER
 }
 
 model Category {
   id        String   @id @default(cuid())
-  spaceId   String
+  vaultId   String
   name      String
   order     Int      @default(0)
   createdAt DateTime @default(now())
 
-  space     Space      @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  vault     Vault      @relation(fields: [vaultId], references: [id], onDelete: Cascade)
   bookmarks Bookmark[]
 
   @@map("category")
@@ -148,13 +148,13 @@ model Bookmark {
   @@map("bookmark")
 }
 
-model SpaceSettings {
+model VaultSettings {
   id            String  @id @default(cuid())
-  spaceId       String  @unique
+  vaultId       String  @unique
   theme         String? @default("light")
   allowComments Boolean @default(false)
 
-  space Space @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  vault Vault @relation(fields: [vaultId], references: [id], onDelete: Cascade)
 
-  @@map("space_settings")
+  @@map("vault_settings")
 }

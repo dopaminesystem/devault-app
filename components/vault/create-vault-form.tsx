@@ -1,19 +1,19 @@
 "use client";
 
 import { useActionState, useEffect, useState } from "react";
-import { createSpace, CreateSpaceState } from "@/app/actions/space";
+import { createVault, CreateVaultState } from "@/app/actions/vault";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
-const initialState: CreateSpaceState = {
+const initialState: CreateVaultState = {
     message: "",
     errors: {},
 };
 
-export function CreateSpaceForm() {
-    const [state, formAction, isPending] = useActionState(createSpace, initialState);
+export function CreateVaultForm() {
+    const [state, formAction, isPending] = useActionState(createVault, initialState);
     const [name, setName] = useState("");
     const [slug, setSlug] = useState("");
 

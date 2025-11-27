@@ -1,5 +1,5 @@
 import { getBookmarks } from "@/app/actions/bookmark";
-import { getSpace } from "@/app/actions/space";
+import { getVault } from "@/app/actions/vault";
 import { BookmarkList } from "@/components/bookmark/bookmark-list";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,11 +7,11 @@ import { Lock } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-export default async function SpacePage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function VaultPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
-    const result = await getSpace(slug);
+    const result = await getVault(slug);
 
-    if (result.error === "Space not found") {
+    if (result.error === "Vault not found") {
         notFound();
     }
 
@@ -25,12 +25,12 @@ export default async function SpacePage({ params }: { params: Promise<{ slug: st
                         </div>
                         <CardTitle>Access Denied</CardTitle>
                         <CardDescription>
-                            You do not have permission to view this space.
+                            You do not have permission to view this vault.
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <p className="mb-4 text-sm text-muted-foreground">
-                            This space is restricted. You may need to sign in or join a specific Discord server to access it.
+                            This vault is restricted. You may need to sign in or join a specific Discord server to access it.
                         </p>
                         <div className="flex justify-center gap-4">
                             <Button asChild variant="outline">
@@ -50,17 +50,17 @@ export default async function SpacePage({ params }: { params: Promise<{ slug: st
         return <div>Error: {result.error}</div>;
     }
 
-    const { space } = result;
+    const { vault } = result;
 
     // Fetch bookmarks
-    const bookmarksResult = await getBookmarks(space!.id);
+    const bookmarksResult = await getBookmarks(vault!.id);
     const bookmarks = bookmarksResult.bookmarks || [];
 
     return (
         <div className="container mx-auto py-8 px-4">
             <div className="mb-8">
-                <h1 className="text-4xl font-bold mb-2">{space?.name}</h1>
-                <p className="text-muted-foreground text-lg">{space?.description || "No description"}</p>
+                <h1 className="text-4xl font-bold mb-2">{vault?.name}</h1>
+                <p className="text-muted-foreground text-lg">{vault?.description || "No description"}</p>
             </div>
 
             <div className="space-y-6">

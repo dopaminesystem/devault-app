@@ -10,10 +10,10 @@ async function main() {
         return;
     }
 
-    const space = await prisma.space.create({
+    const vault = await prisma.vault.create({
         data: {
-            name: "Demo Space",
-            slug: "demo-space",
+            name: "Demo Vault",
+            slug: "demo-vault",
             ownerId: user.id,
             accessType: "PUBLIC",
             categories: {
@@ -40,7 +40,7 @@ async function main() {
         },
     });
 
-    console.log("Created space:", space);
+    console.log("Created vault:", vault);
 }
 
 main()

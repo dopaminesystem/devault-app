@@ -7,13 +7,13 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
-const createSpaceSchema = z.object({
+const createVaultSchema = z.object({
     name: z.string().min(3, "Name must be at least 3 characters").max(50, "Name must be less than 50 characters"),
     slug: z.string().min(3, "Slug must be at least 3 characters").max(50, "Slug must be less than 50 characters").regex(/^[a-z0-9-]+$/, "Slug must contain only lowercase letters, numbers, and hyphens"),
     description: z.string().max(200, "Description must be less than 200 characters").optional(),
 });
 
-export type CreateSpaceState = {
+export type CreateVaultState = {
     errors?: {
         name?: string[];
         slug?: string[];
@@ -23,7 +23,7 @@ export type CreateSpaceState = {
     message?: string;
 };
 
-export async function createSpace(prevState: CreateSpaceState, formData: FormData): Promise<CreateSpaceState> {
+export async function createVault(prevState: CreateVaultState, formData: FormData): Promise<CreateVaultState> {
     const session = await auth.api.getSession({
         headers: await headers(),
     });
@@ -34,7 +34,7 @@ export async function createSpace(prevState: CreateSpaceState, formData: FormDat
         };
     }
 
-    const validatedFields = createSpaceSchema.safeParse({
+    const validatedFields = createVaultSchema.safeParse({
         name: formData.get("name"),
         slug: formData.get("slug"),
         description: formData.get("description"),
@@ -51,20 +51,20 @@ export async function createSpace(prevState: CreateSpaceState, formData: FormDat
 
     try {
         // Enforce 1 vault per user limit
-        const existingSpace = await prisma.space.findFirst({
+        const existingVault = await prisma.vault.findFirst({
             where: {
                 ownerId: session.user.id,
             },
         });
 
-        if (existingSpace) {
+        if (existingVault) {
             return {
                 message: "You can only create one vault.",
             };
         }
 
         // Check if slug is unique
-        const existingSlug = await prisma.space.findUnique({
+        const existingSlug = await prisma.vault.findUnique({
             where: {
                 slug,
             },
@@ -79,7 +79,7 @@ export async function createSpace(prevState: CreateSpaceState, formData: FormDat
             };
         }
 
-        await prisma.space.create({
+        await prisma.vault.create({
             data: {
                 name,
                 slug,
@@ -95,7 +95,7 @@ export async function createSpace(prevState: CreateSpaceState, formData: FormDat
         });
 
     } catch (error) {
-        console.error("Failed to create space:", error);
+        console.error("Failed to create vault:", error);
         return {
             message: "Failed to create vault. Please try again.",
         };
@@ -105,12 +105,12 @@ export async function createSpace(prevState: CreateSpaceState, formData: FormDat
     redirect("/dashboard");
 }
 
-export async function getSpace(slug: string) {
+export async function getVault(slug: string) {
     const session = await auth.api.getSession({
         headers: await headers(),
     });
 
-    const space = await prisma.space.findUnique({
+    const vault = await prisma.vault.findUnique({
         where: { slug },
         include: {
             owner: true,
@@ -118,16 +118,16 @@ export async function getSpace(slug: string) {
         },
     });
 
-    if (!space) {
-        return { error: "Space not found" };
+    if (!vault) {
+        return { error: "Vault not found" };
     }
 
     // Check access
-    const isOwner = session?.user?.id === space.ownerId;
-    const isMember = space.members.some((m) => m.userId === session?.user?.id);
+    const isOwner = session?.user?.id === vault.ownerId;
+    const isMember = vault.members.some((m) => m.userId === session?.user?.id);
 
-    if (space.accessType === "PUBLIC") {
-        return { space };
+    if (vault.accessType === "PUBLIC") {
+        return { vault };
     }
 
     if (!session?.user) {
@@ -135,7 +135,7 @@ export async function getSpace(slug: string) {
     }
 
     if (isOwner || isMember) {
-        return { space };
+        return { vault };
     }
 
     return { error: "Access denied" };

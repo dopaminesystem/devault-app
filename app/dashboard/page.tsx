@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { CreateSpaceForm } from "@/components/space/create-space-form";
+import { CreateVaultForm } from "@/components/vault/create-vault-form";
 import Link from "next/link";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,7 @@ export default async function DashboardPage() {
         redirect("/");
     }
 
-    const spaces = await prisma.space.findMany({
+    const vaults = await prisma.vault.findMany({
         where: {
             OR: [
                 { ownerId: session.user.id },
@@ -37,24 +37,24 @@ export default async function DashboardPage() {
                 </div>
             </div>
 
-            {spaces.length === 0 ? (
+            {vaults.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 space-y-4">
                     <div className="text-center space-y-2">
                         <h2 className="text-2xl font-semibold">No vaults found</h2>
                         <p className="text-muted-foreground">Create your first vault to get started.</p>
                     </div>
-                    <CreateSpaceForm />
+                    <CreateVaultForm />
                 </div>
             ) : (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {spaces.map((space) => (
-                        <Card key={space.id} className="hover:bg-muted/50 transition-colors">
+                    {vaults.map((vault) => (
+                        <Card key={vault.id} className="hover:bg-muted/50 transition-colors">
                             <CardHeader>
-                                <CardTitle>{space.name}</CardTitle>
-                                <CardDescription>/{space.slug}</CardDescription>
+                                <CardTitle>{vault.name}</CardTitle>
+                                <CardDescription>/{vault.slug}</CardDescription>
                             </CardHeader>
                             <CardContent>
-                                <Link href={`/space/${space.slug}`} passHref>
+                                <Link href={`/vault/${vault.slug}`} passHref>
                                     <Button variant="outline" className="w-full">
                                         Open Vault
                                     </Button>
