@@ -1,14 +1,11 @@
 import { getVault } from "@/app/actions/vault";
 import { VaultSettingsForm } from "@/components/vault/vault-settings-form";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
+import { auth, getSession } from "@/lib/auth";
 import { notFound, redirect } from "next/navigation";
 
 export default async function VaultSettingsPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
-    const session = await auth.api.getSession({
-        headers: await headers(),
-    });
+    const session = await getSession();
 
     if (!session?.user) {
         redirect("/sign-in");

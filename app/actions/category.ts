@@ -1,9 +1,8 @@
 "use server";
 
 import { z } from "zod";
-import { auth } from "@/lib/auth";
+import { auth, getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 
 const createCategorySchema = z.object({
@@ -12,9 +11,7 @@ const createCategorySchema = z.object({
 });
 
 export async function createCategory(prevState: any, formData: FormData) {
-    const session = await auth.api.getSession({
-        headers: await headers(),
-    });
+    const session = await getSession();
 
     if (!session?.user) {
         return { success: false, message: "Unauthorized" };

@@ -1,4 +1,4 @@
-import { auth } from "@/lib/auth";
+import { auth, getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -8,12 +8,10 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 
 export default async function DashboardPage() {
-    const session = await auth.api.getSession({
-        headers: await headers(),
-    });
+    const session = await getSession();
 
     if (!session?.user) {
-        redirect("/");
+        redirect("/sign-in");
     }
 
     const vaults = await prisma.vault.findMany({

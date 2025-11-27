@@ -3,8 +3,7 @@
 import { prisma } from "@/lib/prisma";
 
 import { z } from "zod";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
+import { auth, getSession } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
 export async function getBookmarks(vaultId: string) {
@@ -38,9 +37,7 @@ const createBookmarkSchema = z.object({
 });
 
 export async function createBookmark(prevState: any, formData: FormData) {
-    const session = await auth.api.getSession({
-        headers: await headers(),
-    });
+    const session = await getSession();
 
     if (!session?.user) {
         return { success: false, message: "Unauthorized" };

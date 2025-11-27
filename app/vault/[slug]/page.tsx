@@ -9,16 +9,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Lock, Settings } from "lucide-react";
 import Link from "next/link";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
+import { auth, getSession } from "@/lib/auth";
 
 export default async function VaultPage({ params, searchParams }: { params: Promise<{ slug: string }>, searchParams: Promise<{ category?: string }> }) {
     const { slug } = await params;
     const { category: categoryId } = await searchParams;
     const result = await getVault(slug);
-    const session = await auth.api.getSession({
-        headers: await headers(),
-    });
+    const session = await getSession();
 
     if (result.error === "Vault not found") {
         return (

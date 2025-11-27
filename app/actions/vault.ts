@@ -1,9 +1,8 @@
 "use server";
 
 import { z } from "zod";
-import { auth } from "@/lib/auth";
+import { auth, getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { hash, compare } from "bcryptjs";
@@ -25,9 +24,7 @@ export type CreateVaultState = {
 };
 
 export async function createVault(prevState: CreateVaultState, formData: FormData): Promise<CreateVaultState> {
-    const session = await auth.api.getSession({
-        headers: await headers(),
-    });
+    const session = await getSession();
 
     if (!session?.user) {
         return {
@@ -107,9 +104,7 @@ export async function createVault(prevState: CreateVaultState, formData: FormDat
 }
 
 export async function getVault(slug: string) {
-    const session = await auth.api.getSession({
-        headers: await headers(),
-    });
+    const session = await getSession();
 
     const vault = await prisma.vault.findUnique({
         where: { slug },
@@ -149,9 +144,7 @@ const updateVaultSettingsSchema = z.object({
 });
 
 export async function updateVaultSettings(prevState: any, formData: FormData) {
-    const session = await auth.api.getSession({
-        headers: await headers(),
-    });
+    const session = await getSession();
 
     if (!session?.user) {
         return { message: "Unauthorized" };
@@ -208,9 +201,7 @@ export async function updateVaultSettings(prevState: any, formData: FormData) {
 }
 
 export async function joinVault(prevState: any, formData: FormData) {
-    const session = await auth.api.getSession({
-        headers: await headers(),
-    });
+    const session = await getSession();
 
     if (!session?.user) {
         return { success: false, message: "Unauthorized" };
