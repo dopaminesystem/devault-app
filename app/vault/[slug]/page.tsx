@@ -1,19 +1,40 @@
 import { getBookmarks } from "@/app/actions/bookmark";
 import { getVault } from "@/app/actions/vault";
 import { JoinVaultForm } from "@/components/vault/join-vault-form";
+import { CreateBookmarkForm } from "@/components/bookmark/create-bookmark-form";
 import { BookmarkList } from "@/components/bookmark/bookmark-list";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Lock } from "lucide-react";
+import { Lock, Settings } from "lucide-react";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
 export default async function VaultPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
     const result = await getVault(slug);
+    const session = await auth.api.getSession({
+        headers: await headers(),
+    });
 
     if (result.error === "Vault not found") {
-        notFound();
+        return (
+            <div className="flex min-h-screen items-center justify-center p-4">
+                <Card className="w-full max-w-md text-center">
+                    <CardHeader>
+                        <CardTitle>Vault Not Found</CardTitle>
+                        <CardDescription>
+                            The vault you are looking for does not exist or has been removed.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Button asChild>
+                            <Link href="/dashboard">Go to Dashboard</Link>
+                        </Button>
+                    </CardContent>
+                </Card>
+            </div>
+        );
     }
 
     if (result.error === "Access denied" || result.error === "Unauthorized") {
@@ -63,31 +84,37 @@ export default async function VaultPage({ params }: { params: Promise<{ slug: st
         );
     }
 
-    if (result.error) {
-        return <div>Error: {result.error}</div>;
-    }
-
     const { vault } = result;
+    if (!vault) return null; // Should not happen given checks above
 
     // Fetch bookmarks
-    const bookmarksResult = await getBookmarks(vault!.id);
-    const bookmarks = bookmarksResult.bookmarks || [];
+    const { bookmarks } = await getBookmarks(vault.id);
+    const isOwner = session?.user?.id === vault.ownerId;
+    const isMember = vault.members.some((m) => m.userId === session?.user?.id);
+    const canEdit = isOwner || isMember;
 
     return (
         <div className="container mx-auto py-8 px-4">
-            <div className="mb-8">
-                <h1 className="text-4xl font-bold mb-2">{vault?.name}</h1>
-                <p className="text-muted-foreground text-lg">{vault?.description || "No description"}</p>
-            </div>
-
-            <div className="space-y-6">
-                <div className="flex justify-between items-center">
-                    <h2 className="text-2xl font-semibold">Bookmarks</h2>
-                    {/* Add Bookmark Button could go here */}
+            <div className="mb-8 flex items-center justify-between">
+                <div>
+                    <h1 className="text-3xl font-bold">{vault.name}</h1>
+                    {vault.description && (
+                        <p className="mt-2 text-muted-foreground">{vault.description}</p>
+                    )}
                 </div>
-
-                <BookmarkList bookmarks={bookmarks} />
+                <div className="flex gap-2">
+                    {canEdit && <CreateBookmarkForm vaultId={vault.id} />}
+                    {isOwner && (
+                        <Button variant="outline" size="icon" asChild>
+                            <Link href={`/vault/${slug}/settings`}>
+                                <Settings className="h-4 w-4" />
+                            </Link>
+                        </Button>
+                    )}
+                </div>
             </div>
+
+            <BookmarkList bookmarks={bookmarks || []} />
         </div>
     );
 }
