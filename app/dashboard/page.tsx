@@ -1,5 +1,6 @@
 import { auth, getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { Vault } from "@prisma/client";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { CreateVaultForm } from "@/components/vault/create-vault-form";
@@ -45,7 +46,7 @@ export default async function DashboardPage() {
                 </div>
             ) : (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {vaults.map((vault) => (
+                    {vaults.map((vault: Vault) => (
                         <Card key={vault.id} className="hover:bg-muted/50 transition-colors">
                             <CardHeader>
                                 <CardTitle>{vault.name}</CardTitle>
