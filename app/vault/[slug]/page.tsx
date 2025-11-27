@@ -1,8 +1,10 @@
 import { getBookmarks } from "@/app/actions/bookmark";
 import { getVault } from "@/app/actions/vault";
+import { getCategories } from "@/app/actions/category";
 import { JoinVaultForm } from "@/components/vault/join-vault-form";
 import { CreateBookmarkForm } from "@/components/bookmark/create-bookmark-form";
 import { BookmarkList } from "@/components/bookmark/bookmark-list";
+import { VaultSidebar } from "@/components/vault/vault-sidebar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Lock, Settings } from "lucide-react";
@@ -10,8 +12,9 @@ import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 
-export default async function VaultPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function VaultPage({ params, searchParams }: { params: Promise<{ slug: string }>, searchParams: Promise<{ category?: string }> }) {
     const { slug } = await params;
+    const { category: categoryId } = await searchParams;
     const result = await getVault(slug);
     const session = await auth.api.getSession({
         headers: await headers(),
@@ -89,32 +92,47 @@ export default async function VaultPage({ params }: { params: Promise<{ slug: st
 
     // Fetch bookmarks
     const { bookmarks } = await getBookmarks(vault.id);
+    const { categories } = await getCategories(vault.id);
+
     const isOwner = session?.user?.id === vault.ownerId;
     const isMember = vault.members.some((m) => m.userId === session?.user?.id);
     const canEdit = isOwner || isMember;
 
-    return (
-        <div className="container mx-auto py-8 px-4">
-            <div className="mb-8 flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold">{vault.name}</h1>
-                    {vault.description && (
-                        <p className="mt-2 text-muted-foreground">{vault.description}</p>
-                    )}
-                </div>
-                <div className="flex gap-2">
-                    {canEdit && <CreateBookmarkForm vaultId={vault.id} />}
-                    {isOwner && (
-                        <Button variant="outline" size="icon" asChild>
-                            <Link href={`/vault/${slug}/settings`}>
-                                <Settings className="h-4 w-4" />
-                            </Link>
-                        </Button>
-                    )}
-                </div>
-            </div>
+    // Filter bookmarks if category selected
+    const filteredBookmarks = categoryId
+        ? bookmarks?.filter(b => b.categoryId === categoryId)
+        : bookmarks;
 
-            <BookmarkList bookmarks={bookmarks || []} />
+    return (
+        <div className="flex min-h-screen">
+            <VaultSidebar
+                vaultId={vault.id}
+                slug={slug}
+                categories={categories || []}
+                canEdit={canEdit}
+            />
+            <div className="flex-1 container mx-auto py-8 px-4">
+                <div className="mb-8 flex items-center justify-between">
+                    <div>
+                        <h1 className="text-3xl font-bold">{vault.name}</h1>
+                        {vault.description && (
+                            <p className="mt-2 text-muted-foreground">{vault.description}</p>
+                        )}
+                    </div>
+                    <div className="flex gap-2">
+                        {canEdit && <CreateBookmarkForm vaultId={vault.id} />}
+                        {isOwner && (
+                            <Button variant="outline" size="icon" asChild>
+                                <Link href={`/vault/${slug}/settings`}>
+                                    <Settings className="h-4 w-4" />
+                                </Link>
+                            </Button>
+                        )}
+                    </div>
+                </div>
+
+                <BookmarkList bookmarks={filteredBookmarks || []} />
+            </div>
         </div>
     );
 }
