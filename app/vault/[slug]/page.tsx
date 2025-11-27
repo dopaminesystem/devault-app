@@ -1,5 +1,6 @@
 import { getBookmarks } from "@/app/actions/bookmark";
 import { getVault } from "@/app/actions/vault";
+import { JoinVaultForm } from "@/components/vault/join-vault-form";
 import { BookmarkList } from "@/components/bookmark/bookmark-list";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,6 +17,22 @@ export default async function VaultPage({ params }: { params: Promise<{ slug: st
     }
 
     if (result.error === "Access denied" || result.error === "Unauthorized") {
+        // If we have the vault object (even if access denied), we can check accessType
+        // But getVault returns error string if denied.
+        // We need to fetch basic info to know if it's password protected.
+        // Let's modify getVault to return basic info even on error?
+        // Or just fetch it here again? Fetching here is safer for now to avoid breaking getVault contract.
+
+        const { prisma } = await import("@/lib/prisma");
+        const vaultCheck = await prisma.vault.findUnique({
+            where: { slug },
+            select: { id: true, name: true, accessType: true }
+        });
+
+        if (vaultCheck && vaultCheck.accessType === "PASSWORD") {
+            return <JoinVaultForm vaultId={vaultCheck.id} vaultName={vaultCheck.name} />;
+        }
+
         return (
             <div className="flex min-h-screen items-center justify-center p-4">
                 <Card className="w-full max-w-md text-center">
