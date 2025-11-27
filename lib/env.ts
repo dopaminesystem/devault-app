@@ -10,7 +10,7 @@ const serverSchema = z.object({
 });
 
 const clientSchema = z.object({
-    NEXT_PUBLIC_APP_URL: z.string().url().trim(),
+    NEXT_PUBLIC_APP_URL: z.url().trim(),
 });
 
 // Type inference
@@ -27,27 +27,30 @@ const processEnv = {
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
 };
 
-// Only validate server vars on server
-const serverEnv = typeof window === 'undefined'
-    ? serverSchema.safeParse(processEnv)
-    : { success: true, data: {} as z.infer<typeof serverSchema> }; // Skip server validation on client
+// Server Validation
+let serverData = {} as z.infer<typeof serverSchema>;
 
-const clientEnv = clientSchema.safeParse(processEnv);
-
-if (!serverEnv.success) {
-    console.error(
-        "❌ Invalid server environment variables:",
-        serverEnv.error.flatten().fieldErrors
-    );
-    throw new Error("Invalid server environment variables");
+if (typeof window === 'undefined') {
+    const parsed = serverSchema.safeParse(processEnv);
+    if (!parsed.success) {
+        console.error(
+            "❌ Invalid server environment variables:",
+            parsed.error.flatten().fieldErrors
+        );
+        throw new Error("Invalid server environment variables");
+    }
+    serverData = parsed.data;
 }
 
-if (!clientEnv.success) {
+// Client Validation
+const clientParsed = clientSchema.safeParse(processEnv);
+
+if (!clientParsed.success) {
     console.error(
         "❌ Invalid client environment variables:",
-        clientEnv.error.flatten().fieldErrors
+        clientParsed.error.flatten().fieldErrors
     );
     throw new Error("Invalid client environment variables");
 }
 
-export const env = { ...serverEnv.data, ...clientEnv.data } as Env;
+export const env = { ...serverData, ...clientParsed.data } as Env;
