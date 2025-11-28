@@ -3,6 +3,7 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "./prisma";
 import { env } from "./env";
 import { headers } from "next/headers";
+import { nextCookies } from "better-auth/next-js";
 
 export const auth = betterAuth({
     database: prismaAdapter(prisma, {
@@ -17,6 +18,7 @@ export const auth = betterAuth({
             clientSecret: env.DISCORD_CLIENT_SECRET,
         },
     },
+    plugins: [nextCookies()],
 });
 
 export async function getSession() {
