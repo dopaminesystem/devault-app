@@ -1,0 +1,256 @@
+"use server";
+
+import { z } from "zod";
+import { auth, getSession } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { VaultMember } from "@prisma/client";
+import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
+import { hash, compare } from "bcryptjs";
+
+const createVaultSchema = z.object({
+    name: z.string().min(3, "Name must be at least 3 characters").max(50, "Name must be less than 50 characters"),
+    slug: z.string().min(3, "Slug must be at least 3 characters").max(50, "Slug must be less than 50 characters").regex(/^[a-z0-9-]+$/, "Slug must contain only lowercase letters, numbers, and hyphens"),
+    description: z.string().max(200, "Description must be less than 200 characters").optional(),
+});
+
+export type CreateVaultState = {
+    errors?: {
+        name?: string[];
+        slug?: string[];
+        description?: string[];
+        _form?: string[];
+    };
+    message?: string;
+};
+
+export async function createVault(prevState: CreateVaultState, formData: FormData): Promise<CreateVaultState> {
+    const session = await getSession();
+
+    if (!session?.user) {
+        return {
+            message: "Unauthorized",
+        };
+    }
+
+    const validatedFields = createVaultSchema.safeParse({
+        name: formData.get("name"),
+        slug: formData.get("slug"),
+        description: formData.get("description"),
+    });
+
+    if (!validatedFields.success) {
+        return {
+            errors: validatedFields.error.flatten().fieldErrors,
+            message: "Invalid fields",
+        };
+    }
+
+    const { name, slug, description } = validatedFields.data;
+
+    try {
+        // Enforce 1 vault per user limit
+        const existingVault = await prisma.vault.findFirst({
+            where: {
+                ownerId: session.user.id,
+            },
+        });
+
+        if (existingVault) {
+            return {
+                message: "You can only create one vault.",
+            };
+        }
+
+        // Check if slug is unique
+        const existingSlug = await prisma.vault.findUnique({
+            where: {
+                slug,
+            },
+        });
+
+        if (existingSlug) {
+            return {
+                errors: {
+                    slug: ["This URL is already taken."],
+                },
+                message: "Slug already exists",
+            };
+        }
+
+        await prisma.vault.create({
+            data: {
+                name,
+                slug,
+                description,
+                ownerId: session.user.id,
+                members: {
+                    create: {
+                        userId: session.user.id,
+                        role: "OWNER",
+                    }
+                }
+            },
+        });
+
+    } catch (error) {
+        console.error("Failed to create vault:", error);
+        return {
+            message: "Failed to create vault. Please try again.",
+        };
+    }
+
+    revalidatePath("/dashboard");
+    redirect("/dashboard");
+}
+
+export async function getVault(slug: string) {
+    const session = await getSession();
+
+    const vault = await prisma.vault.findUnique({
+        where: { slug },
+        include: {
+            owner: true,
+            members: true,
+        },
+    });
+
+    if (!vault) {
+        return { error: "Vault not found" };
+    }
+
+    // Check access
+    const isOwner = session?.user?.id === vault.ownerId;
+    const isMember = vault.members.some((m: VaultMember) => m.userId === session?.user?.id);
+
+    if (vault.accessType === "PUBLIC") {
+        return { vault };
+    }
+
+    if (!session?.user) {
+        return { error: "Unauthorized" };
+    }
+
+    if (isOwner || isMember) {
+        return { vault };
+    }
+
+    return { error: "Access denied" };
+}
+
+const updateVaultSettingsSchema = z.object({
+    vaultId: z.string(),
+    accessType: z.enum(["PUBLIC", "PASSWORD"]),
+    password: z.string().optional(),
+});
+
+export async function updateVaultSettings(prevState: any, formData: FormData) {
+    const session = await getSession();
+
+    if (!session?.user) {
+        return { message: "Unauthorized" };
+    }
+
+    const validatedFields = updateVaultSettingsSchema.safeParse({
+        vaultId: formData.get("vaultId"),
+        accessType: formData.get("accessType"),
+        password: formData.get("password"),
+    });
+
+    if (!validatedFields.success) {
+        return { message: "Invalid fields" };
+    }
+
+    const { vaultId, accessType, password } = validatedFields.data;
+
+    const vault = await prisma.vault.findUnique({
+        where: { id: vaultId },
+    });
+
+    if (!vault) {
+        return { message: "Vault not found" };
+    }
+
+    if (vault.ownerId !== session.user.id) {
+        return { message: "Unauthorized" };
+    }
+
+    let passwordHash = vault.passwordHash;
+
+    if (accessType === "PASSWORD") {
+        if (password && password.length > 0) {
+            passwordHash = await hash(password, 10);
+        } else if (!passwordHash) {
+            return { message: "Password is required for private vaults" };
+        }
+    } else {
+        passwordHash = null;
+    }
+
+    await prisma.vault.update({
+        where: { id: vaultId },
+        data: {
+            accessType,
+            passwordHash,
+        },
+    });
+
+    revalidatePath(`/vault/${vault.slug}`);
+    revalidatePath(`/vault/${vault.slug}/settings`);
+
+    return { message: "Settings updated successfully" };
+}
+
+export async function joinVault(prevState: any, formData: FormData) {
+    const session = await getSession();
+
+    if (!session?.user) {
+        return { success: false, message: "Unauthorized" };
+    }
+
+    const vaultId = formData.get("vaultId") as string;
+    const password = formData.get("password") as string;
+
+    if (!vaultId || !password) {
+        return { success: false, message: "Missing fields" };
+    }
+
+    const vault = await prisma.vault.findUnique({
+        where: { id: vaultId },
+    });
+
+    if (!vault) {
+        return { success: false, message: "Vault not found" };
+    }
+
+    if (vault.accessType !== "PASSWORD") {
+        return { success: false, message: "This vault does not require a password" };
+    }
+
+    if (!vault.passwordHash) {
+        // Should not happen if logic is correct, but safe fallback
+        return { success: false, message: "Vault configuration error" };
+    }
+
+    const isValid = await compare(password, vault.passwordHash);
+
+    if (!isValid) {
+        return { success: false, message: "Invalid password" };
+    }
+
+    try {
+        await prisma.vaultMember.create({
+            data: {
+                vaultId,
+                userId: session.user.id,
+                role: "MEMBER",
+            },
+        });
+    } catch (error) {
+        // Ignore unique constraint error if already member
+        console.log("User might already be a member", error);
+    }
+
+    revalidatePath(`/vault/${vault.slug}`);
+    return { success: true, message: "Joined successfully" };
+}
