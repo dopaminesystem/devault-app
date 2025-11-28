@@ -22,6 +22,9 @@ model User {
   ownedVaults Vault[]       @relation("VaultOwner")
   memberships VaultMember[]
 
+  defaultVaultId String?
+  defaultVault   Vault? @relation("UserDefaultVault", fields: [defaultVaultId], references: [id])
+
   @@map("user")
 }
 
@@ -88,6 +91,8 @@ model Vault {
   members    VaultMember[]
   categories Category[]
   settings   VaultSettings?
+
+  defaultForUsers User[] @relation("UserDefaultVault")
 
   @@map("vault")
 }

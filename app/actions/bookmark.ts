@@ -2,7 +2,6 @@
 
 import { prisma } from "@/lib/prisma";
 import { VaultMember } from "@prisma/client";
-
 import { z } from "zod";
 import { auth, getSession } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
