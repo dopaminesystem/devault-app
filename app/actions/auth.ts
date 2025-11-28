@@ -2,12 +2,18 @@
 
 import { auth } from "@/lib/auth";
 import { z } from "zod";
+import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 
 const signUpSchema = z.object({
-    email: z.email(),
-    password: z.string().min(8),
-    name: z.string().min(2),
+    email: z.string().email("Invalid email address"),
+    password: z.string().min(8, "Password must be at least 8 characters"),
+    name: z.string().min(2, "Name must be at least 2 characters"),
+});
+
+const signInSchema = z.object({
+    email: z.string().email("Invalid email address"),
+    password: z.string().min(1, "Password is required"),
 });
 
 export type AuthActionState = {
@@ -24,11 +30,13 @@ export async function signUpAction(
     prevState: AuthActionState,
     formData: FormData
 ): Promise<AuthActionState> {
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
-    const name = formData.get("name") as string;
+    const rawData = {
+        email: formData.get("email") as string,
+        password: formData.get("password") as string,
+        name: formData.get("name") as string,
+    };
 
-    const validation = signUpSchema.safeParse({ email, password, name });
+    const validation = signUpSchema.safeParse(rawData);
 
     if (!validation.success) {
         return {
@@ -38,38 +46,32 @@ export async function signUpAction(
     }
 
     try {
-        const res = await auth.api.signUpEmail({
-            body: {
-                email,
-                password,
-                name,
-            },
-            headers: await headers(),
+        await auth.api.signUpEmail({
+            body: validation.data,
         });
-
-        if (!res) {
-            return { error: "Failed to create account" };
-        }
-
-        return { success: true };
     } catch (error) {
-        return { error: (error as Error).message || "Something went wrong" };
+        if (error instanceof Error) {
+            if (error.message.includes("already exists")) {
+                return { error: "An account with this email already exists" };
+            }
+            return { error: error.message };
+        }
+        return { error: "Something went wrong during sign up" };
     }
-}
 
-const signInSchema = z.object({
-    email: z.email(),
-    password: z.string().min(1, "Password is required"),
-});
+    redirect("/dashboard");
+}
 
 export async function signInAction(
     prevState: AuthActionState,
     formData: FormData
 ): Promise<AuthActionState> {
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
+    const rawData = {
+        email: formData.get("email") as string,
+        password: formData.get("password") as string,
+    };
 
-    const validation = signInSchema.safeParse({ email, password });
+    const validation = signInSchema.safeParse(rawData);
 
     if (!validation.success) {
         return {
@@ -79,21 +81,24 @@ export async function signInAction(
     }
 
     try {
-        const res = await auth.api.signInEmail({
-            body: {
-                email,
-                password,
-            },
-            headers: await headers(),
+        await auth.api.signInEmail({
+            body: validation.data,
         });
-
-        if (!res) {
-            return { error: "Invalid email or password" };
-        }
-
-        return { success: true };
     } catch (error) {
-        // Better-Auth might throw on invalid credentials
+        if (error instanceof Error) {
+            return { error: error.message };
+        }
         return { error: "Invalid email or password" };
     }
+
+    redirect("/dashboard");
+}
+
+export async function signOutAction() {
+    try {
+        await auth.api.signOut();
+    } catch (error) {
+        console.error("Sign out error:", error);
+    }
+    redirect("/");
 }
