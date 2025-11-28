@@ -120,7 +120,7 @@ export async function getVault(slug: string) {
 
     // Check access
     const isOwner = session?.user?.id === vault.ownerId;
-    const isMember = vault.members.some((m) => m.userId === session?.user?.id);
+    const isMember = vault.members.some((m: any) => m.userId === session?.user?.id);
 
     if (vault.accessType === "PUBLIC") {
         return { vault };

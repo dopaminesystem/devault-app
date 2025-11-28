@@ -39,7 +39,7 @@ export async function createCategory(prevState: any, formData: FormData) {
     }
 
     const isOwner = vault.ownerId === session.user.id;
-    const isMember = vault.members.some(m => m.userId === session.user.id);
+    const isMember = vault.members.some((m: any) => m.userId === session.user.id);
 
     if (!isOwner && !isMember) {
         return { success: false, message: "You do not have permission to add categories to this vault" };

@@ -92,12 +92,12 @@ export default async function VaultPage({ params, searchParams }: { params: Prom
     const { categories } = await getCategories(vault.id);
 
     const isOwner = session?.user?.id === vault.ownerId;
-    const isMember = vault.members.some((m) => m.userId === session?.user?.id);
+    const isMember = vault.members.some((m: any) => m.userId === session?.user?.id);
     const canEdit = isOwner || isMember;
 
     // Filter bookmarks if category selected
     const filteredBookmarks = categoryId
-        ? bookmarks?.filter(b => b.categoryId === categoryId)
+        ? bookmarks?.filter((b: any) => b.categoryId === categoryId)
         : bookmarks;
 
     return (
