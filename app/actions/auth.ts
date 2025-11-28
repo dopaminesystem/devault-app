@@ -3,6 +3,7 @@
 import { auth } from "@/lib/auth";
 import { z } from "zod";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 
 const signUpSchema = z.object({
     email: z.string().email("Invalid email address"),

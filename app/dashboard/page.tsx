@@ -1,4 +1,4 @@
-import { auth, getSession } from "@/lib/auth";
+import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Vault } from "@prisma/client";
 import { redirect } from "next/navigation";
@@ -6,6 +6,7 @@ import { CreateVaultForm } from "@/components/vault/create-vault-form";
 import Link from "next/link";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { SignOutButton } from "@/components/auth/sign-out-button";
 
 export default async function DashboardPage() {
     const session = await getSession();
@@ -33,6 +34,7 @@ export default async function DashboardPage() {
                     <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
                     <p className="text-muted-foreground">Manage your vaults and bookmarks.</p>
                 </div>
+                <SignOutButton />
             </div>
 
             {vaults.length === 0 ? (
