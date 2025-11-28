@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { auth, getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { VaultMember } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
 const createCategorySchema = z.object({
@@ -39,7 +40,7 @@ export async function createCategory(prevState: any, formData: FormData) {
     }
 
     const isOwner = vault.ownerId === session.user.id;
-    const isMember = vault.members.some((m: any) => m.userId === session.user.id);
+    const isMember = vault.members.some((m: VaultMember) => m.userId === session.user.id);
 
     if (!isOwner && !isMember) {
         return { success: false, message: "You do not have permission to add categories to this vault" };

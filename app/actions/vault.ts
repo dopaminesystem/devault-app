@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { auth, getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { VaultMember } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { hash, compare } from "bcryptjs";
@@ -120,7 +121,7 @@ export async function getVault(slug: string) {
 
     // Check access
     const isOwner = session?.user?.id === vault.ownerId;
-    const isMember = vault.members.some((m: any) => m.userId === session?.user?.id);
+    const isMember = vault.members.some((m: VaultMember) => m.userId === session?.user?.id);
 
     if (vault.accessType === "PUBLIC") {
         return { vault };

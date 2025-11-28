@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { VaultMember } from "@prisma/client";
 
 import { z } from "zod";
 import { auth, getSession } from "@/lib/auth";
@@ -73,7 +74,7 @@ export async function createBookmark(prevState: any, formData: FormData) {
     }
 
     const isOwner = vault.ownerId === session.user.id;
-    const isMember = vault.members.some((m: any) => m.userId === session.user.id);
+    const isMember = vault.members.some((m: VaultMember) => m.userId === session.user.id);
 
     if (!isOwner && !isMember) {
         return { success: false, message: "You do not have permission to add bookmarks to this vault" };

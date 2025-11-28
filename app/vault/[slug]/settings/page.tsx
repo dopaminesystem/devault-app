@@ -6,6 +6,7 @@ import { notFound, redirect } from "next/navigation";
 export default async function VaultSettingsPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
     const session = await getSession();
+    const { prisma } = await import("@/lib/prisma");
 
     if (!session?.user) {
         redirect("/sign-in");
@@ -16,7 +17,6 @@ export default async function VaultSettingsPage({ params }: { params: Promise<{ 
     // For settings, we need to fetch raw vault and check owner.
 
     // Let's use prisma directly here for owner check to be safe and explicit
-    const { prisma } = await import("@/lib/prisma");
     const vault = await prisma.vault.findUnique({
         where: { slug },
     });

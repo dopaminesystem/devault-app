@@ -10,12 +10,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Lock, Settings } from "lucide-react";
 import Link from "next/link";
 import { auth, getSession } from "@/lib/auth";
+import { Bookmark, VaultMember } from "@prisma/client";
 
 export default async function VaultPage({ params, searchParams }: { params: Promise<{ slug: string }>, searchParams: Promise<{ category?: string }> }) {
     const { slug } = await params;
     const { category: categoryId } = await searchParams;
     const result = await getVault(slug);
     const session = await getSession();
+    const { prisma } = await import("@/lib/prisma");
 
     if (result.error === "Vault not found") {
         return (
@@ -44,7 +46,6 @@ export default async function VaultPage({ params, searchParams }: { params: Prom
         // Let's modify getVault to return basic info even on error?
         // Or just fetch it here again? Fetching here is safer for now to avoid breaking getVault contract.
 
-        const { prisma } = await import("@/lib/prisma");
         const vaultCheck = await prisma.vault.findUnique({
             where: { slug },
             select: { id: true, name: true, accessType: true }
@@ -92,12 +93,12 @@ export default async function VaultPage({ params, searchParams }: { params: Prom
     const { categories } = await getCategories(vault.id);
 
     const isOwner = session?.user?.id === vault.ownerId;
-    const isMember = vault.members.some((m: any) => m.userId === session?.user?.id);
+    const isMember = vault.members.some((m: VaultMember) => m.userId === session?.user?.id);
     const canEdit = isOwner || isMember;
 
     // Filter bookmarks if category selected
     const filteredBookmarks = categoryId
-        ? bookmarks?.filter((b: any) => b.categoryId === categoryId)
+        ? bookmarks?.filter((b: Bookmark) => b.categoryId === categoryId)
         : bookmarks;
 
     return (
