@@ -2,7 +2,6 @@
 
 import { prisma } from "@/lib/prisma";
 import { VaultMember } from "@prisma/client";
-
 import { z } from "zod";
 import { auth, getSession } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
@@ -116,4 +115,117 @@ export async function createBookmark(prevState: any, formData: FormData) {
         console.error("Failed to create bookmark:", error);
         return { success: false, message: "Failed to create bookmark" };
     }
+}
+
+const updateBookmarkSchema = z.object({
+    bookmarkId: z.string(),
+    url: z.string().url("Please enter a valid URL"),
+    title: z.string().optional(),
+    description: z.string().optional(),
+    categoryId: z.string().min(1, "Category is required"),
+    tags: z.string().optional(),
+});
+
+export async function updateBookmark(prevState: any, formData: FormData) {
+    const session = await getSession();
+
+    if (!session?.user) {
+        return { success: false, message: "Unauthorized" };
+    }
+
+    const validatedFields = updateBookmarkSchema.safeParse({
+        bookmarkId: formData.get("bookmarkId"),
+        url: formData.get("url"),
+        title: formData.get("title"),
+        description: formData.get("description"),
+        categoryId: formData.get("categoryId"),
+        tags: formData.get("tags"),
+    });
+
+    if (!validatedFields.success) {
+        return { success: false, message: "Invalid fields" };
+    }
+
+    const { bookmarkId, url, title, description, categoryId, tags } = validatedFields.data;
+
+    // Parse tags
+    const tagsArray = tags
+        ? tags.split(",").map((tag) => tag.trim()).filter((tag) => tag.length > 0)
+        : [];
+
+    const bookmark = await prisma.bookmark.findUnique({
+        where: { id: bookmarkId },
+        include: { category: { include: { vault: { include: { members: true } } } } },
+    });
+
+    if (!bookmark) {
+        return { success: false, message: "Bookmark not found" };
+    }
+
+    const isOwner = bookmark.category.vault.ownerId === session.user.id;
+    const isMember = bookmark.category.vault.members.some((m: VaultMember) => m.userId === session.user.id);
+
+    if (!isOwner && !isMember) {
+        return { success: false, message: "Unauthorized" };
+    }
+
+    // Verify new category belongs to same vault
+    const newCategory = await prisma.category.findUnique({
+        where: { id: categoryId },
+    });
+
+    if (!newCategory || newCategory.vaultId !== bookmark.category.vaultId) {
+        return { success: false, message: "Invalid category" };
+    }
+
+    await prisma.bookmark.update({
+        where: { id: bookmarkId },
+        data: {
+            url,
+            title: title || url,
+            description,
+            categoryId,
+            tags: tagsArray,
+        },
+    });
+
+    revalidatePath(`/vault/${bookmark.category.vault.slug}`);
+    return { success: true, message: "Bookmark updated" };
+}
+
+export async function deleteBookmark(prevState: any, formData: FormData) {
+    const session = await getSession();
+
+    if (!session?.user) {
+        return { success: false, message: "Unauthorized" };
+    }
+
+    const bookmarkId = formData.get("bookmarkId") as string;
+
+    if (!bookmarkId) {
+        return { success: false, message: "Missing bookmark ID" };
+    }
+
+    const bookmark = await prisma.bookmark.findUnique({
+        where: { id: bookmarkId },
+        include: { category: { include: { vault: { include: { members: true } } } } },
+    });
+
+    if (!bookmark) {
+        return { success: false, message: "Bookmark not found" };
+    }
+
+    const isOwner = bookmark.category.vault.ownerId === session.user.id;
+    const isMember = bookmark.category.vault.members.some((m: VaultMember) => m.userId === session.user.id);
+
+    if (!isOwner && !isMember) {
+        return { success: false, message: "Unauthorized" };
+    }
+
+    await prisma.bookmark.delete({
+        where: { id: bookmarkId },
+    });
+
+    revalidatePath(`/vault/${bookmark.category.vault.slug}`);
+    return { success: true, message: "Bookmark deleted" };
 }

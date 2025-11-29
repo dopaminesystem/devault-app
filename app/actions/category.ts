@@ -85,3 +85,88 @@ export async function getCategories(vaultId: string) {
         return { error: "Failed to fetch categories" };
     }
 }
+
+const updateCategorySchema = z.object({
+    categoryId: z.string(),
+    name: z.string().min(1, "Name is required").max(50, "Name must be less than 50 characters"),
+});
+
+export async function updateCategory(prevState: any, formData: FormData) {
+    const session = await getSession();
+
+    if (!session?.user) {
+        return { success: false, message: "Unauthorized" };
+    }
+
+    const validatedFields = updateCategorySchema.safeParse({
+        categoryId: formData.get("categoryId"),
+        name: formData.get("name"),
+    });
+
+    if (!validatedFields.success) {
+        return { success: false, message: "Invalid fields" };
+    }
+
+    const { categoryId, name } = validatedFields.data;
+
+    const category = await prisma.category.findUnique({
+        where: { id: categoryId },
+        include: { vault: { include: { members: true } } },
+    });
+
+    if (!category) {
+        return { success: false, message: "Category not found" };
+    }
+
+    const isOwner = category.vault.ownerId === session.user.id;
+    const isMember = category.vault.members.some((m: VaultMember) => m.userId === session.user.id);
+
+    if (!isOwner && !isMember) {
+        return { success: false, message: "Unauthorized" };
+    }
+
+    await prisma.category.update({
+        where: { id: categoryId },
+        data: { name },
+    });
+
+    revalidatePath(`/vault/${category.vault.slug}`);
+    return { success: true, message: "Category updated" };
+}
+
+export async function deleteCategory(prevState: any, formData: FormData) {
+    const session = await getSession();
+
+    if (!session?.user) {
+        return { success: false, message: "Unauthorized" };
+    }
+
+    const categoryId = formData.get("categoryId") as string;
+
+    if (!categoryId) {
+        return { success: false, message: "Missing category ID" };
+    }
+
+    const category = await prisma.category.findUnique({
+        where: { id: categoryId },
+        include: { vault: { include: { members: true } } },
+    });
+
+    if (!category) {
+        return { success: false, message: "Category not found" };
+    }
+
+    const isOwner = category.vault.ownerId === session.user.id;
+    const isMember = category.vault.members.some((m: VaultMember) => m.userId === session.user.id);
+
+    if (!isOwner && !isMember) {
+        return { success: false, message: "Unauthorized" };
+    }
+
+    await prisma.category.delete({
+        where: { id: categoryId },
+    });
+
+    revalidatePath(`/vault/${category.vault.slug}`);
+    return { success: true, message: "Category deleted" };
+}
