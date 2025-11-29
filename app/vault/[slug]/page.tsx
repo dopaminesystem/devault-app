@@ -5,6 +5,7 @@ import { JoinVaultForm } from "@/components/vault/join-vault-form";
 import { CreateBookmarkForm } from "@/components/bookmark/create-bookmark-form";
 import { BookmarkList } from "@/components/bookmark/bookmark-list";
 import { VaultSidebar } from "@/components/vault/vault-sidebar";
+import { VaultSearch } from "@/components/vault/vault-search";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Lock, Settings } from "lucide-react";
@@ -117,7 +118,8 @@ export default async function VaultPage({ params, searchParams }: { params: Prom
                             <p className="mt-2 text-muted-foreground">{vault.description}</p>
                         )}
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 items-center">
+                        <VaultSearch bookmarks={bookmarks || []} />
                         {canEdit && <CreateBookmarkForm vaultId={vault.id} />}
                         {isOwner && (
                             <Button variant="outline" size="icon" asChild>
