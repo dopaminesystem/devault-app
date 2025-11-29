@@ -254,3 +254,88 @@ export async function joinVault(prevState: any, formData: FormData) {
     revalidatePath(`/vault/${vault.slug}`);
     return { success: true, message: "Joined successfully" };
 }
+
+const updateVaultSchema = z.object({
+    vaultId: z.string(),
+    name: z.string().min(3, "Name must be at least 3 characters").max(50, "Name must be less than 50 characters"),
+    description: z.string().max(200, "Description must be less than 200 characters").optional(),
+});
+
+export async function updateVault(prevState: any, formData: FormData) {
+    const session = await getSession();
+
+    if (!session?.user) {
+        return { message: "Unauthorized" };
+    }
+
+    const validatedFields = updateVaultSchema.safeParse({
+        vaultId: formData.get("vaultId"),
+        name: formData.get("name"),
+        description: formData.get("description"),
+    });
+
+    if (!validatedFields.success) {
+        return { message: "Invalid fields" };
+    }
+
+    const { vaultId, name, description } = validatedFields.data;
+
+    const vault = await prisma.vault.findUnique({
+        where: { id: vaultId },
+    });
+
+    if (!vault) {
+        return { message: "Vault not found" };
+    }
+
+    if (vault.ownerId !== session.user.id) {
+        return { message: "Unauthorized" };
+    }
+
+    await prisma.vault.update({
+        where: { id: vaultId },
+        data: {
+            name,
+            description,
+        },
+    });
+
+    revalidatePath(`/vault/${vault.slug}`);
+    revalidatePath(`/vault/${vault.slug}/settings`);
+    revalidatePath("/dashboard");
+
+    return { message: "Vault updated successfully" };
+}
+
+export async function deleteVault(prevState: any, formData: FormData) {
+    const session = await getSession();
+
+    if (!session?.user) {
+        return { message: "Unauthorized" };
+    }
+
+    const vaultId = formData.get("vaultId") as string;
+
+    if (!vaultId) {
+        return { message: "Missing vault ID" };
+    }
+
+    const vault = await prisma.vault.findUnique({
+        where: { id: vaultId },
+    });
+
+    if (!vault) {
+        return { message: "Vault not found" };
+    }
+
+    if (vault.ownerId !== session.user.id) {
+        return { message: "Unauthorized" };
+    }
+
+    await prisma.vault.delete({
+        where: { id: vaultId },
+    });
+
+    revalidatePath("/dashboard");
+    redirect("/dashboard");
+}

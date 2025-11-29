@@ -1,38 +1,47 @@
 import { getVault } from "@/app/actions/vault";
-import { VaultSettingsForm } from "@/components/vault/vault-settings-form";
-import { auth, getSession } from "@/lib/auth";
-import { notFound, redirect } from "next/navigation";
+import { getSession } from "@/lib/auth";
+import { EditVaultForm } from "@/components/vault/edit-vault-form";
+import { VaultAccessForm } from "@/components/vault/vault-access-form";
+import { DeleteVaultForm } from "@/components/vault/delete-vault-form";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
+import { redirect } from "next/navigation";
 
 export default async function VaultSettingsPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
     const session = await getSession();
-    const { prisma } = await import("@/lib/prisma");
+    const result = await getVault(slug);
 
-    if (!session?.user) {
-        redirect("/sign-in");
+    if (result.error || !result.vault) {
+        redirect("/dashboard");
     }
 
-    // We use getVault but we need to bypass the access check for the owner settings page
-    // Actually getVault handles access check for viewing content.
-    // For settings, we need to fetch raw vault and check owner.
+    const { vault } = result;
 
-    // Let's use prisma directly here for owner check to be safe and explicit
-    const vault = await prisma.vault.findUnique({
-        where: { slug },
-    });
-
-    if (!vault) {
-        notFound();
-    }
-
-    if (vault.ownerId !== session.user.id) {
+    if (vault.ownerId !== session?.user?.id) {
         redirect(`/vault/${slug}`);
     }
 
     return (
-        <div className="container mx-auto py-8 px-4">
-            <h1 className="text-3xl font-bold mb-8">Settings: {vault.name}</h1>
-            <VaultSettingsForm vault={vault} />
+        <div className="container mx-auto py-8 px-4 max-w-2xl space-y-8">
+            <div className="flex items-center gap-4">
+                <Button variant="ghost" size="icon" asChild>
+                    <Link href={`/vault/${slug}`}>
+                        <ArrowLeft className="h-4 w-4" />
+                    </Link>
+                </Button>
+                <div>
+                    <h1 className="text-3xl font-bold">Vault Settings</h1>
+                    <p className="text-muted-foreground">Manage settings for {vault.name}</p>
+                </div>
+            </div>
+
+            <div className="space-y-6">
+                <EditVaultForm vault={vault} />
+                <VaultAccessForm vault={vault} />
+                <DeleteVaultForm vaultId={vault.id} vaultName={vault.name} />
+            </div>
         </div>
     );
 }

@@ -129,7 +129,7 @@ export default async function VaultPage({ params, searchParams }: { params: Prom
                     </div>
                 </div>
 
-                <BookmarkList bookmarks={filteredBookmarks || []} />
+                <BookmarkList bookmarks={filteredBookmarks || []} categories={categories || []} canEdit={canEdit} />
             </div>
         </div>
     );
