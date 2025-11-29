@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { CreateCategoryForm } from "@/components/vault/create-category-form";
@@ -43,6 +43,7 @@ type VaultSidebarProps = {
 
 export function VaultSidebar({ vaultId, slug, categories, canEdit }: VaultSidebarProps) {
     const pathname = usePathname();
+    const searchParams = useSearchParams();
     const [editingCategory, setEditingCategory] = useState<Category | null>(null);
     const [deletingCategory, setDeletingCategory] = useState<Category | null>(null);
 
@@ -64,7 +65,7 @@ export function VaultSidebar({ vaultId, slug, categories, canEdit }: VaultSideba
                     <div className="space-y-1">
                         <Button
                             asChild
-                            variant={pathname === `/vault/${slug}` && !window.location.search.includes("category=") ? "secondary" : "ghost"}
+                            variant={pathname === `/vault/${slug}` && !searchParams.get("category") ? "secondary" : "ghost"}
                             className="w-full justify-start"
                         >
                             <Link href={`/vault/${slug}`}>
@@ -79,9 +80,7 @@ export function VaultSidebar({ vaultId, slug, categories, canEdit }: VaultSideba
                                     variant="ghost"
                                     className={cn(
                                         "w-full justify-start",
-                                        // Simple check for query param in URL string if available, or rely on server side prop?
-                                        // Client side check:
-                                        typeof window !== 'undefined' && window.location.search.includes(`category=${category.id}`) && "bg-accent text-accent-foreground"
+                                        searchParams.get("category") === category.id && "bg-accent text-accent-foreground"
                                     )}
                                 >
                                     <Link href={`/vault/${slug}?category=${category.id}`} className="flex-1 truncate">
@@ -124,13 +123,15 @@ export function VaultSidebar({ vaultId, slug, categories, canEdit }: VaultSideba
             </div>
 
             {/* Edit Dialog */}
-            {editingCategory && (
-                <EditCategoryDialog
-                    category={editingCategory}
-                    open={!!editingCategory}
-                    onOpenChange={(open) => !open && setEditingCategory(null)}
-                />
-            )}
+            {
+                editingCategory && (
+                    <EditCategoryDialog
+                        category={editingCategory}
+                        open={!!editingCategory}
+                        onOpenChange={(open) => !open && setEditingCategory(null)}
+                    />
+                )
+            }
 
             {/* Delete Alert */}
             <AlertDialog open={!!deletingCategory} onOpenChange={(open) => !open && setDeletingCategory(null)}>
@@ -157,6 +158,6 @@ export function VaultSidebar({ vaultId, slug, categories, canEdit }: VaultSideba
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
-        </div>
+        </div >
     );
 }
