@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { updateDefaultVault } from "@/app/actions/user";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,6 +33,27 @@ const initialState = {
 
 export function DefaultVaultForm({ vaults, defaultVaultId }: DefaultVaultFormProps) {
     const [state, formAction, pending] = useActionState(updateDefaultVault, initialState);
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    if (!mounted) {
+        return (
+            <Card>
+                <CardHeader>
+                    <CardTitle>Default Vault</CardTitle>
+                    <CardDescription>
+                        Select the vault where bookmarks from Discord will be saved by default.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="h-10 w-full bg-muted animate-pulse rounded-md" />
+                </CardContent>
+            </Card>
+        );
+    }
 
     return (
         <Card>
