@@ -2,6 +2,9 @@ import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { DefaultVaultForm } from "@/components/user/default-vault-form";
+import { Button } from "@/components/ui/button";
+import { ConnectDiscordButton } from "@/components/user/connect-discord-button";
+import { FaDiscord } from "react-icons/fa";
 
 import { Button } from "@/components/ui/button";
 import { ConnectDiscordButton } from "@/components/user/connect-discord-button";
@@ -49,6 +52,7 @@ export default async function SettingsPage() {
                 <DefaultVaultForm
                     vaults={vaults}
                     defaultVaultId={user?.defaultVaultId}
+                    isPro={false}
                 />
 
                 <div className="space-y-4 pt-6 border-t">
