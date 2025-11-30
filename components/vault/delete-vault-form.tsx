@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { deleteVault } from "@/app/actions/vault";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, Trash2 } from "lucide-react";
@@ -29,6 +30,7 @@ const initialState = {
 export function DeleteVaultForm({ vaultId, vaultName }: DeleteVaultFormProps) {
     const [state, action, isPending] = useActionState(deleteVault, initialState);
     const [isOpen, setIsOpen] = useState(false);
+    const [confirmText, setConfirmText] = useState("");
 
     return (
         <Card className="border-destructive/50">
@@ -64,6 +66,16 @@ export function DeleteVaultForm({ vaultId, vaultName }: DeleteVaultFormProps) {
                                 <span className="font-semibold text-foreground"> {vaultName} </span>
                                 and remove all data from our servers.
                             </AlertDialogDescription>
+                            <div className="py-4 space-y-2">
+                                <p className="text-sm text-muted-foreground">
+                                    Please type <span className="font-mono font-bold select-all">delete {vaultName}</span> to confirm.
+                                </p>
+                                <Input
+                                    value={confirmText}
+                                    onChange={(e) => setConfirmText(e.target.value)}
+                                    placeholder={`delete ${vaultName}`}
+                                />
+                            </div>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                             <AlertDialogCancel>Cancel</AlertDialogCancel>
@@ -72,7 +84,7 @@ export function DeleteVaultForm({ vaultId, vaultName }: DeleteVaultFormProps) {
                                 <AlertDialogAction
                                     type="submit"
                                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                    disabled={isPending}
+                                    disabled={isPending || confirmText !== `delete ${vaultName}`}
                                 >
                                     {isPending ? "Deleting..." : "Delete Vault"}
                                 </AlertDialogAction>
