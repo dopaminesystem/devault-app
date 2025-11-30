@@ -5,6 +5,7 @@ const serverSchema = z.object({
     BETTER_AUTH_SECRET: z.string().min(1).trim(),
     DISCORD_CLIENT_ID: z.string().min(1).trim(),
     DISCORD_CLIENT_SECRET: z.string().min(1).trim(),
+    DISCORD_BOT_TOKEN: z.string().min(1).trim().optional(),
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
     BETTER_AUTH_URL: z.string().url().optional(), // Optional as it might be inferred or not strictly required by app code directly
 });
@@ -22,6 +23,7 @@ const processEnv = {
     BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
     DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID,
     DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET,
+    DISCORD_BOT_TOKEN: process.env.DISCORD_BOT_TOKEN,
     NODE_ENV: process.env.NODE_ENV,
     BETTER_AUTH_URL: process.env.BETTER_AUTH_URL,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
