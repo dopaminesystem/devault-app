@@ -7,6 +7,7 @@ import { VaultMember } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { hash, compare } from "bcryptjs";
+import { isDiscordMembership } from "@/lib/discord";
 
 const createVaultSchema = z.object({
     name: z.string().min(3, "Name must be at least 3 characters").max(50, "Name must be less than 50 characters"),
@@ -135,13 +136,25 @@ export async function getVault(slug: string) {
         return { vault };
     }
 
+    if (vault.accessType === "DISCORD_GATED" && vault.discordGuildId) {
+        if (!session?.user) {
+            return { error: "Unauthorized" };
+        }
+
+        const hasAccess = await isDiscordMembership(session.user.id, vault.discordGuildId);
+        if (hasAccess) {
+            return { vault };
+        }
+    }
+
     return { error: "Access denied" };
 }
 
 const updateVaultSettingsSchema = z.object({
     vaultId: z.string(),
-    accessType: z.enum(["PUBLIC", "PASSWORD"]),
-    password: z.string().optional(),
+    accessType: z.enum(["PUBLIC", "PASSWORD", "DISCORD_GATED"]),
+    password: z.string().nullable().optional(),
+    discordGuildId: z.string().nullable().optional(),
 });
 
 export async function updateVaultSettings(prevState: any, formData: FormData) {
@@ -155,13 +168,15 @@ export async function updateVaultSettings(prevState: any, formData: FormData) {
         vaultId: formData.get("vaultId"),
         accessType: formData.get("accessType"),
         password: formData.get("password"),
+        discordGuildId: formData.get("discordGuildId"),
     });
 
     if (!validatedFields.success) {
+        console.error("Validation error:", validatedFields.error.flatten());
         return { message: "Invalid fields" };
     }
 
-    const { vaultId, accessType, password } = validatedFields.data;
+    const { vaultId, accessType, password, discordGuildId } = validatedFields.data;
 
     const vault = await prisma.vault.findUnique({
         where: { id: vaultId },
@@ -183,6 +198,11 @@ export async function updateVaultSettings(prevState: any, formData: FormData) {
         } else if (!passwordHash) {
             return { message: "Password is required for private vaults" };
         }
+    } else if (accessType === "DISCORD_GATED") {
+        if (!discordGuildId || discordGuildId.trim().length === 0) {
+            return { message: "Discord Server ID is required for Discord-gated vaults" };
+        }
+        passwordHash = null;
     } else {
         passwordHash = null;
     }
@@ -192,6 +212,7 @@ export async function updateVaultSettings(prevState: any, formData: FormData) {
         data: {
             accessType,
             passwordHash,
+            discordGuildId: discordGuildId || null, // Allow clearing it
         },
     });
 

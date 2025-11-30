@@ -3,6 +3,10 @@ import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { DefaultVaultForm } from "@/components/user/default-vault-form";
 
+import { Button } from "@/components/ui/button";
+import { ConnectDiscordButton } from "@/components/user/connect-discord-button";
+import { FaDiscord } from "react-icons/fa";
+
 export default async function SettingsPage() {
     const session = await getSession();
 
@@ -10,11 +14,16 @@ export default async function SettingsPage() {
         redirect("/sign-in");
     }
 
-    // Fetch user with default vault
+    // Fetch user with default vault and accounts
     const user = await prisma.user.findUnique({
         where: { id: session.user.id },
-        select: { defaultVaultId: true },
+        select: {
+            defaultVaultId: true,
+            accounts: true
+        },
     });
+
+    const discordAccount = user?.accounts.find(a => a.providerId === "discord");
 
     // Fetch available vaults
     const vaults = await prisma.vault.findMany({
@@ -41,6 +50,28 @@ export default async function SettingsPage() {
                     vaults={vaults}
                     defaultVaultId={user?.defaultVaultId}
                 />
+
+                <div className="space-y-4 pt-6 border-t">
+                    <h2 className="text-xl font-semibold">Connected Accounts</h2>
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="flex items-center space-x-4">
+                            <FaDiscord className="h-8 w-8 text-[#5865F2]" />
+                            <div>
+                                <p className="font-medium">Discord</p>
+                                <p className="text-sm text-muted-foreground">
+                                    {discordAccount
+                                        ? "Your account is connected."
+                                        : "Connect to save bookmarks directly from Discord."}
+                                </p>
+                            </div>
+                        </div>
+                        {discordAccount ? (
+                            <Button variant="outline" disabled>Connected</Button>
+                        ) : (
+                            <ConnectDiscordButton />
+                        )}
+                    </div>
+                </div>
             </div>
         </div>
     );
