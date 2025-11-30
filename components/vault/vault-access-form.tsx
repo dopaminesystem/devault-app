@@ -13,6 +13,7 @@ interface VaultAccessFormProps {
     vault: {
         id: string;
         accessType: "PUBLIC" | "PASSWORD" | "DISCORD_GATED";
+        discordGuildId?: string | null;
     };
 }
 
@@ -51,11 +52,15 @@ export function VaultAccessForm({ vault }: VaultAccessFormProps) {
                                 <RadioGroupItem value="PASSWORD" id="password" />
                                 <Label htmlFor="password">Password Protected</Label>
                             </div>
+                            <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="DISCORD_GATED" id="discord_gated" />
+                                <Label htmlFor="discord_gated">Discord Server Member (Only members can view)</Label>
+                            </div>
                         </RadioGroup>
                     </div>
 
                     {accessType === "PASSWORD" && (
-                        <div className="space-y-2">
+                        <div className="space-y-2 pl-6 border-l-2 ml-1">
                             <Label htmlFor="password-input">Password</Label>
                             <Input
                                 id="password-input"
@@ -65,6 +70,24 @@ export function VaultAccessForm({ vault }: VaultAccessFormProps) {
                             />
                             <p className="text-xs text-muted-foreground">
                                 Leave blank to keep existing password.
+                            </p>
+                        </div>
+                    )}
+
+
+
+                    {accessType === "DISCORD_GATED" && (
+                        <div className="space-y-2 pl-6 border-l-2 ml-1">
+                            <Label htmlFor="discordGuildId">Discord Server ID (Guild ID)</Label>
+                            <Input
+                                id="discordGuildId"
+                                name="discordGuildId"
+                                placeholder="e.g. 123456789012345678"
+                                defaultValue={vault.discordGuildId || ""}
+                                required
+                            />
+                            <p className="text-xs text-muted-foreground">
+                                Right-click your server icon in Discord and select "Copy Server ID".
                             </p>
                         </div>
                     )}

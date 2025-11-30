@@ -4,6 +4,7 @@ import { z } from "zod";
 
 const saveBookmarkSchema = z.object({
     discordId: z.string(),
+    guildId: z.string().optional(),
     url: z.string().url(),
     title: z.string().optional(),
     description: z.string().optional(),
@@ -28,7 +29,7 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        const { discordId, url, title, description, tags } = validation.data;
+        const { discordId, guildId, url, title, description, tags } = validation.data;
 
         // 2. Identify the user
         const account = await prisma.account.findFirst({
@@ -49,11 +50,29 @@ export async function POST(req: NextRequest) {
         }
 
         const user = account.user;
+        let targetVaultId = user.defaultVaultId;
 
-        // 3. Get default vault
-        if (!user.defaultVaultId) {
+        // 3. Resolve Vault (Check for Guild Link)
+        if (guildId) {
+            // Find a vault linked to this guild where the user is a member/owner
+            const linkedVault = await prisma.vault.findFirst({
+                where: {
+                    discordGuildId: guildId,
+                    OR: [
+                        { ownerId: user.id },
+                        { members: { some: { userId: user.id } } }
+                    ]
+                }
+            });
+
+            if (linkedVault) {
+                targetVaultId = linkedVault.id;
+            }
+        }
+
+        if (!targetVaultId) {
             return NextResponse.json(
-                { error: "Default vault not set. Please configure it in your settings." },
+                { error: "Default vault not set and no linked vault found. Please configure your settings." },
                 { status: 400 }
             );
         }
@@ -61,7 +80,7 @@ export async function POST(req: NextRequest) {
         // 4. Check/Create "Discord Imports" category
         let category = await prisma.category.findFirst({
             where: {
-                vaultId: user.defaultVaultId,
+                vaultId: targetVaultId,
                 name: "Discord Imports",
             },
         });
@@ -69,7 +88,7 @@ export async function POST(req: NextRequest) {
         if (!category) {
             category = await prisma.category.create({
                 data: {
-                    vaultId: user.defaultVaultId,
+                    vaultId: targetVaultId,
                     name: "Discord Imports",
                     order: 0, // Put it at the top
                 },
