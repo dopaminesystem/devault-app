@@ -66,14 +66,30 @@ export async function POST(req: Request) {
             return NextResponse.json({ message: "Access denied to default vault" }, { status: 403 });
         }
 
+        // Find or create "General" category
+        let category = await prisma.category.findFirst({
+            where: {
+                vaultId: user.defaultVaultId,
+                name: "General",
+            },
+        });
+
+        if (!category) {
+            category = await prisma.category.create({
+                data: {
+                    vaultId: user.defaultVaultId,
+                    name: "General",
+                },
+            });
+        }
+
         // Create bookmark
         const bookmark = await prisma.bookmark.create({
             data: {
                 url,
                 title,
                 description,
-                vaultId: user.defaultVaultId,
-                createdById: session.user.id,
+                categoryId: category.id,
             },
         });
 
