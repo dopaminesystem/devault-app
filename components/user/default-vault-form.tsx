@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState } from "react";
 import { updateDefaultVault } from "@/app/actions/user";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,6 +24,7 @@ import { Vault } from "@prisma/client";
 interface DefaultVaultFormProps {
     vaults: Vault[];
     defaultVaultId?: string | null;
+    isPro?: boolean;
 }
 
 const initialState = {
@@ -31,34 +32,20 @@ const initialState = {
     message: "",
 };
 
-export function DefaultVaultForm({ vaults, defaultVaultId }: DefaultVaultFormProps) {
+export function DefaultVaultForm({ vaults, defaultVaultId, isPro = false }: DefaultVaultFormProps) {
     const [state, formAction, pending] = useActionState(updateDefaultVault, initialState);
-    const [mounted, setMounted] = useState(false);
-
-    useEffect(() => {
-        setMounted(true);
-    }, []);
-
-    if (!mounted) {
-        return (
-            <Card>
-                <CardHeader>
-                    <CardTitle>Default Vault</CardTitle>
-                    <CardDescription>
-                        Select the vault where bookmarks from Discord will be saved by default.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="h-10 w-full bg-muted animate-pulse rounded-md" />
-                </CardContent>
-            </Card>
-        );
-    }
 
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Default Vault</CardTitle>
+                <div className="flex items-center justify-between">
+                    <CardTitle>Default Vault</CardTitle>
+                    {!isPro && (
+                        <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full font-medium">
+                            Pro Feature
+                        </span>
+                    )}
+                </div>
                 <CardDescription>
                     Select the vault where bookmarks from Discord will be saved by default.
                 </CardDescription>
@@ -67,7 +54,7 @@ export function DefaultVaultForm({ vaults, defaultVaultId }: DefaultVaultFormPro
                 <form action={formAction} className="space-y-4">
                     <div className="space-y-2">
                         <Label htmlFor="vaultId">Vault</Label>
-                        <Select name="vaultId" defaultValue={defaultVaultId || undefined}>
+                        <Select name="vaultId" defaultValue={defaultVaultId || undefined} disabled={!isPro || pending}>
                             <SelectTrigger>
                                 <SelectValue placeholder="Select a vault" />
                             </SelectTrigger>
@@ -81,13 +68,20 @@ export function DefaultVaultForm({ vaults, defaultVaultId }: DefaultVaultFormPro
                         </Select>
                     </div>
 
+                    {!isPro && (
+                        <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-md">
+                            Default vault selection is available on the Pro plan.
+                            Free users save to their first created vault by default.
+                        </div>
+                    )}
+
                     {state.message && (
                         <p className={`text-sm ${state.success ? "text-green-500" : "text-red-500"}`}>
                             {state.message}
                         </p>
                     )}
 
-                    <Button type="submit" disabled={pending}>
+                    <Button type="submit" disabled={!isPro || pending}>
                         {pending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         Save Changes
                     </Button>

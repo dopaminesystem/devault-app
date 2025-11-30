@@ -1,7 +1,7 @@
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import { DefaultVaultForm } from "@/components/user/default-vault-form";
+import { DefaultVaultFormWrapper } from "@/components/user/default-vault-form-wrapper";
 
 import { Button } from "@/components/ui/button";
 import { ConnectDiscordButton } from "@/components/user/connect-discord-button";
@@ -46,9 +46,10 @@ export default async function SettingsPage() {
             </div>
 
             <div className="space-y-6">
-                <DefaultVaultForm
+                <DefaultVaultFormWrapper
                     vaults={vaults}
                     defaultVaultId={user?.defaultVaultId}
+                    isPro={false}
                 />
 
                 <div className="space-y-4 pt-6 border-t">
