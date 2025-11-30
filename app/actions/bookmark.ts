@@ -5,6 +5,7 @@ import { VaultMember } from "@prisma/client";
 import { z } from "zod";
 import { auth, getSession } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
+import { normalizeUrl } from "@/lib/utils";
 
 export async function getBookmarks(vaultId: string) {
     try {
@@ -43,9 +44,12 @@ export async function createBookmark(prevState: any, formData: FormData) {
         return { success: false, message: "Unauthorized" };
     }
 
+    const rawUrl = formData.get("url") as string;
+    const normalizedUrl = rawUrl ? normalizeUrl(rawUrl) : "";
+
     const validatedFields = createBookmarkSchema.safeParse({
         vaultId: formData.get("vaultId"),
-        url: formData.get("url"),
+        url: normalizedUrl,
         title: formData.get("title"),
         description: formData.get("description"),
         tags: formData.get("tags"),
@@ -133,9 +137,12 @@ export async function updateBookmark(prevState: any, formData: FormData) {
         return { success: false, message: "Unauthorized" };
     }
 
+    const rawUrl = formData.get("url") as string;
+    const normalizedUrl = rawUrl ? normalizeUrl(rawUrl) : "";
+
     const validatedFields = updateBookmarkSchema.safeParse({
         bookmarkId: formData.get("bookmarkId"),
-        url: formData.get("url"),
+        url: normalizedUrl,
         title: formData.get("title"),
         description: formData.get("description"),
         categoryId: formData.get("categoryId"),
