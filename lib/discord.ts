@@ -1,6 +1,39 @@
 import { prisma } from "@/lib/prisma";
+import { env } from "@/lib/env";
 
 export async function isDiscordMembership(userId: string, guildId: string, roleId?: string) {
+    // Strategy 1: Use Bot Token (Preferred)
+    if (env.DISCORD_BOT_TOKEN) {
+        try {
+            const response = await fetch(`https://discord.com/api/guilds/${guildId}/members/${userId}`, {
+                headers: {
+                    Authorization: `Bot ${env.DISCORD_BOT_TOKEN}`,
+                },
+            });
+
+            if (response.status === 404) {
+                return false;
+            }
+
+            if (!response.ok) {
+                console.error("Failed to fetch guild member with bot token", await response.text());
+                // Fallback to user token if bot fails (e.g. bot not in guild)? 
+                // Usually if bot fails, it's a permission issue or bot not in guild.
+                // We can try fallback or just return false. Let's try fallback.
+            } else {
+                const member = await response.json();
+                if (roleId) {
+                    return member.roles.includes(roleId);
+                }
+                return true;
+            }
+        } catch (error) {
+            console.error("Discord Bot API error:", error);
+            // Fallback to user token
+        }
+    }
+
+    // Strategy 2: Use User Access Token (Fallback)
     const account = await prisma.account.findFirst({
         where: {
             userId,
