@@ -73,7 +73,7 @@ export function VaultSearch({ bookmarks }: VaultSearchProps) {
                         {bookmarks.map((bookmark) => (
                             <CommandItem
                                 key={bookmark.id}
-                                value={`${bookmark.title} ${bookmark.url} ${bookmark.description}`}
+                                value={`${bookmark.title || ""} ${bookmark.url} ${bookmark.description || ""} ${bookmark.category.name} ${bookmark.tags.join(" ")}`}
                                 onSelect={() => {
                                     setOpen(false);
                                     setTimeout(() => {
