@@ -12,6 +12,7 @@ type VaultSettingsFormProps = {
     vault: {
         id: string;
         accessType: "PUBLIC" | "PASSWORD" | "DISCORD_GATED";
+        discordGuildId?: string | null;
     };
 };
 
@@ -60,6 +61,17 @@ export function VaultSettingsForm({ vault }: VaultSettingsFormProps) {
                                 </p>
                             </div>
                         </div>
+                        <div className="flex items-center space-x-3 space-y-0">
+                            <RadioGroupItem value="DISCORD_GATED" id="discord_gated" />
+                            <div className="grid gap-1.5 leading-none">
+                                <Label htmlFor="discord_gated" className="font-medium">
+                                    Discord Server Member
+                                </Label>
+                                <p className="text-sm text-muted-foreground">
+                                    Only members of a specific Discord Server can view.
+                                </p>
+                            </div>
+                        </div>
                     </RadioGroup>
 
                     {accessType === "PASSWORD" && (
@@ -77,6 +89,29 @@ export function VaultSettingsForm({ vault }: VaultSettingsFormProps) {
                             </p>
                         </div>
                     )}
+
+                    <div className="pt-4 border-t">
+                        <Label htmlFor="discordGuildId" className="text-base font-medium">Discord Integration</Label>
+                        <p className="text-sm text-muted-foreground mb-4">
+                            Link this vault to a Discord Server.
+                            {accessType === "DISCORD_GATED"
+                                ? " Required for 'Discord Server Member' access."
+                                : " Messages saved from that server will automatically go here."}
+                        </p>
+                        <div className="space-y-2">
+                            <Label htmlFor="discordGuildId">Discord Server ID (Guild ID)</Label>
+                            <Input
+                                id="discordGuildId"
+                                name="discordGuildId"
+                                placeholder="e.g. 123456789012345678"
+                                defaultValue={vault.discordGuildId || ""}
+                                required={accessType === "DISCORD_GATED"}
+                            />
+                            <p className="text-xs text-muted-foreground">
+                                Right-click your server icon in Discord and select "Copy Server ID" (Developer Mode required).
+                            </p>
+                        </div>
+                    </div>
 
                     {state.message && (
                         <p className={`text-sm ${state.message.includes("success") ? "text-green-500" : "text-red-500"}`}>
