@@ -2,7 +2,7 @@ import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Vault } from "@prisma/client";
 import { redirect } from "next/navigation";
-import { CreateVaultForm } from "@/components/vault/create-vault-form";
+import { CreateVaultDialog } from "@/components/vault/create-vault-dialog";
 import Link from "next/link";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -52,7 +52,7 @@ export default async function DashboardPage() {
                                 Create your first vault to start collecting your bookmarks in a distraction-free environment.
                             </p>
                         </div>
-                        <CreateVaultForm />
+                        <CreateVaultDialog />
                     </div>
                 ) : (
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -72,11 +72,8 @@ export default async function DashboardPage() {
                             </Card>
                         ))}
 
-                        {/* Add New Vault Card (Visual Only for now, or could move form here) */}
-                        <div className="flex flex-col items-center justify-center p-6 rounded-xl border border-dashed border-zinc-800 bg-zinc-900/20 hover:bg-zinc-900/40 transition-colors gap-4">
-                            <p className="text-sm text-zinc-500 font-medium">Need another space?</p>
-                            <CreateVaultForm />
-                        </div>
+                        {/* Add New Vault Card */}
+                        <CreateVaultDialog />
                     </div>
                 )}
             </div>
