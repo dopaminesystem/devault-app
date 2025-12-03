@@ -44,16 +44,14 @@ export function Sidebar({
                     <Button
                         variant="ghost"
                         onClick={() => onSelectCategory(null)}
-                        className={`w-full justify-between ${selectedCategory === null
+                        className={`w-full justify-start gap-3 ${selectedCategory === null
                             ? 'bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 hover:text-indigo-300'
                             : 'text-zinc-400 hover:text-zinc-100'
                             }`}
                     >
-                        <div className="flex items-center gap-3">
-                            <Layout size={16} />
-                            All Bookmarks
-                        </div>
-                        <span className={`text-[10px] ${selectedCategory === null ? 'text-indigo-400' : 'text-zinc-600'}`}>
+                        <Layout size={16} />
+                        All Bookmarks
+                        <span className={`ml-auto text-[10px] ${selectedCategory === null ? 'text-indigo-400' : 'text-zinc-600'}`}>
                             {totalBookmarks}
                         </span>
                     </Button>
@@ -82,15 +80,13 @@ export function Sidebar({
                                 key={cat}
                                 variant="ghost"
                                 onClick={() => onSelectCategory(cat)}
-                                className={`w-full justify-between group ${selectedCategory === cat
+                                className={`w-full justify-start gap-3 group ${selectedCategory === cat
                                     ? 'bg-zinc-900 text-zinc-100'
                                     : 'text-zinc-400 hover:text-zinc-200'
                                     }`}
                             >
-                                <div className="flex items-center gap-3">
-                                    <Folder size={16} className={`transition-colors ${selectedCategory === cat ? 'text-indigo-400 fill-indigo-500/20' : 'text-zinc-600 group-hover:text-zinc-500'}`} />
-                                    {cat}
-                                </div>
+                                <Folder size={16} className={`transition-colors ${selectedCategory === cat ? 'text-indigo-400 fill-indigo-500/20' : 'text-zinc-600 group-hover:text-zinc-500'}`} />
+                                {cat}
                             </Button>
                         ))
                     ) : (

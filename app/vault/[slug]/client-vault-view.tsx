@@ -171,7 +171,7 @@ export default function ClientVaultView({
                                 <Card
                                     key={bookmark.id}
                                     onClick={() => openDetail(bookmark)}
-                                    className="h-[180px] group hover:-translate-y-1 hover:shadow-indigo-500/10"
+                                    className="h-[180px] p-0 gap-0 group hover:-translate-y-1 hover:shadow-indigo-500/10"
                                 >
                                     <CardContent className="p-5 h-full flex flex-col justify-between">
                                         <div className="flex items-start justify-between">

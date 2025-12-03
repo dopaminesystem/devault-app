@@ -14,6 +14,7 @@ import {
 import { BookmarkWithCategory } from './bookmark-card';
 import { format } from 'date-fns';
 import { SheetShell } from "@/components/ui/sheet-shell";
+import { Button } from "@/components/ui/button";
 
 // Helper for badge colors (same as in BookmarkCard)
 const getCategoryColor = (categoryName: string) => {
@@ -115,32 +116,33 @@ export function DetailSheet({ bookmark, isOpen, onClose, onDelete, isDeleting = 
             </div>
 
             <div className="p-6 border-t border-zinc-800/50 bg-zinc-900/30 flex justify-between items-center rounded-b-2xl mt-auto">
-                <button
+                <Button
+                    variant="ghost"
                     onClick={() => onDelete(bookmark.id)}
                     disabled={isDeleting}
-                    className="flex items-center gap-2 text-sm text-red-400 hover:text-red-300 hover:bg-red-950/30 px-3 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="text-red-400 hover:text-red-300 hover:bg-red-950/30 rounded-full"
                 >
                     {isDeleting ? (
                         <>
-                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-red-400 border-t-transparent" />
+                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-red-400 border-t-transparent mr-2" />
                             Deleting...
                         </>
                     ) : (
                         <>
-                            <Trash2 size={16} /> Delete
+                            <Trash2 size={16} className="mr-2" /> Delete
                         </>
                     )}
-                </button>
+                </Button>
                 <div className="flex gap-3">
-                    <button className="flex items-center gap-2 text-sm text-zinc-300 hover:text-white hover:bg-zinc-800 px-4 py-2 rounded-lg transition-colors">
+                    <Button variant="ghost" className="text-zinc-300 hover:text-white hover:bg-zinc-800 rounded-full">
                         Edit
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                         onClick={() => window.open(bookmark.url, '_blank')}
-                        className="flex items-center gap-2 text-sm font-medium text-zinc-950 bg-zinc-100 hover:bg-white px-4 py-2 rounded-lg transition-colors shadow-[0_0_15px_rgba(255,255,255,0.1)]"
+                        className="bg-zinc-100 text-zinc-950 hover:bg-white rounded-full shadow-[0_0_15px_rgba(255,255,255,0.1)]"
                     >
-                        <ExternalLink size={16} /> Visit
-                    </button>
+                        <ExternalLink size={16} className="mr-2" /> Visit
+                    </Button>
                 </div>
             </div>
         </SheetShell>
