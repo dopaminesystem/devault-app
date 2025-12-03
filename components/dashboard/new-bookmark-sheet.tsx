@@ -5,7 +5,8 @@ import { Link as LinkIcon, Type, List, Hash, Save, Plus, X } from 'lucide-react'
 import { createBookmark } from '@/app/actions/bookmark';
 import { useActionState } from 'react';
 import { SheetShell } from "@/components/ui/sheet-shell";
-import { INPUT_STYLES } from '@/lib/constants';
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 interface NewBookmarkSheetProps {
     isOpen: boolean;
@@ -85,11 +86,10 @@ export function NewBookmarkSheet({ isOpen, onClose, vaultId, categories: initial
                         <label className="flex items-center gap-2 text-xs font-medium text-zinc-500 uppercase tracking-wider">
                             <LinkIcon size={12} /> URL
                         </label>
-                        <input
+                        <Input
                             name="url"
                             type="text"
                             placeholder="https://example.com"
-                            className={INPUT_STYLES}
                             autoFocus
                             required
                         />
@@ -98,22 +98,21 @@ export function NewBookmarkSheet({ isOpen, onClose, vaultId, categories: initial
                         <label className="flex items-center gap-2 text-xs font-medium text-zinc-500 uppercase tracking-wider">
                             <Type size={12} /> Title
                         </label>
-                        <input
+                        <Input
                             name="title"
                             type="text"
                             placeholder="e.g., Amazing Design Tool"
-                            className={INPUT_STYLES}
                         />
                     </div>
                     <div className="space-y-2">
                         <label className="flex items-center gap-2 text-xs font-medium text-zinc-500 uppercase tracking-wider">
                             <List size={12} /> Description
                         </label>
-                        <textarea
+                        <Textarea
                             name="description"
                             rows={4}
                             placeholder="What makes this link special?"
-                            className={`${INPUT_STYLES} resize-none`}
+                            className="resize-none"
                         />
                     </div>
 
