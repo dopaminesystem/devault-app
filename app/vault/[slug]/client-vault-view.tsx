@@ -148,74 +148,107 @@ export default function ClientVaultView({
                     </div>
 
                     {/* Content Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {filteredBookmarks.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 
-                        {/* Add New Button */}
-                        <button
-                            onClick={() => setIsNewBookmarkOpen(true)}
-                            className="group flex flex-col items-center justify-center h-[180px] border border-dashed border-zinc-800 rounded-2xl hover:bg-zinc-900/30 hover:border-zinc-700 transition-all cursor-pointer bg-zinc-900/10"
-                        >
-                            <div className="w-12 h-12 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform shadow-lg">
-                                <Plus size={20} className="text-zinc-500 group-hover:text-zinc-300" />
-                            </div>
-                            <span className="text-sm font-medium text-zinc-500 group-hover:text-zinc-300">New Bookmark</span>
-                        </button>
+                            {/* Add New Button */}
+                            <button
+                                onClick={() => setIsNewBookmarkOpen(true)}
+                                className="group flex flex-col items-center justify-center h-[180px] border border-dashed border-zinc-800 rounded-2xl hover:bg-zinc-900/30 hover:border-zinc-700 transition-all cursor-pointer bg-zinc-900/10"
+                            >
+                                <div className="w-12 h-12 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform shadow-lg">
+                                    <Plus size={20} className="text-zinc-500 group-hover:text-zinc-300" />
+                                </div>
+                                <span className="text-sm font-medium text-zinc-500 group-hover:text-zinc-300">New Bookmark</span>
+                            </button>
 
-                        {/* Render Bookmarks */}
-                        {filteredBookmarks.map((bookmark) => {
-                            const hostname = new URL(bookmark.url).hostname;
-                            const faviconUrl = `https://www.google.com/s2/favicons?domain=${bookmark.url}&sz=64`;
-                            const categoryColor = getCategoryColor(bookmark.category.name);
+                            {/* Render Bookmarks */}
+                            {filteredBookmarks.map((bookmark) => {
+                                const hostname = new URL(bookmark.url).hostname;
+                                const faviconUrl = `https://www.google.com/s2/favicons?domain=${bookmark.url}&sz=64`;
+                                const categoryColor = getCategoryColor(bookmark.category.name);
 
-                            return (
-                                <Card
-                                    key={bookmark.id}
-                                    onClick={() => openDetail(bookmark)}
-                                    className="h-[180px] p-0 gap-0 group hover:-translate-y-1 hover:shadow-indigo-500/10"
-                                >
-                                    <CardContent className="p-5 h-full flex flex-col justify-between">
-                                        <div className="flex items-start justify-between">
-                                            <div className="w-10 h-10 rounded-lg bg-zinc-950/50 border border-zinc-800/50 flex items-center justify-center group-hover:border-zinc-700 transition-colors">
-                                                <img
-                                                    src={faviconUrl}
-                                                    alt="icon"
-                                                    className="w-5 h-5 opacity-70 group-hover:opacity-100 transition-opacity grayscale group-hover:grayscale-0"
-                                                />
+                                return (
+                                    <Card
+                                        key={bookmark.id}
+                                        onClick={() => openDetail(bookmark)}
+                                        className="h-[180px] p-0 gap-0 group hover:-translate-y-1 hover:shadow-indigo-500/10"
+                                    >
+                                        <CardContent className="p-5 h-full flex flex-col justify-between">
+                                            <div className="flex items-start justify-between">
+                                                <div className="w-10 h-10 rounded-lg bg-zinc-950/50 border border-zinc-800/50 flex items-center justify-center group-hover:border-zinc-700 transition-colors">
+                                                    <img
+                                                        src={faviconUrl}
+                                                        alt="icon"
+                                                        className="w-5 h-5 opacity-70 group-hover:opacity-100 transition-opacity grayscale group-hover:grayscale-0"
+                                                    />
+                                                </div>
+                                                <Badge className={`${categoryColor} border opacity-70 group-hover:opacity-100`}>
+                                                    {bookmark.category.name}
+                                                </Badge>
                                             </div>
-                                            <Badge className={`${categoryColor} border opacity-70 group-hover:opacity-100`}>
-                                                {bookmark.category.name}
-                                            </Badge>
-                                        </div>
 
-                                        <div className="mt-2">
-                                            <h3 className="font-semibold text-zinc-200 group-hover:text-white transition-colors line-clamp-1">
-                                                {bookmark.title}
-                                            </h3>
-                                            <p className="text-sm text-zinc-500 mt-1 line-clamp-2 group-hover:text-zinc-400 transition-colors">
-                                                {bookmark.description}
-                                            </p>
-                                        </div>
+                                            <div className="mt-2">
+                                                <h3 className="font-semibold text-zinc-200 group-hover:text-white transition-colors line-clamp-1">
+                                                    {bookmark.title}
+                                                </h3>
+                                                <p className="text-sm text-zinc-500 mt-1 line-clamp-2 group-hover:text-zinc-400 transition-colors">
+                                                    {bookmark.description}
+                                                </p>
+                                            </div>
 
-                                        <div className="flex items-center gap-1 text-xs text-zinc-600 group-hover:text-indigo-400 transition-colors mt-auto pt-2">
-                                            <Globe size={10} />
-                                            <span className="truncate">{hostname}</span>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            );
-                        })}
-                    </div>
-
-                    {/* Empty State */}
-                    {filteredBookmarks.length === 0 && (
-                        <div className="text-center py-20">
-                            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-zinc-900/50 border border-zinc-800 mb-4 shadow-xl">
-                                <Command size={24} className="text-zinc-600" />
-                            </div>
-                            <p className="text-zinc-500">No bookmarks found in this category.</p>
-                            <Button variant="link" onClick={() => setActiveCategoryFilter(null)} className="text-indigo-400 mt-2">
-                                Clear filter
-                            </Button>
+                                            <div className="flex items-center gap-1 text-xs text-zinc-600 group-hover:text-indigo-400 transition-colors mt-auto pt-2">
+                                                <Globe size={10} />
+                                                <span className="truncate">{hostname}</span>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                );
+                            })}
+                        </div>
+                    ) : (
+                        /* Empty State */
+                        <div className="col-span-full flex flex-col items-center justify-center py-20 px-4">
+                            {search ? (
+                                <div className="text-center space-y-4">
+                                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-zinc-900/50 border border-zinc-800 shadow-xl">
+                                        <Search size={24} className="text-zinc-600" />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <h3 className="text-lg font-medium text-zinc-200">No results found</h3>
+                                        <p className="text-zinc-500">
+                                            We couldn't find anything matching "{search}"
+                                        </p>
+                                    </div>
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => setSearch('')}
+                                        className="mt-4"
+                                    >
+                                        Clear search
+                                    </Button>
+                                </div>
+                            ) : (
+                                <div
+                                    onClick={() => setIsNewBookmarkOpen(true)}
+                                    className="group relative w-full max-w-md flex flex-col items-center justify-center p-12 border-2 border-dashed border-zinc-800 rounded-3xl bg-zinc-900/10 hover:bg-zinc-900/30 hover:border-zinc-700 transition-all cursor-pointer text-center space-y-4"
+                                >
+                                    <div className="w-20 h-20 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center group-hover:scale-110 transition-transform shadow-2xl">
+                                        <Plus size={32} className="text-zinc-500 group-hover:text-zinc-300" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <h3 className="text-xl font-semibold text-zinc-200 group-hover:text-white transition-colors">
+                                            No bookmarks in this category
+                                        </h3>
+                                        <p className="text-zinc-500 max-w-xs mx-auto group-hover:text-zinc-400 transition-colors">
+                                            Add a new bookmark to this category to get started.
+                                        </p>
+                                    </div>
+                                    <Button className="mt-4 bg-zinc-100 text-zinc-950 hover:bg-white shadow-lg shadow-indigo-500/10">
+                                        Create Bookmark
+                                    </Button>
+                                </div>
+                            )}
                         </div>
                     )}
 
