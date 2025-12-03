@@ -1,5 +1,5 @@
 "use client"
-import { ArrowRight, Sparkles, Github, Zap, Layers, Cpu } from "lucide-react"
+import { ArrowRight, Sparkles, Github, Zap, Shield, Tags, Globe, Share2, Code } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -9,11 +9,11 @@ export default function LandingPage() {
     <div className="flex flex-col min-h-screen animate-in fade-in duration-1000 bg-zinc-950 text-zinc-100 font-sans selection:bg-indigo-500/30">
       <header className="flex items-center justify-between px-6 py-6 max-w-7xl mx-auto w-full z-50">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center shadow-[0_0_20px_rgba(99,102,241,0.3)]">
+          {/* <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center shadow-[0_0_20px_rgba(99,102,241,0.3)]">
             <Sparkles className="text-white w-4 h-4" />
-          </div>
+          </div> */}
           <span className="font-bold text-lg tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-400">
-            Antigravity
+            Devault
           </span>
         </div>
         <div className="flex items-center gap-6">
@@ -47,7 +47,7 @@ export default function LandingPage() {
           </h1>
 
           <p className="text-lg md:text-xl text-zinc-400 max-w-xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-200">
-            The vault for design engineers. Capture references, tools, and inspiration in a weightless, distraction-free
+            The vault for everyone. Capture references, tools, and inspiration in a weightless, distraction-free
             environment.
           </p>
 
@@ -67,31 +67,58 @@ export default function LandingPage() {
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-20 px-4 animate-in fade-in zoom-in-95 duration-1000 delay-500">
-            <Card>
-              <CardHeader>
-                <Zap className="w-6 h-6 text-yellow-400 mb-3 mx-auto md:mx-0" />
-                <CardTitle className="text-sm font-semibold text-zinc-200 mb-1">Instant Search</CardTitle>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-20 px-4 animate-in fade-in zoom-in-95 duration-1000 delay-500">
+            <Card className="h-full bg-zinc-900/40 border-zinc-800/60 hover:bg-zinc-900/60 transition-all duration-300">
+              <CardHeader className="items-center text-center">
+                <Shield className="w-6 h-6 text-emerald-400 mb-3 mx-auto" />
+                <CardTitle className="text-sm font-semibold text-zinc-200 mb-1">Secure</CardTitle>
                 <CardDescription className="text-xs text-zinc-500">
-                  Client-side filtering for zero latency. Find anything in milliseconds.
+                  Your data is encrypted at rest and in transit.
                 </CardDescription>
               </CardHeader>
             </Card>
-            <Card>
-              <CardHeader>
-                <Layers className="w-6 h-6 text-indigo-400 mb-3 mx-auto md:mx-0" />
-                <CardTitle className="text-sm font-semibold text-zinc-200 mb-1">Design Engineering</CardTitle>
+            <Card className="h-full bg-zinc-900/40 border-zinc-800/60 hover:bg-zinc-900/60 transition-all duration-300">
+              <CardHeader className="items-center text-center">
+                <Tags className="w-6 h-6 text-blue-400 mb-3 mx-auto" />
+                <CardTitle className="text-sm font-semibold text-zinc-200 mb-1">Smart Organization</CardTitle>
                 <CardDescription className="text-xs text-zinc-500">
-                  Built for the intersection of code and design. Syntax highlighting included.
+                  Tag, categorize, and filter your assets with flexible system.
                 </CardDescription>
               </CardHeader>
             </Card>
-            <Card>
-              <CardHeader>
-                <Cpu className="w-6 h-6 text-emerald-400 mb-3 mx-auto md:mx-0" />
-                <CardTitle className="text-sm font-semibold text-zinc-200 mb-1">AI-Ready Context</CardTitle>
+            <Card className="h-full bg-zinc-900/40 border-zinc-800/60 hover:bg-zinc-900/60 transition-all duration-300">
+              <CardHeader className="items-center text-center">
+                <Zap className="w-6 h-6 text-yellow-400 mb-3 mx-auto" />
+                <CardTitle className="text-sm font-semibold text-zinc-200 mb-1">Lightning Fast</CardTitle>
                 <CardDescription className="text-xs text-zinc-500">
-                  Structured data ready for your LLM workflows via MCP.
+                  Instant page loads and seamless interactions.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+            <Card className="h-full bg-zinc-900/40 border-zinc-800/60 hover:bg-zinc-900/60 transition-all duration-300">
+              <CardHeader className="items-center text-center">
+                <Globe className="w-6 h-6 text-indigo-400 mb-3 mx-auto" />
+                <CardTitle className="text-sm font-semibold text-zinc-200 mb-1">Anywhere</CardTitle>
+                <CardDescription className="text-xs text-zinc-500">
+                  Access your bookmarks from any device, anytime.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+            <Card className="h-full bg-zinc-900/40 border-zinc-800/60 hover:bg-zinc-900/60 transition-all duration-300">
+              <CardHeader className="items-center text-center">
+                <Share2 className="w-6 h-6 text-pink-400 mb-3 mx-auto" />
+                <CardTitle className="text-sm font-semibold text-zinc-200 mb-1">Selective Sharing</CardTitle>
+                <CardDescription className="text-xs text-zinc-500">
+                  Keep your personal items private, but share curated collections with the world via public links.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+            <Card className="h-full bg-zinc-900/40 border-zinc-800/60 hover:bg-zinc-900/60 transition-all duration-300">
+              <CardHeader className="items-center text-center">
+                <Code className="w-6 h-6 text-zinc-400 mb-3 mx-auto" />
+                <CardTitle className="text-sm font-semibold text-zinc-200 mb-1">Developer First</CardTitle>
+                <CardDescription className="text-xs text-zinc-500">
+                  Open source and ready for you to extend.
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -100,7 +127,7 @@ export default function LandingPage() {
       </main>
 
       <footer className="py-8 text-center border-t border-white/5 bg-zinc-950/50 backdrop-blur-md">
-        <p className="text-xs text-zinc-600">Designed & Engineered by Dhafin using Antigravity V2.</p>
+        <p className="text-xs text-zinc-600">Vault for everyone.</p>
       </footer>
     </div>
   )

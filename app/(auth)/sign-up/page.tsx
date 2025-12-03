@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation"
 import { useActionState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { FaDiscord } from "react-icons/fa"
 
 export default function SignUpPage() {
     const [isRegister, setIsRegister] = useState(true)
@@ -42,12 +43,12 @@ export default function SignUpPage() {
             </Link>
 
             <div className="flex flex-col items-center mb-8 space-y-2 z-10">
-                <div className="relative">
+                {/* <div className="relative">
                     <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center shadow-[0_0_30px_rgba(99,102,241,0.3)]">
                         <Sparkles className="text-white w-6 h-6" />
                     </div>
                     <div className="absolute -inset-2 bg-indigo-500/20 blur-xl rounded-full -z-10" />
-                </div>
+                </div> */}
                 <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-b from-white to-zinc-400 bg-clip-text text-transparent">
                     Join the Vault
                 </h1>
@@ -116,15 +117,12 @@ export default function SignUpPage() {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                    <Button variant="outline" className="w-full">
+                <div className="flex gap-3">
+                    {/* <Button variant="outline" className="w-full">
                         <Github className="w-4 h-4" /> <span className="hidden sm:inline">GitHub</span>
-                    </Button>
+                    </Button> */}
                     <Button variant="outline" onClick={handleDiscordSignIn} className="w-full">
-                        <div className="w-4 h-4 rounded-full bg-white text-black flex items-center justify-center text-[10px] font-bold">
-                            D
-                        </div>
-                        <span className="hidden sm:inline">Discord</span>
+                        <FaDiscord className="w-4 h-4" /> <span className="hidden sm:inline">Discord</span>
                     </Button>
                 </div>
             </div>
