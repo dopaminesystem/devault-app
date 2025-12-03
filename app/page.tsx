@@ -1,7 +1,8 @@
 "use client"
 import { ArrowRight, Sparkles, Github, Zap, Layers, Cpu } from "lucide-react"
-import { TOKENS } from "@/lib/constants"
 import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 
 export default function LandingPage() {
   return (
@@ -19,11 +20,10 @@ export default function LandingPage() {
           <Link href="/sign-in" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">
             Log In
           </Link>
-          <Link
-            href="/sign-up"
-            className="px-5 py-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-sm font-medium transition-all backdrop-blur-md text-zinc-100"
-          >
-            Sign Up
+          <Link href="/sign-up">
+            <Button variant="outline" className="border-white/10 bg-white/5 hover:bg-white/10 text-zinc-100 backdrop-blur-md rounded-full h-9">
+              Sign Up
+            </Button>
           </Link>
         </div>
       </header>
@@ -52,40 +52,49 @@ export default function LandingPage() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-6 animate-in fade-in slide-in-from-bottom-16 duration-1000 delay-300">
-            <Link
-              href="/sign-up"
-              className={`${TOKENS.btn} ${TOKENS.btnPrimary} px-8 h-12 text-base hover:shadow-[0_0_40px_rgba(255,255,255,0.2)] rounded-full`}
-            >
-              Start Collecting <ArrowRight className="w-4 h-4 ml-2" />
+            <Link href="/sign-up">
+              <Button size="lg" className="text-base h-12 px-8">
+                Start Collecting <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
             </Link>
-            <button
+            <Button
+              variant="outline"
+              size="lg"
+              className="h-12 px-8"
               onClick={() => window.open("https://github.com", "_blank")}
-              className="px-8 h-12 rounded-full border border-zinc-800 bg-zinc-950/50 text-zinc-300 hover:text-white hover:border-zinc-700 transition-all flex items-center gap-2"
             >
               <Github className="w-5 h-5" /> Star on GitHub
-            </button>
+            </Button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-20 px-4 animate-in fade-in zoom-in-95 duration-1000 delay-500">
-            <div className="p-6 rounded-2xl border border-zinc-800/50 bg-zinc-900/20 backdrop-blur-sm">
-              <Zap className="w-6 h-6 text-yellow-400 mb-3 mx-auto md:mx-0" />
-              <h3 className="text-sm font-semibold text-zinc-200 mb-1">Instant Search</h3>
-              <p className="text-xs text-zinc-500">
-                Client-side filtering for zero latency. Find anything in milliseconds.
-              </p>
-            </div>
-            <div className="p-6 rounded-2xl border border-zinc-800/50 bg-zinc-900/20 backdrop-blur-sm">
-              <Layers className="w-6 h-6 text-indigo-400 mb-3 mx-auto md:mx-0" />
-              <h3 className="text-sm font-semibold text-zinc-200 mb-1">Design Engineering</h3>
-              <p className="text-xs text-zinc-500">
-                Built for the intersection of code and design. Syntax highlighting included.
-              </p>
-            </div>
-            <div className="p-6 rounded-2xl border border-zinc-800/50 bg-zinc-900/20 backdrop-blur-sm">
-              <Cpu className="w-6 h-6 text-emerald-400 mb-3 mx-auto md:mx-0" />
-              <h3 className="text-sm font-semibold text-zinc-200 mb-1">AI-Ready Context</h3>
-              <p className="text-xs text-zinc-500">Structured data ready for your LLM workflows via MCP.</p>
-            </div>
+            <Card>
+              <CardHeader>
+                <Zap className="w-6 h-6 text-yellow-400 mb-3 mx-auto md:mx-0" />
+                <CardTitle className="text-sm font-semibold text-zinc-200 mb-1">Instant Search</CardTitle>
+                <CardDescription className="text-xs text-zinc-500">
+                  Client-side filtering for zero latency. Find anything in milliseconds.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+            <Card>
+              <CardHeader>
+                <Layers className="w-6 h-6 text-indigo-400 mb-3 mx-auto md:mx-0" />
+                <CardTitle className="text-sm font-semibold text-zinc-200 mb-1">Design Engineering</CardTitle>
+                <CardDescription className="text-xs text-zinc-500">
+                  Built for the intersection of code and design. Syntax highlighting included.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+            <Card>
+              <CardHeader>
+                <Cpu className="w-6 h-6 text-emerald-400 mb-3 mx-auto md:mx-0" />
+                <CardTitle className="text-sm font-semibold text-zinc-200 mb-1">AI-Ready Context</CardTitle>
+                <CardDescription className="text-xs text-zinc-500">
+                  Structured data ready for your LLM workflows via MCP.
+                </CardDescription>
+              </CardHeader>
+            </Card>
           </div>
         </div>
       </main>

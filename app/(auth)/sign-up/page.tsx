@@ -8,6 +8,7 @@ import { authClient } from "@/lib/auth-client"
 import { useRouter } from "next/navigation"
 import { useActionState, useEffect } from "react"
 import Link from "next/link"
+import { Button } from "@/components/ui/button"
 
 export default function SignUpPage() {
     const [isRegister, setIsRegister] = useState(true)
@@ -100,10 +101,10 @@ export default function SignUpPage() {
                         <p className="text-xs text-red-500 text-center">{state.error}</p>
                     )}
 
-                    <button type="submit" disabled={pending} className={`${TOKENS.btn} ${TOKENS.btnPrimary} w-full mt-2 group rounded-xl`}>
+                    <Button type="submit" disabled={pending} className="w-full mt-2 group">
                         {pending ? "Creating Account..." : "Create Account"}
                         <ArrowRight className="w-4 h-4 opacity-50 group-hover:translate-x-0.5 transition-transform" />
-                    </button>
+                    </Button>
                 </form>
 
                 <div className="relative">
@@ -116,15 +117,15 @@ export default function SignUpPage() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
-                    <button className={`${TOKENS.btn} ${TOKENS.btnSecondary}`}>
+                    <Button variant="outline" className="w-full">
                         <Github className="w-4 h-4" /> <span className="hidden sm:inline">GitHub</span>
-                    </button>
-                    <button onClick={handleDiscordSignIn} className={`${TOKENS.btn} ${TOKENS.btnSecondary}`}>
+                    </Button>
+                    <Button variant="outline" onClick={handleDiscordSignIn} className="w-full">
                         <div className="w-4 h-4 rounded-full bg-white text-black flex items-center justify-center text-[10px] font-bold">
                             D
                         </div>
                         <span className="hidden sm:inline">Discord</span>
-                    </button>
+                    </Button>
                 </div>
             </div>
 

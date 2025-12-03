@@ -4,6 +4,7 @@ import React from 'react';
 import { Layout, Star, Clock, Folder, Plus, Trash2 } from 'lucide-react';
 import { VaultSwitcher } from './vault-switcher';
 import { Vault } from '@prisma/client';
+import { Button } from "@/components/ui/button";
 
 interface SidebarProps {
     vaults: Vault[];
@@ -40,11 +41,12 @@ export function Sidebar({
                     <h3 className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider px-3 mb-2">
                         Library
                     </h3>
-                    <button
+                    <Button
+                        variant="ghost"
                         onClick={() => onSelectCategory(null)}
-                        className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-all group ${selectedCategory === null
-                            ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'
-                            : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900/50 border border-transparent'
+                        className={`w-full justify-between ${selectedCategory === null
+                            ? 'bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 hover:text-indigo-300'
+                            : 'text-zinc-400 hover:text-zinc-100'
                             }`}
                     >
                         <div className="flex items-center gap-3">
@@ -54,16 +56,16 @@ export function Sidebar({
                         <span className={`text-[10px] ${selectedCategory === null ? 'text-indigo-400' : 'text-zinc-600'}`}>
                             {totalBookmarks}
                         </span>
-                    </button>
+                    </Button>
 
-                    <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900/50 transition-all border border-transparent">
+                    <Button variant="ghost" className="w-full justify-start gap-3 text-zinc-400 hover:text-zinc-100">
                         <Star size={16} />
                         Favorites
-                    </button>
-                    <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900/50 transition-all border border-transparent">
+                    </Button>
+                    <Button variant="ghost" className="w-full justify-start gap-3 text-zinc-400 hover:text-zinc-100">
                         <Clock size={16} />
                         Recent
-                    </button>
+                    </Button>
                 </div>
 
                 {/* Categories */}
@@ -76,19 +78,20 @@ export function Sidebar({
                     </h3>
                     {categories.length > 0 ? (
                         categories.map(cat => (
-                            <button
+                            <Button
                                 key={cat}
+                                variant="ghost"
                                 onClick={() => onSelectCategory(cat)}
-                                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-all group ${selectedCategory === cat
-                                    ? 'bg-zinc-900 border border-zinc-800 text-zinc-100 shadow-sm'
-                                    : 'text-zinc-400 hover:text-zinc-200 border border-transparent hover:bg-zinc-900/30'
+                                className={`w-full justify-between group ${selectedCategory === cat
+                                    ? 'bg-zinc-900 text-zinc-100'
+                                    : 'text-zinc-400 hover:text-zinc-200'
                                     }`}
                             >
                                 <div className="flex items-center gap-3">
                                     <Folder size={16} className={`transition-colors ${selectedCategory === cat ? 'text-indigo-400 fill-indigo-500/20' : 'text-zinc-600 group-hover:text-zinc-500'}`} />
                                     {cat}
                                 </div>
-                            </button>
+                            </Button>
                         ))
                     ) : (
                         <div className="px-3 py-4 text-xs text-zinc-600 italic">No categories yet</div>
@@ -97,10 +100,10 @@ export function Sidebar({
 
                 {/* Bottom Actions */}
                 <div className="pt-8 border-t border-zinc-800/50">
-                    <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-zinc-400 hover:text-red-400 hover:bg-red-950/20 transition-all border border-transparent">
+                    <Button variant="ghost" className="w-full justify-start gap-3 text-zinc-400 hover:text-red-400 hover:bg-red-950/20">
                         <Trash2 size={16} />
                         Trash
-                    </button>
+                    </Button>
                 </div>
             </div>
         </aside>
