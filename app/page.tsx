@@ -1,142 +1,134 @@
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import { FeatureCard } from "@/components/feature-card";
-import { Shield, Layers, Globe, ArrowRight, Vault, Zap, Lock, Share2, Code, Terminal } from "lucide-react";
+"use client"
+import { ArrowRight, Sparkles, Github, Zap, Shield, Tags, Globe, Share2, Code } from "lucide-react"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 
-export default function Home() {
+export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col selection:bg-primary/20 font-sans">
-      {/* Header/Nav - Ultra Minimal */}
-      <header className="container mx-auto px-6 py-6 flex justify-between items-center border-b border-border/40">
-        <div className="flex items-center gap-2 font-bold text-xl tracking-tighter">
-          <Vault className="h-5 w-5" />
-          <span>Devault</span>
+    <div className="flex flex-col min-h-screen animate-in fade-in duration-1000 bg-zinc-950 text-zinc-100 font-sans selection:bg-indigo-500/30">
+      <header className="flex items-center justify-between px-6 py-6 max-w-7xl mx-auto w-full z-50">
+        <div className="flex items-center gap-3">
+          {/* <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center shadow-[0_0_20px_rgba(99,102,241,0.3)]">
+            <Sparkles className="text-white w-4 h-4" />
+          </div> */}
+          <span className="font-bold text-lg tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-400">
+            Devault
+          </span>
         </div>
-        <nav className="flex items-center gap-6">
-          <Link href="https://github.com/dhafin/devault" target="_blank" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-            GitHub
+        <div className="flex items-center gap-6">
+          <Link href="/sign-in" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">
+            Log In
           </Link>
-          <Link href="/dashboard">
-            <Button variant="outline" className="font-medium border-border/60 hover:bg-muted/50 h-9 px-4 text-sm">
-              Log in
+          <Link href="/sign-up">
+            <Button variant="outline" className="border-white/10 bg-white/5 hover:bg-white/10 text-zinc-100 backdrop-blur-md rounded-full h-9">
+              Sign Up
             </Button>
           </Link>
-        </nav>
+        </div>
       </header>
 
-      <main className="flex-1 container mx-auto px-6 py-16 md:py-24 flex flex-col gap-20">
-        {/* Hero Section */}
-        <section className="flex flex-col items-start text-left gap-8 max-w-5xl">
-          <div className="inline-flex items-center border border-border/60 bg-muted/30 px-3 py-1 text-xs font-mono text-muted-foreground backdrop-blur-sm">
-            <span className="flex h-1.5 w-1.5 bg-primary mr-2 animate-pulse"></span>
-            IN ALPHA
+      <main className="flex-1 flex flex-col items-center justify-center text-center px-4 relative">
+        {/* Decorative Gradients */}
+        <div className="fixed top-0 left-0 w-full h-[500px] bg-gradient-to-b from-indigo-950/20 to-transparent pointer-events-none" />
+        <div className="fixed bottom-0 right-0 w-[500px] h-[500px] bg-radial-gradient from-blue-900/10 to-transparent rounded-full blur-3xl pointer-events-none" />
+
+        <div className="space-y-8 max-w-4xl relative z-10">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-medium animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+            </span>
+            v2.0 is now live
           </div>
 
-          <div className="space-y-6">
-            <h1 className="text-6xl md:text-8xl lg:text-9xl font-bold tracking-tighter text-foreground leading-[0.9]">
-              DIGITAL <br />
-              <span className="text-muted-foreground/50">VAULT.</span>
-            </h1>
-            <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl leading-relaxed tracking-tight font-light">
-              The minimalist home for your bookmarks and snippets. <br className="hidden md:block" />
-              Secure. Organized. Designed for focus.
-            </p>
-          </div>
+          <h1 className="text-6xl md:text-8xl font-bold tracking-tight bg-gradient-to-b from-white via-white to-zinc-600 bg-clip-text text-transparent pb-4 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+            Bookmarks at <br /> Zero Gravity.
+          </h1>
 
-          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto pt-4">
-            <Link href="/dashboard" className="w-full sm:w-auto">
-              <Button size="lg" className="w-full sm:w-auto h-14 px-10 text-lg font-medium rounded-none border-2 border-primary hover:bg-primary/90 transition-all">
-                Get Started
+          <p className="text-lg md:text-xl text-zinc-400 max-w-xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-200">
+            The vault for everyone. Capture references, tools, and inspiration in a weightless, distraction-free
+            environment.
+          </p>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-6 animate-in fade-in slide-in-from-bottom-16 duration-1000 delay-300">
+            <Link href="/sign-up">
+              <Button size="lg" className="text-base h-12 px-8">
+                Start Collecting <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </Link>
-            <Link href="https://github.com/dhafin/devault" target="_blank" className="w-full sm:w-auto">
-              <Button variant="outline" size="lg" className="w-full sm:w-auto h-14 px-10 text-lg font-medium rounded-none border-2 border-border hover:bg-muted/50 transition-all">
-                View Source
-              </Button>
-            </Link>
+            <Button
+              variant="outline"
+              size="lg"
+              className="h-12 px-8"
+              onClick={() => window.open("https://github.com", "_blank")}
+            >
+              <Github className="w-5 h-5" /> Star on GitHub
+            </Button>
           </div>
-        </section>
 
-        {/* Bento Grid Features */}
-        <section className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 auto-rows-[minmax(200px,auto)]">
-
-          {/* Large Feature 1 - Security */}
-          <Card className="md:col-span-2 lg:col-span-2 row-span-2 bg-card border-border/40 hover:border-primary/50 transition-colors group relative overflow-hidden rounded-none">
-            <div className="absolute inset-0 bg-grid-white/5 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] -z-10" />
-            <CardHeader className="h-full flex flex-col justify-between p-8">
-              <Shield className="h-12 w-12 mb-4 text-foreground stroke-1" />
-              <div className="space-y-2">
-                <CardTitle className="text-3xl font-bold tracking-tighter">Uncompromising Security</CardTitle>
-                <p className="text-muted-foreground text-lg leading-relaxed max-w-md">
-                  Your data is encrypted at rest and in transit. We prioritize privacy above all else, ensuring your vault remains truly yours.
-                </p>
-              </div>
-            </CardHeader>
-          </Card>
-
-          {/* Medium Feature 2 - Organization */}
-          <FeatureCard
-            className="md:col-span-1 lg:col-span-2"
-            headerClassName="p-8"
-            icon={Layers}
-            iconClassName="h-8 w-8"
-            title="Smart Organization"
-            titleClassName="text-2xl"
-            description="Tag, categorize, and filter your assets with a powerful, flexible system designed for speed."
-            descriptionClassName="text-lg"
-          />
-
-          {/* Small Feature 3 - Speed */}
-          <FeatureCard
-            icon={Zap}
-            title="Lightning Fast"
-            description="Instant page loads and seamless interactions."
-          />
-
-          {/* Small Feature 4 - Access */}
-          <FeatureCard
-            icon={Globe}
-            title="Accessible Anywhere"
-            description="Your vault travels with you. Access your bookmarks from any device, anytime."
-          />
-
-          {/* Medium Feature 5 - Sharing */}
-          <FeatureCard
-            className="md:col-span-3 lg:col-span-2"
-            headerClassName="p-8"
-            icon={Share2}
-            iconClassName="h-8 w-8"
-            title="Selective Sharing"
-            titleClassName="text-2xl"
-            description="Keep your personal items private, but share curated collections with the world via public links."
-            descriptionClassName="text-lg"
-          />
-
-          {/* Small Feature 6 - Developer First */}
-          <FeatureCard
-            className="md:col-span-1 lg:col-span-2 flex flex-col justify-center items-center text-center p-8"
-            customIcon={
-              <div className="flex justify-center gap-4 text-muted-foreground mb-4">
-                <Code className="h-8 w-8" />
-                <Terminal className="h-8 w-8" />
-              </div>
-            }
-            title="Developer First"
-            description="Open source and ready for you to extend."
-          />
-
-        </section>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-20 px-4 animate-in fade-in zoom-in-95 duration-1000 delay-500">
+            <Card className="h-full bg-zinc-900/40 border-zinc-800/60 hover:bg-zinc-900/60 transition-all duration-300">
+              <CardHeader className="items-center text-center">
+                <Shield className="w-6 h-6 text-emerald-400 mb-3 mx-auto" />
+                <CardTitle className="text-sm font-semibold text-zinc-200 mb-1">Secure</CardTitle>
+                <CardDescription className="text-xs text-zinc-500">
+                  Your data is encrypted at rest and in transit.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+            <Card className="h-full bg-zinc-900/40 border-zinc-800/60 hover:bg-zinc-900/60 transition-all duration-300">
+              <CardHeader className="items-center text-center">
+                <Tags className="w-6 h-6 text-blue-400 mb-3 mx-auto" />
+                <CardTitle className="text-sm font-semibold text-zinc-200 mb-1">Smart Organization</CardTitle>
+                <CardDescription className="text-xs text-zinc-500">
+                  Tag, categorize, and filter your assets with flexible system.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+            <Card className="h-full bg-zinc-900/40 border-zinc-800/60 hover:bg-zinc-900/60 transition-all duration-300">
+              <CardHeader className="items-center text-center">
+                <Zap className="w-6 h-6 text-yellow-400 mb-3 mx-auto" />
+                <CardTitle className="text-sm font-semibold text-zinc-200 mb-1">Lightning Fast</CardTitle>
+                <CardDescription className="text-xs text-zinc-500">
+                  Instant page loads and seamless interactions.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+            <Card className="h-full bg-zinc-900/40 border-zinc-800/60 hover:bg-zinc-900/60 transition-all duration-300">
+              <CardHeader className="items-center text-center">
+                <Globe className="w-6 h-6 text-indigo-400 mb-3 mx-auto" />
+                <CardTitle className="text-sm font-semibold text-zinc-200 mb-1">Anywhere</CardTitle>
+                <CardDescription className="text-xs text-zinc-500">
+                  Access your bookmarks from any device, anytime.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+            <Card className="h-full bg-zinc-900/40 border-zinc-800/60 hover:bg-zinc-900/60 transition-all duration-300">
+              <CardHeader className="items-center text-center">
+                <Share2 className="w-6 h-6 text-pink-400 mb-3 mx-auto" />
+                <CardTitle className="text-sm font-semibold text-zinc-200 mb-1">Selective Sharing</CardTitle>
+                <CardDescription className="text-xs text-zinc-500">
+                  Keep your personal items private, but share curated collections with the world via public links.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+            <Card className="h-full bg-zinc-900/40 border-zinc-800/60 hover:bg-zinc-900/60 transition-all duration-300">
+              <CardHeader className="items-center text-center">
+                <Code className="w-6 h-6 text-zinc-400 mb-3 mx-auto" />
+                <CardTitle className="text-sm font-semibold text-zinc-200 mb-1">Developer First</CardTitle>
+                <CardDescription className="text-xs text-zinc-500">
+                  Open source and ready for you to extend.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </div>
+        </div>
       </main>
 
-      <footer className="container mx-auto px-6 py-12 border-t border-border/40 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground font-mono">
-        <p>&copy; {new Date().getFullYear()} DEVAULT. OPEN SOURCE SOFTWARE.</p>
-        <div className="flex gap-8">
-          <Link href="#" className="hover:text-foreground transition-colors uppercase tracking-wider">Privacy</Link>
-          <Link href="#" className="hover:text-foreground transition-colors uppercase tracking-wider">Terms</Link>
-          <Link href="#" className="hover:text-foreground transition-colors uppercase tracking-wider">Twitter</Link>
-        </div>
+      <footer className="py-8 text-center border-t border-white/5 bg-zinc-950/50 backdrop-blur-md">
+        <p className="text-xs text-zinc-600">Vault for everyone.</p>
       </footer>
     </div>
-  );
+  )
 }

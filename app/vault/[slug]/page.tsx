@@ -2,20 +2,16 @@ import { getBookmarks } from "@/app/actions/bookmark";
 import { getVault } from "@/app/actions/vault";
 import { getCategories } from "@/app/actions/category";
 import { JoinVaultForm } from "@/components/vault/join-vault-form";
-import { CreateBookmarkForm } from "@/components/bookmark/create-bookmark-form";
-import { BookmarkList } from "@/components/bookmark/bookmark-list";
-import { VaultSidebar } from "@/components/vault/vault-sidebar";
-import { VaultSearch } from "@/components/vault/vault-search";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Lock, Settings } from "lucide-react";
+import { Lock } from "lucide-react";
 import Link from "next/link";
-import { auth, getSession } from "@/lib/auth";
-import { Bookmark, VaultMember } from "@prisma/client";
+import { getSession } from "@/lib/auth";
+import { VaultMember } from "@prisma/client";
+import ClientVaultView from "./client-vault-view";
 
 export default async function VaultPage({ params, searchParams }: { params: Promise<{ slug: string }>, searchParams: Promise<{ category?: string }> }) {
     const { slug } = await params;
-    const { category: categoryId } = await searchParams;
     const result = await getVault(slug);
     const session = await getSession();
     const { prisma } = await import("@/lib/prisma");
@@ -41,12 +37,6 @@ export default async function VaultPage({ params, searchParams }: { params: Prom
     }
 
     if (result.error === "Access denied" || result.error === "Unauthorized") {
-        // If we have the vault object (even if access denied), we can check accessType
-        // But getVault returns error string if denied.
-        // We need to fetch basic info to know if it's password protected.
-        // Let's modify getVault to return basic info even on error?
-        // Or just fetch it here again? Fetching here is safer for now to avoid breaking getVault contract.
-
         const vaultCheck = await prisma.vault.findUnique({
             where: { slug },
             select: { id: true, name: true, accessType: true }
@@ -87,52 +77,32 @@ export default async function VaultPage({ params, searchParams }: { params: Prom
     }
 
     const { vault } = result;
-    if (!vault) return null; // Should not happen given checks above
+    if (!vault) return null;
 
-    // Fetch bookmarks
+    // Fetch bookmarks and categories
     const { bookmarks } = await getBookmarks(vault.id);
     const { categories } = await getCategories(vault.id);
 
-    const isOwner = session?.user?.id === vault.ownerId;
-    const isMember = vault.members.some((m: VaultMember) => m.userId === session?.user?.id);
-    const canEdit = isOwner || isMember;
-
-    // Filter bookmarks if category selected
-    const filteredBookmarks = categoryId
-        ? bookmarks?.filter((b: Bookmark) => b.categoryId === categoryId)
-        : bookmarks;
+    // Fetch all user vaults for the switcher
+    let allVaults: any[] = [];
+    if (session?.user) {
+        allVaults = await prisma.vault.findMany({
+            where: {
+                OR: [
+                    { ownerId: session.user.id },
+                    { members: { some: { userId: session.user.id } } }
+                ]
+            },
+            orderBy: { createdAt: "desc" }
+        });
+    }
 
     return (
-        <div className="flex min-h-screen">
-            <VaultSidebar
-                vaultId={vault.id}
-                slug={slug}
-                categories={categories || []}
-                canEdit={canEdit}
-            />
-            <div className="flex-1 container mx-auto py-8 px-4">
-                <div className="mb-8 flex items-center justify-between">
-                    <div>
-                        <h1 className="text-3xl font-bold">{vault.name}</h1>
-                        {vault.description && (
-                            <p className="mt-2 text-muted-foreground">{vault.description}</p>
-                        )}
-                    </div>
-                    <div className="flex gap-2 items-center">
-                        <VaultSearch bookmarks={bookmarks || []} />
-                        {canEdit && <CreateBookmarkForm vaultId={vault.id} />}
-                        {isOwner && (
-                            <Button variant="outline" size="icon" asChild>
-                                <Link href={`/vault/${slug}/settings`}>
-                                    <Settings className="h-4 w-4" />
-                                </Link>
-                            </Button>
-                        )}
-                    </div>
-                </div>
-
-                <BookmarkList bookmarks={filteredBookmarks || []} categories={categories || []} canEdit={canEdit} />
-            </div>
-        </div>
+        <ClientVaultView
+            vault={vault}
+            allVaults={allVaults}
+            initialBookmarks={bookmarks || []}
+            initialCategories={categories || []}
+        />
     );
 }

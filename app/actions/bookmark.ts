@@ -35,6 +35,7 @@ const createBookmarkSchema = z.object({
     title: z.string().optional(),
     description: z.string().optional(),
     tags: z.string().optional(),
+    category: z.string().optional(),
 });
 
 export async function createBookmark(prevState: any, formData: FormData) {
@@ -53,13 +54,14 @@ export async function createBookmark(prevState: any, formData: FormData) {
         title: formData.get("title"),
         description: formData.get("description"),
         tags: formData.get("tags"),
+        category: formData.get("category"),
     });
 
     if (!validatedFields.success) {
         return { success: false, message: "Invalid fields", errors: validatedFields.error.flatten().fieldErrors };
     }
 
-    const { vaultId, url, title, description, tags } = validatedFields.data;
+    const { vaultId, url, title, description, tags, category: categoryName } = validatedFields.data;
 
     // Parse tags
     const tagsArray = tags
@@ -84,20 +86,29 @@ export async function createBookmark(prevState: any, formData: FormData) {
     }
 
     try {
-        // Find or create "General" category
+        // Find or create category
+        const targetCategoryName = categoryName?.trim() || "General";
+
         let category = await prisma.category.findFirst({
             where: {
                 vaultId,
-                name: "General",
+                name: targetCategoryName,
             },
         });
 
         if (!category) {
+            // Get max order
+            const lastCategory = await prisma.category.findFirst({
+                where: { vaultId },
+                orderBy: { order: 'desc' },
+            });
+            const newOrder = (lastCategory?.order ?? -1) + 1;
+
             category = await prisma.category.create({
                 data: {
                     vaultId,
-                    name: "General",
-                    order: 0,
+                    name: targetCategoryName,
+                    order: newOrder,
                 },
             });
         }
