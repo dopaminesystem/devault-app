@@ -93,7 +93,7 @@ export function DetailSheet({ bookmark, isOpen, onClose, onDelete, isDeleting = 
                     <div className="flex items-center gap-2 text-xs font-medium text-zinc-500 uppercase tracking-wider">
                         <List size={12} /> Description
                     </div>
-                    <p className="text-sm text-zinc-300 leading-relaxed">
+                    <p className="text-sm text-zinc-300 leading-relaxed break-words whitespace-pre-wrap">
                         {bookmark.description || "No description provided."}
                     </p>
                 </div>

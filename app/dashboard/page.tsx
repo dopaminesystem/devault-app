@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SignOutButton } from "@/components/auth/sign-out-button";
+import { Globe, Lock, Shield } from "lucide-react";
 
 export default async function DashboardPage() {
     const session = await getSession();
@@ -57,17 +58,41 @@ export default async function DashboardPage() {
                 ) : (
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                         {vaults.map((vault: Vault) => (
-                            <Card key={vault.id} className="group hover:border-zinc-700 transition-all duration-300">
+                            <Card key={vault.id} className="group hover:border-zinc-700 transition-all duration-300 flex flex-col">
                                 <CardHeader>
-                                    <CardTitle className="group-hover:text-indigo-400 transition-colors">{vault.name}</CardTitle>
-                                    <CardDescription>/{vault.slug}</CardDescription>
+                                    <div className="flex justify-between items-start gap-4">
+                                        <div className="space-y-1.5">
+                                            <CardTitle className="group-hover:text-indigo-400 transition-colors">{vault.name}</CardTitle>
+                                            <CardDescription>/{vault.slug}</CardDescription>
+                                        </div>
+                                        {vault.accessType === "PUBLIC" && (
+                                            <div className="p-2 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" title="Public Access">
+                                                <Globe size={16} />
+                                            </div>
+                                        )}
+                                        {vault.accessType === "PASSWORD" && (
+                                            <div className="p-2 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20" title="Password Protected">
+                                                <Lock size={16} />
+                                            </div>
+                                        )}
+                                        {vault.accessType === "DISCORD_GATED" && (
+                                            <div className="p-2 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20" title="Server Gated">
+                                                <Shield size={16} />
+                                            </div>
+                                        )}
+                                    </div>
                                 </CardHeader>
-                                <CardContent>
-                                    <Link href={`/vault/${vault.slug}`} passHref>
-                                        <Button className="w-full bg-zinc-100 text-zinc-950 hover:bg-white shadow-[0_0_20px_rgba(255,255,255,0.1)]">
-                                            Open Vault
-                                        </Button>
-                                    </Link>
+                                <CardContent className="flex-1 flex flex-col gap-4">
+                                    <p className="text-sm text-zinc-400 line-clamp-2 min-h-[2.5rem]">
+                                        {vault.description || "No description provided."}
+                                    </p>
+                                    <div className="mt-auto pt-4">
+                                        <Link href={`/vault/${vault.slug}`} passHref>
+                                            <Button className="w-full bg-zinc-100 text-zinc-950 hover:bg-white shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+                                                Open Vault
+                                            </Button>
+                                        </Link>
+                                    </div>
                                 </CardContent>
                             </Card>
                         ))}
