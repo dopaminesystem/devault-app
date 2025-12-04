@@ -7,7 +7,6 @@ import { Sidebar } from '@/components/dashboard/sidebar';
 import { DetailSheet } from '@/components/dashboard/detail-sheet';
 import { NewBookmarkSheet } from '@/components/dashboard/new-bookmark-sheet';
 import { BookmarkWithCategory } from '@/components/dashboard/bookmark-card';
-import { deleteBookmark } from '@/app/actions/bookmark';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -45,7 +44,6 @@ export default function ClientVaultView({
     const [selectedBookmark, setSelectedBookmark] = useState<BookmarkWithCategory | null>(null);
     const [isDetailOpen, setIsDetailOpen] = useState(false);
     const [isNewBookmarkOpen, setIsNewBookmarkOpen] = useState(false);
-    const [isDeleting, setIsDeleting] = useState(false);
 
     // Filter bookmarks
     const filteredBookmarks = initialBookmarks.filter(b => {
@@ -63,21 +61,7 @@ export default function ClientVaultView({
         setIsDetailOpen(true);
     };
 
-    const handleDeleteBookmark = async (id: string) => {
-        setIsDeleting(true);
-        try {
-            const formData = new FormData();
-            formData.append("bookmarkId", id);
-            await deleteBookmark(null, formData);
-            setIsDetailOpen(false);
-            // Optimistic update or router refresh could happen here, 
-            // but for now we rely on server action revalidation
-        } catch (error) {
-            console.error("Failed to delete bookmark", error);
-        } finally {
-            setIsDeleting(false);
-        }
-    };
+
 
     const categoryNames = initialCategories.map(c => c.name);
 
@@ -260,8 +244,6 @@ export default function ClientVaultView({
                 bookmark={selectedBookmark}
                 isOpen={isDetailOpen}
                 onClose={() => setIsDetailOpen(false)}
-                onDelete={handleDeleteBookmark}
-                isDeleting={isDeleting}
             />
 
             <NewBookmarkSheet

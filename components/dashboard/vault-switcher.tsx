@@ -39,7 +39,8 @@ export function VaultSwitcher({
         setIsOpen(false);
     };
 
-    const activeStyle = activeVault ? getVaultStyle(vaults.findIndex(v => v.id === activeVault.id)) : getVaultStyle(0);
+    const vaultIndex = activeVault ? vaults.findIndex(v => v.id === activeVault.id) : -1;
+    const activeStyle = activeVault ? getVaultStyle(vaultIndex >= 0 ? vaultIndex : 0) : getVaultStyle(0);
     const ActiveIcon = activeStyle.icon;
 
     return (
