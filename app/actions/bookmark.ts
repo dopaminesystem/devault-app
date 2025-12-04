@@ -51,17 +51,24 @@ export async function createBookmark(prevState: any, formData: FormData) {
     const validatedFields = createBookmarkSchema.safeParse({
         vaultId: formData.get("vaultId"),
         url: normalizedUrl,
-        title: formData.get("title"),
-        description: formData.get("description"),
-        tags: formData.get("tags"),
-        category: formData.get("category"),
+        title: formData.get("title") || undefined,
+        description: formData.get("description") || undefined,
+        tags: formData.get("tags") || undefined,
+        category: formData.get("category") || undefined,
     });
 
     if (!validatedFields.success) {
+        console.error("Validation error:", validatedFields.error.flatten());
         return { success: false, message: "Invalid fields", errors: validatedFields.error.flatten().fieldErrors };
     }
 
-    const { vaultId, url, title, description, tags, category: categoryName } = validatedFields.data;
+    let { vaultId, url, title, description, tags, category: categoryName } = validatedFields.data;
+
+    // Fallback for new category if passed separately
+    const newCategoryName = formData.get("newCategoryName") as string;
+    if (!categoryName && newCategoryName) {
+        categoryName = newCategoryName;
+    }
 
     // Parse tags
     const tagsArray = tags

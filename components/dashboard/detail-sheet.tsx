@@ -97,6 +97,20 @@ export function DetailSheet({ bookmark, isOpen, onClose, onDelete, isDeleting = 
                         {bookmark.description || "No description provided."}
                     </p>
                 </div>
+                {bookmark.tags && bookmark.tags.length > 0 && (
+                    <div className="space-y-3 pt-2">
+                        <div className="flex items-center gap-2 text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                            <Hash size={12} /> Tags
+                        </div>
+                        <div className="flex gap-2 flex-wrap">
+                            {bookmark.tags.map((tag) => (
+                                <Badge key={tag} className="bg-zinc-800 text-zinc-300 border-zinc-700 hover:bg-zinc-700 transition-colors">
+                                    {tag}
+                                </Badge>
+                            ))}
+                        </div>
+                    </div>
+                )}
                 <div className="flex gap-4">
                     <div className="space-y-2">
                         <div className="flex items-center gap-2 text-xs font-medium text-zinc-500 uppercase tracking-wider">
@@ -113,6 +127,8 @@ export function DetailSheet({ bookmark, isOpen, onClose, onDelete, isDeleting = 
                         </span>
                     </div>
                 </div>
+
+
             </div>
 
             <div className="p-6 border-t border-zinc-800/50 bg-zinc-900/30 flex justify-between items-center rounded-b-2xl mt-auto">

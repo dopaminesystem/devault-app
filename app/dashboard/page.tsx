@@ -98,7 +98,24 @@ export default async function DashboardPage() {
                         ))}
 
                         {/* Add New Vault Card */}
-                        <CreateVaultDialog />
+                        {vaults.length < 1 ? (
+                            <CreateVaultDialog />
+                        ) : (
+                            <div className="flex flex-col items-center justify-center p-6 rounded-xl border border-dashed border-zinc-800 bg-zinc-900/10 gap-4 h-full min-h-[200px] opacity-60 cursor-not-allowed relative overflow-hidden group">
+                                <div className="absolute inset-0 bg-zinc-950/50 backdrop-blur-[1px] z-10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div className="bg-zinc-900 border border-zinc-800 px-4 py-2 rounded-full text-xs font-medium text-zinc-400 shadow-xl">
+                                        Free Tier Limit Reached
+                                    </div>
+                                </div>
+                                <div className="w-12 h-12 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center">
+                                    <Lock size={24} className="text-zinc-600" />
+                                </div>
+                                <div className="text-center space-y-1">
+                                    <p className="text-sm text-zinc-500 font-medium">Create New Vault</p>
+                                    <p className="text-xs text-indigo-400 font-medium">Pro Feature</p>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
