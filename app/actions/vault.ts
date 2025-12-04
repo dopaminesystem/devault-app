@@ -79,7 +79,7 @@ export async function createVault(prevState: CreateVaultState, formData: FormDat
             };
         }
 
-        await prisma.vault.create({
+        const newVault = await prisma.vault.create({
             data: {
                 name,
                 slug,
@@ -93,6 +93,19 @@ export async function createVault(prevState: CreateVaultState, formData: FormDat
                 }
             },
         });
+
+        // Check if user has a default vault, if not set this one
+        const user = await prisma.user.findUnique({
+            where: { id: session.user.id },
+            select: { defaultVaultId: true }
+        });
+
+        if (!user?.defaultVaultId) {
+            await prisma.user.update({
+                where: { id: session.user.id },
+                data: { defaultVaultId: newVault.id }
+            });
+        }
 
     } catch (error) {
         console.error("Failed to create vault:", error);
@@ -351,6 +364,19 @@ export async function deleteVault(prevState: any, formData: FormData) {
 
     if (vault.ownerId !== session.user.id) {
         return { message: "Unauthorized" };
+    }
+
+    // Check if this is the default vault
+    const user = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { defaultVaultId: true }
+    });
+
+    if (user?.defaultVaultId === vaultId) {
+        await prisma.user.update({
+            where: { id: session.user.id },
+            data: { defaultVaultId: null }
+        });
     }
 
     await prisma.vault.delete({
