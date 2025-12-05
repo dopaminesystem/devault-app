@@ -32,6 +32,7 @@ interface ClientVaultViewProps {
     initialBookmarks: BookmarkWithCategory[];
     initialCategories: Category[];
     isOwner: boolean;
+    isMember: boolean;
 }
 
 export default function ClientVaultView({
@@ -39,7 +40,8 @@ export default function ClientVaultView({
     allVaults,
     initialBookmarks,
     initialCategories,
-    isOwner
+    isOwner,
+    isMember
 }: ClientVaultViewProps) {
     const [search, setSearch] = useState('');
     const [activeCategoryFilter, setActiveCategoryFilter] = useState<string | null>(null);
@@ -147,15 +149,17 @@ export default function ClientVaultView({
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 
                             {/* Add New Button */}
-                            <button
-                                onClick={() => setIsNewBookmarkOpen(true)}
-                                className="group flex flex-col items-center justify-center h-[180px] border border-dashed border-zinc-800 rounded-2xl hover:bg-zinc-900/30 hover:border-zinc-700 transition-all cursor-pointer bg-zinc-900/10"
-                            >
-                                <div className="w-12 h-12 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform shadow-lg">
-                                    <Plus size={20} className="text-zinc-500 group-hover:text-zinc-300" />
-                                </div>
-                                <span className="text-sm font-medium text-zinc-500 group-hover:text-zinc-300">New Bookmark</span>
-                            </button>
+                            {(isOwner || isMember) && (
+                                <button
+                                    onClick={() => setIsNewBookmarkOpen(true)}
+                                    className="group flex flex-col items-center justify-center h-[180px] border border-dashed border-zinc-800 rounded-2xl hover:bg-zinc-900/30 hover:border-zinc-700 transition-all cursor-pointer bg-zinc-900/10"
+                                >
+                                    <div className="w-12 h-12 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform shadow-lg">
+                                        <Plus size={20} className="text-zinc-500 group-hover:text-zinc-300" />
+                                    </div>
+                                    <span className="text-sm font-medium text-zinc-500 group-hover:text-zinc-300">New Bookmark</span>
+                                </button>
+                            )}
 
                             {/* Render Bookmarks */}
                             {filteredBookmarks.map((bookmark) => {
@@ -225,8 +229,9 @@ export default function ClientVaultView({
                                 </div>
                             ) : (
                                 <div
-                                    onClick={() => setIsNewBookmarkOpen(true)}
-                                    className="group relative w-full max-w-md flex flex-col items-center justify-center p-12 border-2 border-dashed border-zinc-800 rounded-3xl bg-zinc-900/10 hover:bg-zinc-900/30 hover:border-zinc-700 transition-all cursor-pointer text-center space-y-4"
+                                    onClick={() => (isOwner || isMember) && setIsNewBookmarkOpen(true)}
+                                    className={`group relative w-full max-w-md flex flex-col items-center justify-center p-12 border-2 border-dashed border-zinc-800 rounded-3xl bg-zinc-900/10 transition-all text-center space-y-4 ${(isOwner || isMember) ? 'hover:bg-zinc-900/30 hover:border-zinc-700 cursor-pointer' : 'cursor-default opacity-50'
+                                        }`}
                                 >
                                     <div className="w-20 h-20 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center group-hover:scale-110 transition-transform shadow-2xl">
                                         <Plus size={32} className="text-zinc-500 group-hover:text-zinc-300" />
@@ -236,12 +241,16 @@ export default function ClientVaultView({
                                             No bookmarks in this category
                                         </h3>
                                         <p className="text-zinc-500 max-w-xs mx-auto group-hover:text-zinc-400 transition-colors">
-                                            Add a new bookmark to this category to get started.
+                                            {(isOwner || isMember)
+                                                ? "Add a new bookmark to this category to get started."
+                                                : "This category is empty."}
                                         </p>
                                     </div>
-                                    <Button className="mt-4 bg-zinc-100 text-zinc-950 hover:bg-white shadow-lg shadow-indigo-500/10">
-                                        Create Bookmark
-                                    </Button>
+                                    {(isOwner || isMember) && (
+                                        <Button className="mt-4 bg-zinc-100 text-zinc-950 hover:bg-white shadow-lg shadow-indigo-500/10">
+                                            Create Bookmark
+                                        </Button>
+                                    )}
                                 </div>
                             )}
                         </div>
@@ -255,6 +264,8 @@ export default function ClientVaultView({
                 bookmark={selectedBookmark}
                 isOpen={isDetailOpen}
                 onClose={() => setIsDetailOpen(false)}
+                isOwner={isOwner}
+                isMember={isMember}
             />
 
             <NewBookmarkSheet
