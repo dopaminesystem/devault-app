@@ -97,12 +97,15 @@ export default async function VaultPage({ params, searchParams }: { params: Prom
         });
     }
 
+    const isOwner = session?.user?.id === vault.ownerId;
+
     return (
         <ClientVaultView
             vault={vault}
             allVaults={allVaults}
             initialBookmarks={bookmarks || []}
             initialCategories={categories || []}
+            isOwner={isOwner}
         />
     );
 }

@@ -7,7 +7,7 @@ import Link from "next/link";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SignOutButton } from "@/components/auth/sign-out-button";
-import { Globe, Lock, Shield } from "lucide-react";
+import { Globe, Lock, Shield, Settings as SettingsIcon } from "lucide-react";
 
 export default async function DashboardPage() {
     const session = await getSession();
@@ -42,7 +42,14 @@ export default async function DashboardPage() {
                         </h1>
                         <p className="text-zinc-400">Manage your vaults and bookmarks.</p>
                     </div>
-                    <SignOutButton />
+                    <div className="flex items-center gap-3">
+                        <Button variant="ghost" size="icon" asChild className="text-zinc-400 hover:text-zinc-100">
+                            <Link href="/settings">
+                                <SettingsIcon size={20} />
+                            </Link>
+                        </Button>
+                        <SignOutButton />
+                    </div>
                 </div>
 
                 {vaults.length === 0 ? (

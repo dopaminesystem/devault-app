@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Search, Plus, Command, Globe, Layout, Star, Clock, Folder, Trash2 } from 'lucide-react';
+import { Search, Plus, Command, Globe, Layout, Star, Clock, Folder, Trash2, Settings as SettingsIcon } from 'lucide-react';
 import { Vault, Bookmark, Category } from '@prisma/client';
 import { Sidebar } from '@/components/dashboard/sidebar';
 import { DetailSheet } from '@/components/dashboard/detail-sheet';
@@ -31,13 +31,15 @@ interface ClientVaultViewProps {
     allVaults: Vault[];
     initialBookmarks: BookmarkWithCategory[];
     initialCategories: Category[];
+    isOwner: boolean;
 }
 
 export default function ClientVaultView({
     vault,
     allVaults,
     initialBookmarks,
-    initialCategories
+    initialCategories,
+    isOwner
 }: ClientVaultViewProps) {
     const [search, setSearch] = useState('');
     const [activeCategoryFilter, setActiveCategoryFilter] = useState<string | null>(null);
@@ -110,22 +112,31 @@ export default function ClientVaultView({
                                 </p>
                             </div>
 
-                            {/* Search Bar */}
-                            <div className="w-full max-w-md relative group">
-                                <div className="absolute inset-0 bg-indigo-500/20 rounded-xl blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
-                                <div className="relative">
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-                                    <Input
-                                        type="text"
-                                        placeholder={`Search in ${vault.name}...`}
-                                        className="pl-10 bg-zinc-900/80 backdrop-blur-xl border-zinc-800"
-                                        value={search}
-                                        onChange={(e) => setSearch(e.target.value)}
-                                    />
-                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 flex gap-1">
-                                        <kbd className="text-[10px] text-zinc-500 border border-zinc-800 rounded px-1.5 py-0.5 bg-zinc-900 font-sans">⌘K</kbd>
+                            {/* Search Bar & Settings */}
+                            <div className="flex items-center gap-3 w-full max-w-md">
+                                <div className="relative group flex-1">
+                                    <div className="absolute inset-0 bg-indigo-500/20 rounded-xl blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
+                                    <div className="relative">
+                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                                        <Input
+                                            type="text"
+                                            placeholder={`Search in ${vault.name}...`}
+                                            className="pl-10 bg-zinc-900/80 backdrop-blur-xl border-zinc-800"
+                                            value={search}
+                                            onChange={(e) => setSearch(e.target.value)}
+                                        />
+                                        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex gap-1">
+                                            <kbd className="text-[10px] text-zinc-500 border border-zinc-800 rounded px-1.5 py-0.5 bg-zinc-900 font-sans">⌘K</kbd>
+                                        </div>
                                     </div>
                                 </div>
+                                {isOwner && (
+                                    <Button variant="outline" size="icon" asChild className="shrink-0 bg-zinc-900/80 border-zinc-800 hover:bg-zinc-900 hover:text-zinc-100">
+                                        <a href={`/vault/${vault.slug}/settings`}>
+                                            <SettingsIcon size={18} />
+                                        </a>
+                                    </Button>
+                                )}
                             </div>
                         </div>
 

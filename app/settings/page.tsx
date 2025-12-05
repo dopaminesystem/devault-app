@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { ConnectDiscordButton } from "@/components/user/connect-discord-button";
 import { FaDiscord } from "react-icons/fa";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { User, Settings, Shield, Link as LinkIcon } from "lucide-react";
+import { User, Settings, Shield, Link as LinkIcon, ArrowLeft } from "lucide-react";
 import { SignOutButton } from "@/components/auth/sign-out-button";
+import Link from "next/link";
 
 export default async function SettingsPage() {
     const session = await getSession();
@@ -47,14 +48,22 @@ export default async function SettingsPage() {
             <div className="fixed top-0 left-0 w-full h-[500px] bg-gradient-to-b from-indigo-950/20 to-transparent pointer-events-none" />
 
             <div className="relative z-10 container max-w-4xl mx-auto py-12 px-6 space-y-10">
-                <div className="flex justify-between items-end border-b border-white/5 pb-8">
-                    <div className="space-y-2">
-                        <h1 className="text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-white to-zinc-500">
-                            Settings
-                        </h1>
-                        <p className="text-zinc-400">Manage your account preferences and integrations.</p>
+                <div className="flex flex-col gap-6 border-b border-white/5 pb-8">
+                    <Button variant="ghost" size="sm" asChild className="w-fit text-zinc-400 hover:text-zinc-100 -ml-2">
+                        <Link href="/dashboard">
+                            <ArrowLeft className="h-4 w-4 mr-2" />
+                            Back to Dashboard
+                        </Link>
+                    </Button>
+                    <div className="flex justify-between items-end">
+                        <div className="space-y-2">
+                            <h1 className="text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-white to-zinc-500">
+                                Settings
+                            </h1>
+                            <p className="text-zinc-400">Manage your account preferences and integrations.</p>
+                        </div>
+                        <SignOutButton />
                     </div>
-                    <SignOutButton />
                 </div>
 
                 <div className="grid gap-8">
