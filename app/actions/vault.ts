@@ -9,27 +9,20 @@ import { revalidatePath } from "next/cache";
 import { hash, compare } from "bcryptjs";
 import { isDiscordMembership } from "@/lib/discord";
 
+import { ActionState } from "@/lib/types";
+
 const createVaultSchema = z.object({
     name: z.string().min(3, "Name must be at least 3 characters").max(50, "Name must be less than 50 characters"),
     slug: z.string().min(3, "Slug must be at least 3 characters").max(50, "Slug must be less than 50 characters").regex(/^[a-z0-9-]+$/, "Slug must contain only lowercase letters, numbers, and hyphens"),
     description: z.string().max(200, "Description must be less than 200 characters").optional(),
 });
 
-export type CreateVaultState = {
-    errors?: {
-        name?: string[];
-        slug?: string[];
-        description?: string[];
-        _form?: string[];
-    };
-    message?: string;
-};
-
-export async function createVault(prevState: CreateVaultState, formData: FormData): Promise<CreateVaultState> {
+export async function createVault(prevState: ActionState, formData: FormData): Promise<ActionState> {
     const session = await getSession();
 
     if (!session?.user) {
         return {
+            success: false,
             message: "Unauthorized",
         };
     }
@@ -42,7 +35,8 @@ export async function createVault(prevState: CreateVaultState, formData: FormDat
 
     if (!validatedFields.success) {
         return {
-            errors: validatedFields.error.flatten().fieldErrors,
+            success: false,
+            fieldErrors: validatedFields.error.flatten().fieldErrors,
             message: "Invalid fields",
         };
     }
@@ -59,6 +53,7 @@ export async function createVault(prevState: CreateVaultState, formData: FormDat
 
         if (existingVault) {
             return {
+                success: false,
                 message: "You can only create one vault.",
             };
         }
@@ -72,7 +67,8 @@ export async function createVault(prevState: CreateVaultState, formData: FormDat
 
         if (existingSlug) {
             return {
-                errors: {
+                success: false,
+                fieldErrors: {
                     slug: ["This URL is already taken."],
                 },
                 message: "Slug already exists",
@@ -110,12 +106,15 @@ export async function createVault(prevState: CreateVaultState, formData: FormDat
     } catch (error) {
         console.error("Failed to create vault:", error);
         return {
+            success: false,
             message: "Failed to create vault. Please try again.",
         };
     }
 
     revalidatePath("/dashboard");
     redirect("/dashboard");
+    // This part is unreachable due to redirect, but good for type safety if redirect wasn't here
+    return { success: true, message: "Vault created" };
 }
 
 export async function getVault(slug: string) {

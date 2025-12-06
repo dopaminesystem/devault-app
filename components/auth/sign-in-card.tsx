@@ -1,6 +1,7 @@
 "use client";
 
-import { signInAction, AuthActionState } from "@/app/actions/auth";
+import { signInAction } from "@/app/actions/auth";
+import { ActionState } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -18,7 +19,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect } from "react";
 
-const initialState: AuthActionState = {
+const initialState: ActionState = {
     error: "",
     success: false,
 };

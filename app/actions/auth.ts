@@ -5,6 +5,8 @@ import { z } from "zod";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 
+import { ActionState } from "@/lib/types";
+
 const signUpSchema = z.object({
     email: z.string().email("Invalid email address"),
     password: z.string().min(8, "Password must be at least 8 characters"),
@@ -16,20 +18,10 @@ const signInSchema = z.object({
     password: z.string().min(1, "Password is required"),
 });
 
-export type AuthActionState = {
-    error?: string;
-    success?: boolean;
-    fieldErrors?: {
-        email?: string[];
-        password?: string[];
-        name?: string[];
-    };
-};
-
 export async function signUpAction(
-    prevState: AuthActionState,
+    prevState: ActionState,
     formData: FormData
-): Promise<AuthActionState> {
+): Promise<ActionState> {
     const rawData = {
         email: formData.get("email") as string,
         password: formData.get("password") as string,
@@ -40,6 +32,7 @@ export async function signUpAction(
 
     if (!validation.success) {
         return {
+            success: false,
             error: "Validation failed",
             fieldErrors: validation.error.flatten().fieldErrors,
         };
@@ -52,20 +45,21 @@ export async function signUpAction(
     } catch (error) {
         if (error instanceof Error) {
             if (error.message.includes("already exists")) {
-                return { error: "An account with this email already exists" };
+                return { success: false, error: "An account with this email already exists" };
             }
-            return { error: error.message };
+            return { success: false, error: error.message };
         }
-        return { error: "Something went wrong during sign up" };
+        return { success: false, error: "Something went wrong during sign up" };
     }
 
     redirect("/dashboard");
+    return { success: true, message: "Signed up successfully" };
 }
 
 export async function signInAction(
-    prevState: AuthActionState,
+    prevState: ActionState,
     formData: FormData
-): Promise<AuthActionState> {
+): Promise<ActionState> {
     const rawData = {
         email: formData.get("email") as string,
         password: formData.get("password") as string,
@@ -75,6 +69,7 @@ export async function signInAction(
 
     if (!validation.success) {
         return {
+            success: false,
             error: "Validation failed",
             fieldErrors: validation.error.flatten().fieldErrors,
         };
@@ -86,12 +81,13 @@ export async function signInAction(
         });
     } catch (error) {
         if (error instanceof Error) {
-            return { error: error.message };
+            return { success: false, error: error.message };
         }
-        return { error: "Invalid email or password" };
+        return { success: false, error: "Invalid email or password" };
     }
 
     redirect("/dashboard");
+    return { success: true, message: "Signed in successfully" };
 }
 
 export async function signOutAction() {

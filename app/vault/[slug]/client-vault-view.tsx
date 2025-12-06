@@ -5,7 +5,7 @@ import { Vault, Category } from '@prisma/client';
 import { Sidebar } from '@/components/dashboard/sidebar';
 import { DetailSheet } from '@/components/dashboard/detail-sheet';
 import { NewBookmarkSheet } from '@/components/dashboard/new-bookmark-sheet';
-import { BookmarkWithCategory } from '@/components/dashboard/bookmark-card';
+import { BookmarkWithCategory } from '@/lib/types';
 import { VaultHeader } from '@/components/dashboard/vault-view/vault-header';
 import { BookmarkGrid } from '@/components/dashboard/vault-view/bookmark-grid';
 import { VaultEmptyState } from '@/components/dashboard/vault-view/vault-empty-state';

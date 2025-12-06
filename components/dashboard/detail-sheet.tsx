@@ -11,7 +11,7 @@ import {
     ExternalLink,
     X
 } from 'lucide-react';
-import { BookmarkWithCategory } from './bookmark-card';
+import { BookmarkWithCategory, ActionState } from '@/lib/types';
 import { format } from 'date-fns';
 import { SheetShell } from "@/components/ui/sheet-shell";
 import { Button } from "@/components/ui/button";
@@ -47,7 +47,8 @@ interface DetailSheetProps {
 }
 
 export function DetailSheet({ bookmark, isOpen, onClose, isOwner, isMember }: DetailSheetProps) {
-    const [state, formAction, isPending] = useActionState(deleteBookmark, null);
+    const initialState: ActionState = { message: "", success: false };
+    const [state, formAction, isPending] = useActionState(deleteBookmark, initialState);
 
     useEffect(() => {
         if (state?.success) {
