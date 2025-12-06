@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { ArrowRight, Sparkles, Github } from "lucide-react"
+import { ArrowRight } from "lucide-react"
 import { TOKENS } from "@/lib/constants"
 import { signUpAction } from "@/app/actions/auth"
 import { authClient } from "@/lib/auth-client"
@@ -43,12 +43,7 @@ export default function SignUpForm() {
             </Link>
 
             <div className="flex flex-col items-center mb-8 space-y-2 z-10">
-                {/* <div className="relative">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center shadow-[0_0_30px_rgba(99,102,241,0.3)]">
-                        <Sparkles className="text-white w-6 h-6" />
-                    </div>
-                    <div className="absolute -inset-2 bg-indigo-500/20 blur-xl rounded-full -z-10" />
-                </div> */}
+
                 <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-b from-white to-zinc-400 bg-clip-text text-transparent">
                     Join the Vault
                 </h1>
@@ -118,9 +113,7 @@ export default function SignUpForm() {
                 </div>
 
                 <div className="flex gap-3">
-                    {/* <Button variant="outline" className="w-full">
-                        <Github className="w-4 h-4" /> <span className="hidden sm:inline">GitHub</span>
-                    </Button> */}
+
                     <Button variant="outline" onClick={handleDiscordSignIn} className="w-full">
                         <FaDiscord className="w-4 h-4" /> <span className="hidden sm:inline">Discord</span>
                     </Button>
