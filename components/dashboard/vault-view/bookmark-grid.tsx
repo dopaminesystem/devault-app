@@ -2,20 +2,7 @@ import { Plus, Globe } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { BookmarkWithCategory } from "@/lib/types";
-
-
-const getCategoryColor = (categoryName: string) => {
-    const colors = [
-        'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-        'bg-zinc-500/10 text-zinc-400 border-zinc-500/20',
-        'bg-blue-500/10 text-blue-400 border-blue-500/20',
-        'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
-        'bg-purple-500/10 text-purple-400 border-purple-500/20',
-        'bg-rose-500/10 text-rose-400 border-rose-500/20',
-    ];
-    const index = categoryName.length % colors.length;
-    return colors[index];
-};
+import { getCategoryColor } from '@/lib/utils';
 
 interface BookmarkGridProps {
     bookmarks: BookmarkWithCategory[];
