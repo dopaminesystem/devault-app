@@ -73,6 +73,7 @@ export function NewBookmarkSheet({ isOpen, onClose, vaultId, categories: initial
                 <input type="hidden" name="vaultId" value={vaultId} />
                 {/* Hidden input for category since we use state for selection */}
                 <input type="hidden" name="category" value={selectedCategory || ''} />
+                <input type="hidden" name="newCategoryName" value={newCategoryName} />
 
                 <div className="flex items-center justify-between p-6 border-b border-zinc-800/50">
                     <h2 className="text-lg font-semibold text-zinc-100">Add to Vault</h2>
@@ -113,6 +114,16 @@ export function NewBookmarkSheet({ isOpen, onClose, vaultId, categories: initial
                             rows={4}
                             placeholder="What makes this link special?"
                             className="resize-none"
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <label className="flex items-center gap-2 text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                            <Hash size={12} /> Tags
+                        </label>
+                        <Input
+                            name="tags"
+                            type="text"
+                            placeholder="design, tools, inspiration (comma separated)"
                         />
                     </div>
 

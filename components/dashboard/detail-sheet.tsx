@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
     Globe,
     Copy,
@@ -15,6 +15,8 @@ import { BookmarkWithCategory } from './bookmark-card';
 import { format } from 'date-fns';
 import { SheetShell } from "@/components/ui/sheet-shell";
 import { Button } from "@/components/ui/button";
+import { deleteBookmark } from '@/app/actions/bookmark';
+import { useActionState } from 'react';
 
 // Helper for badge colors (same as in BookmarkCard)
 const getCategoryColor = (categoryName: string) => {
@@ -40,11 +42,19 @@ interface DetailSheetProps {
     bookmark: BookmarkWithCategory | null;
     isOpen: boolean;
     onClose: () => void;
-    onDelete: (id: string) => void;
-    isDeleting?: boolean;
+    isOwner: boolean;
+    isMember: boolean;
 }
 
-export function DetailSheet({ bookmark, isOpen, onClose, onDelete, isDeleting = false }: DetailSheetProps) {
+export function DetailSheet({ bookmark, isOpen, onClose, isOwner, isMember }: DetailSheetProps) {
+    const [state, formAction, isPending] = useActionState(deleteBookmark, null);
+
+    useEffect(() => {
+        if (state?.success) {
+            onClose();
+        }
+    }, [state, onClose]);
+
     if (!bookmark) return null;
 
     const categoryColor = getCategoryColor(bookmark.category.name);
@@ -93,10 +103,25 @@ export function DetailSheet({ bookmark, isOpen, onClose, onDelete, isDeleting = 
                     <div className="flex items-center gap-2 text-xs font-medium text-zinc-500 uppercase tracking-wider">
                         <List size={12} /> Description
                     </div>
-                    <p className="text-sm text-zinc-300 leading-relaxed">
+                    <p className="text-sm text-zinc-300 leading-relaxed break-words whitespace-pre-wrap">
                         {bookmark.description || "No description provided."}
                     </p>
                 </div>
+
+                {bookmark.tags && bookmark.tags.length > 0 && (
+                    <div className="space-y-3 pt-2">
+                        <div className="flex items-center gap-2 text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                            <Hash size={12} /> Tags
+                        </div>
+                        <div className="flex gap-2 flex-wrap">
+                            {bookmark.tags.map((tag) => (
+                                <Badge key={tag} className="bg-zinc-800 text-zinc-300 border-zinc-700 hover:bg-zinc-700 transition-colors">
+                                    {tag}
+                                </Badge>
+                            ))}
+                        </div>
+                    </div>
+                )}
                 <div className="flex gap-4">
                     <div className="space-y-2">
                         <div className="flex items-center gap-2 text-xs font-medium text-zinc-500 uppercase tracking-wider">
@@ -113,30 +138,39 @@ export function DetailSheet({ bookmark, isOpen, onClose, onDelete, isDeleting = 
                         </span>
                     </div>
                 </div>
+
+
             </div>
 
             <div className="p-6 border-t border-zinc-800/50 bg-zinc-900/30 flex justify-between items-center rounded-b-2xl mt-auto">
-                <Button
-                    variant="ghost"
-                    onClick={() => onDelete(bookmark.id)}
-                    disabled={isDeleting}
-                    className="text-red-400 hover:text-red-300 hover:bg-red-950/30 rounded-full"
-                >
-                    {isDeleting ? (
-                        <>
-                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-red-400 border-t-transparent mr-2" />
-                            Deleting...
-                        </>
-                    ) : (
-                        <>
-                            <Trash2 size={16} className="mr-2" /> Delete
-                        </>
-                    )}
-                </Button>
+                {(isOwner || isMember) ? (
+                    <form action={formAction}>
+                        <input type="hidden" name="bookmarkId" value={bookmark.id} />
+                        <Button
+                            variant="ghost"
+                            type="submit"
+                            disabled={isPending}
+                            className="text-red-400 hover:text-red-300 hover:bg-red-950/30 rounded-full"
+                        >
+                            {isPending ? (
+                                <>
+                                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-red-400 border-t-transparent mr-2" />
+                                    Deleting...
+                                </>
+                            ) : (
+                                <>
+                                    <Trash2 size={16} className="mr-2" /> Delete
+                                </>
+                            )}
+                        </Button>
+                    </form>
+                ) : <div />}
                 <div className="flex gap-3">
-                    <Button variant="ghost" className="text-zinc-300 hover:text-white hover:bg-zinc-800 rounded-full">
-                        Edit
-                    </Button>
+                    {(isOwner || isMember) && (
+                        <Button variant="ghost" className="text-zinc-300 hover:text-white hover:bg-zinc-800 rounded-full">
+                            Edit
+                        </Button>
+                    )}
                     <Button
                         onClick={() => window.open(bookmark.url, '_blank')}
                         className="bg-zinc-100 text-zinc-950 hover:bg-white rounded-full shadow-[0_0_15px_rgba(255,255,255,0.1)]"

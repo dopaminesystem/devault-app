@@ -4,7 +4,7 @@ import { useActionState, useState } from "react";
 import { deleteVault } from "@/app/actions/vault";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+
 import { Loader2, Trash2 } from "lucide-react";
 import {
     AlertDialog,
@@ -33,27 +33,22 @@ export function DeleteVaultForm({ vaultId, vaultName }: DeleteVaultFormProps) {
     const [confirmText, setConfirmText] = useState("");
 
     return (
-        <Card className="border-destructive/50">
-            <CardHeader>
-                <CardTitle className="text-destructive">Danger Zone</CardTitle>
-                <CardDescription>
-                    Irreversible actions for your vault.
-                </CardDescription>
-            </CardHeader>
-            <CardContent>
-                <p className="text-sm text-muted-foreground">
+        <div className="space-y-6">
+            <div className="space-y-2">
+                <p className="text-sm text-zinc-400">
                     Deleting this vault will permanently remove all categories and bookmarks associated with it. This action cannot be undone.
                 </p>
                 {state?.message && (
-                    <p className="mt-2 text-sm text-red-500">
+                    <p className="text-sm text-red-400 bg-red-500/10 p-3 rounded-lg">
                         {state.message}
                     </p>
                 )}
-            </CardContent>
-            <CardFooter>
+            </div>
+
+            <div className="flex justify-start">
                 <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
                     <AlertDialogTrigger asChild>
-                        <Button variant="destructive">
+                        <Button variant="destructive" className="bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-300 border border-red-500/20">
                             <Trash2 className="mr-2 h-4 w-4" />
                             Delete Vault
                         </Button>
@@ -92,7 +87,7 @@ export function DeleteVaultForm({ vaultId, vaultName }: DeleteVaultFormProps) {
                         </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialog>
-            </CardFooter>
-        </Card>
+            </div>
+        </div>
     );
 }

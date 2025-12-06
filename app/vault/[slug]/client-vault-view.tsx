@@ -1,13 +1,12 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Search, Plus, Command, Globe, Layout, Star, Clock, Folder, Trash2 } from 'lucide-react';
+import { Search, Plus, Command, Globe, Layout, Star, Clock, Folder, Trash2, Settings as SettingsIcon } from 'lucide-react';
 import { Vault, Bookmark, Category } from '@prisma/client';
 import { Sidebar } from '@/components/dashboard/sidebar';
 import { DetailSheet } from '@/components/dashboard/detail-sheet';
 import { NewBookmarkSheet } from '@/components/dashboard/new-bookmark-sheet';
 import { BookmarkWithCategory } from '@/components/dashboard/bookmark-card';
-import { deleteBookmark } from '@/app/actions/bookmark';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -32,20 +31,23 @@ interface ClientVaultViewProps {
     allVaults: Vault[];
     initialBookmarks: BookmarkWithCategory[];
     initialCategories: Category[];
+    isOwner: boolean;
+    isMember: boolean;
 }
 
 export default function ClientVaultView({
     vault,
     allVaults,
     initialBookmarks,
-    initialCategories
+    initialCategories,
+    isOwner,
+    isMember
 }: ClientVaultViewProps) {
     const [search, setSearch] = useState('');
     const [activeCategoryFilter, setActiveCategoryFilter] = useState<string | null>(null);
     const [selectedBookmark, setSelectedBookmark] = useState<BookmarkWithCategory | null>(null);
     const [isDetailOpen, setIsDetailOpen] = useState(false);
     const [isNewBookmarkOpen, setIsNewBookmarkOpen] = useState(false);
-    const [isDeleting, setIsDeleting] = useState(false);
 
     // Filter bookmarks
     const filteredBookmarks = initialBookmarks.filter(b => {
@@ -63,21 +65,7 @@ export default function ClientVaultView({
         setIsDetailOpen(true);
     };
 
-    const handleDeleteBookmark = async (id: string) => {
-        setIsDeleting(true);
-        try {
-            const formData = new FormData();
-            formData.append("bookmarkId", id);
-            await deleteBookmark(null, formData);
-            setIsDetailOpen(false);
-            // Optimistic update or router refresh could happen here, 
-            // but for now we rely on server action revalidation
-        } catch (error) {
-            console.error("Failed to delete bookmark", error);
-        } finally {
-            setIsDeleting(false);
-        }
-    };
+
 
     const categoryNames = initialCategories.map(c => c.name);
 
@@ -126,22 +114,31 @@ export default function ClientVaultView({
                                 </p>
                             </div>
 
-                            {/* Search Bar */}
-                            <div className="w-full max-w-md relative group">
-                                <div className="absolute inset-0 bg-indigo-500/20 rounded-xl blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
-                                <div className="relative">
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-                                    <Input
-                                        type="text"
-                                        placeholder={`Search in ${vault.name}...`}
-                                        className="pl-10 bg-zinc-900/80 backdrop-blur-xl border-zinc-800"
-                                        value={search}
-                                        onChange={(e) => setSearch(e.target.value)}
-                                    />
-                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 flex gap-1">
-                                        <kbd className="text-[10px] text-zinc-500 border border-zinc-800 rounded px-1.5 py-0.5 bg-zinc-900 font-sans">⌘K</kbd>
+                            {/* Search Bar & Settings */}
+                            <div className="flex items-center gap-3 w-full max-w-md">
+                                <div className="relative group flex-1">
+                                    <div className="absolute inset-0 bg-indigo-500/20 rounded-xl blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
+                                    <div className="relative">
+                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                                        <Input
+                                            type="text"
+                                            placeholder={`Search in ${vault.name}...`}
+                                            className="pl-10 bg-zinc-900/80 backdrop-blur-xl border-zinc-800"
+                                            value={search}
+                                            onChange={(e) => setSearch(e.target.value)}
+                                        />
+                                        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex gap-1">
+                                            <kbd className="text-[10px] text-zinc-500 border border-zinc-800 rounded px-1.5 py-0.5 bg-zinc-900 font-sans">⌘K</kbd>
+                                        </div>
                                     </div>
                                 </div>
+                                {isOwner && (
+                                    <Button variant="outline" size="icon" asChild className="shrink-0 bg-zinc-900/80 border-zinc-800 hover:bg-zinc-900 hover:text-zinc-100">
+                                        <a href={`/vault/${vault.slug}/settings`}>
+                                            <SettingsIcon size={18} />
+                                        </a>
+                                    </Button>
+                                )}
                             </div>
                         </div>
 
@@ -152,15 +149,17 @@ export default function ClientVaultView({
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 
                             {/* Add New Button */}
-                            <button
-                                onClick={() => setIsNewBookmarkOpen(true)}
-                                className="group flex flex-col items-center justify-center h-[180px] border border-dashed border-zinc-800 rounded-2xl hover:bg-zinc-900/30 hover:border-zinc-700 transition-all cursor-pointer bg-zinc-900/10"
-                            >
-                                <div className="w-12 h-12 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform shadow-lg">
-                                    <Plus size={20} className="text-zinc-500 group-hover:text-zinc-300" />
-                                </div>
-                                <span className="text-sm font-medium text-zinc-500 group-hover:text-zinc-300">New Bookmark</span>
-                            </button>
+                            {(isOwner || isMember) && (
+                                <button
+                                    onClick={() => setIsNewBookmarkOpen(true)}
+                                    className="group flex flex-col items-center justify-center h-[180px] border border-dashed border-zinc-800 rounded-2xl hover:bg-zinc-900/30 hover:border-zinc-700 transition-all cursor-pointer bg-zinc-900/10"
+                                >
+                                    <div className="w-12 h-12 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform shadow-lg">
+                                        <Plus size={20} className="text-zinc-500 group-hover:text-zinc-300" />
+                                    </div>
+                                    <span className="text-sm font-medium text-zinc-500 group-hover:text-zinc-300">New Bookmark</span>
+                                </button>
+                            )}
 
                             {/* Render Bookmarks */}
                             {filteredBookmarks.map((bookmark) => {
@@ -230,8 +229,9 @@ export default function ClientVaultView({
                                 </div>
                             ) : (
                                 <div
-                                    onClick={() => setIsNewBookmarkOpen(true)}
-                                    className="group relative w-full max-w-md flex flex-col items-center justify-center p-12 border-2 border-dashed border-zinc-800 rounded-3xl bg-zinc-900/10 hover:bg-zinc-900/30 hover:border-zinc-700 transition-all cursor-pointer text-center space-y-4"
+                                    onClick={() => (isOwner || isMember) && setIsNewBookmarkOpen(true)}
+                                    className={`group relative w-full max-w-md flex flex-col items-center justify-center p-12 border-2 border-dashed border-zinc-800 rounded-3xl bg-zinc-900/10 transition-all text-center space-y-4 ${(isOwner || isMember) ? 'hover:bg-zinc-900/30 hover:border-zinc-700 cursor-pointer' : 'cursor-default opacity-50'
+                                        }`}
                                 >
                                     <div className="w-20 h-20 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center group-hover:scale-110 transition-transform shadow-2xl">
                                         <Plus size={32} className="text-zinc-500 group-hover:text-zinc-300" />
@@ -241,12 +241,16 @@ export default function ClientVaultView({
                                             No bookmarks in this category
                                         </h3>
                                         <p className="text-zinc-500 max-w-xs mx-auto group-hover:text-zinc-400 transition-colors">
-                                            Add a new bookmark to this category to get started.
+                                            {(isOwner || isMember)
+                                                ? "Add a new bookmark to this category to get started."
+                                                : "This category is empty."}
                                         </p>
                                     </div>
-                                    <Button className="mt-4 bg-zinc-100 text-zinc-950 hover:bg-white shadow-lg shadow-indigo-500/10">
-                                        Create Bookmark
-                                    </Button>
+                                    {(isOwner || isMember) && (
+                                        <Button className="mt-4 bg-zinc-100 text-zinc-950 hover:bg-white shadow-lg shadow-indigo-500/10">
+                                            Create Bookmark
+                                        </Button>
+                                    )}
                                 </div>
                             )}
                         </div>
@@ -260,8 +264,8 @@ export default function ClientVaultView({
                 bookmark={selectedBookmark}
                 isOpen={isDetailOpen}
                 onClose={() => setIsDetailOpen(false)}
-                onDelete={handleDeleteBookmark}
-                isDeleting={isDeleting}
+                isOwner={isOwner}
+                isMember={isMember}
             />
 
             <NewBookmarkSheet
