@@ -107,6 +107,7 @@ export default function ClientVaultView({
             </div>
 
             <DetailSheet
+                key={selectedBookmark?.id || 'empty'}
                 bookmark={selectedBookmark}
                 isOpen={isDetailOpen}
                 onClose={() => setIsDetailOpen(false)}
