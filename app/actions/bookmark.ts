@@ -7,6 +7,8 @@ import { auth, getSession } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { normalizeUrl } from "@/lib/utils";
 
+import { ActionState } from "@/lib/types";
+
 export async function getBookmarks(vaultId: string) {
     try {
         const bookmarks = await prisma.bookmark.findMany({
@@ -38,7 +40,7 @@ const createBookmarkSchema = z.object({
     category: z.string().optional(),
 });
 
-export async function createBookmark(prevState: any, formData: FormData) {
+export async function createBookmark(prevState: ActionState, formData: FormData): Promise<ActionState> {
     const session = await getSession();
 
     if (!session?.user) {
@@ -59,7 +61,7 @@ export async function createBookmark(prevState: any, formData: FormData) {
 
     if (!validatedFields.success) {
         console.error("Validation error:", validatedFields.error.flatten());
-        return { success: false, message: "Invalid fields", errors: validatedFields.error.flatten().fieldErrors };
+        return { success: false, message: "Invalid fields", fieldErrors: validatedFields.error.flatten().fieldErrors };
     }
 
     let { vaultId, url, title, description, tags, category: categoryName } = validatedFields.data;
@@ -148,7 +150,7 @@ const updateBookmarkSchema = z.object({
     tags: z.string().optional(),
 });
 
-export async function updateBookmark(prevState: any, formData: FormData) {
+export async function updateBookmark(prevState: ActionState, formData: FormData): Promise<ActionState> {
     const session = await getSession();
 
     if (!session?.user) {
@@ -218,7 +220,7 @@ export async function updateBookmark(prevState: any, formData: FormData) {
     return { success: true, message: "Bookmark updated" };
 }
 
-export async function deleteBookmark(prevState: any, formData: FormData) {
+export async function deleteBookmark(prevState: ActionState, formData: FormData): Promise<ActionState> {
     const session = await getSession();
 
     if (!session?.user) {

@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Link as LinkIcon, Type, List, Hash, Save, Plus, X } from 'lucide-react';
+import { ActionState } from '@/lib/types';
 import { createBookmark } from '@/app/actions/bookmark';
 import { useActionState } from 'react';
 import { SheetShell } from "@/components/ui/sheet-shell";
@@ -23,7 +24,8 @@ export function NewBookmarkSheet({ isOpen, onClose, vaultId, categories: initial
     const newCategoryInputRef = useRef<HTMLInputElement>(null);
 
     // Form State
-    const [state, formAction, isPending] = useActionState(createBookmark, null);
+    const initialState: ActionState = { message: "", success: false };
+    const [state, formAction, isPending] = useActionState(createBookmark, initialState);
 
     useEffect(() => {
         if (isAddingCategory && newCategoryInputRef.current) {

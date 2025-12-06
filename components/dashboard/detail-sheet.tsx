@@ -11,26 +11,13 @@ import {
     ExternalLink,
     X
 } from 'lucide-react';
-import { BookmarkWithCategory } from './bookmark-card';
+import { BookmarkWithCategory, ActionState } from '@/lib/types';
 import { format } from 'date-fns';
 import { SheetShell } from "@/components/ui/sheet-shell";
 import { Button } from "@/components/ui/button";
 import { deleteBookmark } from '@/app/actions/bookmark';
+import { normalizeUrl, getCategoryColor } from '@/lib/utils';
 import { useActionState } from 'react';
-
-// Helper for badge colors (same as in BookmarkCard)
-const getCategoryColor = (categoryName: string) => {
-    const colors = [
-        'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-        'bg-zinc-500/10 text-zinc-400 border-zinc-500/20',
-        'bg-blue-500/10 text-blue-400 border-blue-500/20',
-        'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
-        'bg-purple-500/10 text-purple-400 border-purple-500/20',
-        'bg-rose-500/10 text-rose-400 border-rose-500/20',
-    ];
-    const index = categoryName.length % colors.length;
-    return colors[index];
-};
 
 const Badge = ({ children, className }: { children: React.ReactNode, className?: string }) => (
     <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium tracking-wide uppercase border ${className}`}>
@@ -47,7 +34,8 @@ interface DetailSheetProps {
 }
 
 export function DetailSheet({ bookmark, isOpen, onClose, isOwner, isMember }: DetailSheetProps) {
-    const [state, formAction, isPending] = useActionState(deleteBookmark, null);
+    const initialState: ActionState = { message: "", success: false };
+    const [state, formAction, isPending] = useActionState(deleteBookmark, initialState);
 
     useEffect(() => {
         if (state?.success) {

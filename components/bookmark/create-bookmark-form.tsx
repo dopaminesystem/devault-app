@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { createBookmark } from "@/app/actions/bookmark";
+import { ActionState } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,24 +22,14 @@ type CreateBookmarkFormProps = {
     vaultId: string;
 };
 
-type CreateBookmarkState = {
-    message: string;
-    success: boolean;
-    errors?: {
-        url?: string[];
-        title?: string[];
-        description?: string[];
-    };
-};
-
-const initialState: CreateBookmarkState = {
+const initialState: ActionState = {
     message: "",
     success: false,
 };
 
 export function CreateBookmarkForm({ vaultId }: CreateBookmarkFormProps) {
     const [open, setOpen] = useState(false);
-    const [state, formAction, isPending] = useActionState(async (prev: any, formData: FormData) => {
+    const [state, formAction, isPending] = useActionState(async (prev: ActionState, formData: FormData) => {
         const result = await createBookmark(prev, formData);
         if (result.success) {
             setOpen(false);
@@ -72,8 +63,8 @@ export function CreateBookmarkForm({ vaultId }: CreateBookmarkFormProps) {
                                 placeholder="https://example.com"
                                 required
                             />
-                            {state.errors?.url && (
-                                <p className="text-sm text-red-500">{state.errors.url[0]}</p>
+                            {state.fieldErrors?.url && (
+                                <p className="text-sm text-red-500">{state.fieldErrors.url[0]}</p>
                             )}
                         </div>
                         <div className="grid gap-2">

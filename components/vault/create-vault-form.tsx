@@ -1,15 +1,16 @@
 "use client";
 
 import { useActionState, useEffect, useState } from "react";
-import { createVault, CreateVaultState } from "@/app/actions/vault";
+import { createVault } from "@/app/actions/vault";
+import { ActionState } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-const initialState: CreateVaultState = {
+const initialState: ActionState = {
     message: "",
-    errors: {},
+    success: false,
 };
 
 export function CreateVaultForm({ hideCardWrapper = false }: { hideCardWrapper?: boolean }) {
@@ -41,8 +42,8 @@ export function CreateVaultForm({ hideCardWrapper = false }: { hideCardWrapper?:
                         minLength={3}
                         maxLength={50}
                     />
-                    {state.errors?.name && (
-                        <p className="text-sm text-red-500">{state.errors.name.join(", ")}</p>
+                    {state.fieldErrors?.name && (
+                        <p className="text-sm text-red-500">{state.fieldErrors.name.join(", ")}</p>
                     )}
                 </div>
 
@@ -61,8 +62,8 @@ export function CreateVaultForm({ hideCardWrapper = false }: { hideCardWrapper?:
                             maxLength={50}
                         />
                     </div>
-                    {state.errors?.slug && (
-                        <p className="text-sm text-red-500">{state.errors.slug.join(", ")}</p>
+                    {state.fieldErrors?.slug && (
+                        <p className="text-sm text-red-500">{state.fieldErrors.slug.join(", ")}</p>
                     )}
                 </div>
 
@@ -74,13 +75,13 @@ export function CreateVaultForm({ hideCardWrapper = false }: { hideCardWrapper?:
                         placeholder="A place for my design resources..."
                         maxLength={200}
                     />
-                    {state.errors?.description && (
-                        <p className="text-sm text-red-500">{state.errors.description.join(", ")}</p>
+                    {state.fieldErrors?.description && (
+                        <p className="text-sm text-red-500">{state.fieldErrors.description.join(", ")}</p>
                     )}
                 </div>
 
                 {state.message && (
-                    <p className={`text-sm ${state.errors ? "text-red-500" : "text-green-500"}`}>
+                    <p className={`text-sm ${state.fieldErrors || state.error ? "text-red-500" : "text-green-500"}`}>
                         {state.message}
                     </p>
                 )}
