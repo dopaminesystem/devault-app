@@ -4,6 +4,7 @@ import { Link as LinkIcon, Loader2, Sparkles } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { TOKENS } from "@/lib/constants";
+import { ShineBorder } from "@/components/ui/shine-border";
 
 interface URLInputSectionProps {
     url: string;
@@ -20,17 +21,27 @@ export function URLInputSection({ url, onUrlChange, isGenerating, onGenerate, is
                 <LinkIcon size={12} /> URL
             </label>
             <div className="flex gap-2">
-                <Input
-                    name="url"
-                    type="text"
-                    placeholder="https://example.com"
-                    autoFocus
-                    required
-                    value={url}
-                    onChange={(e) => onUrlChange(e.target.value)}
-                    disabled={isPending || isGenerating}
-                    className={TOKENS.input}
-                />
+                <div className="relative group rounded-md flex-1">
+                    <Input
+                        name="url"
+                        type="text"
+                        placeholder="https://example.com"
+                        autoFocus
+                        required
+                        value={url}
+                        onChange={(e) => onUrlChange(e.target.value)}
+                        disabled={isPending || isGenerating}
+                        className={`${TOKENS.input} relative z-10 transition-all duration-300 ${isGenerating ? 'border-transparent focus:border-transparent' : ''}`}
+                    />
+                    {isGenerating && (
+                        <ShineBorder
+                            className="absolute inset-0 z-0 rounded-md"
+                            shineColor={["#6366f1", "#a855f7", "#ec4899"]}
+                            duration={8}
+                            borderWidth={1.5}
+                        />
+                    )}
+                </div>
                 <Button
                     type="button"
                     variant="secondary"

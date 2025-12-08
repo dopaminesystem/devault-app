@@ -109,6 +109,7 @@ export function NewBookmarkSheet({ isOpen, onClose, vaultId, categories: initial
                         description={description}
                         onDescriptionChange={setDescription}
                         isPending={isPending}
+                        isGenerating={isGenerating}
                     />
 
                     <CategorySelector
