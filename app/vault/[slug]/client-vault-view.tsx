@@ -126,6 +126,6 @@ export default function ClientVaultView({
                 categories={categoryNames}
             />
 
-        </div >
+        </div>
     );
 }
