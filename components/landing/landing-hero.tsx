@@ -10,7 +10,7 @@ export function LandingHero() {
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
                 </span>
-                v2.0 is now live
+                Early Access Soon
             </div>
 
             <h1 className="text-6xl md:text-8xl font-bold tracking-tight bg-gradient-to-b from-white via-white to-zinc-600 bg-clip-text text-transparent pb-4 animate-in fade-in slide-in-from-bottom-8 duration-1000">
