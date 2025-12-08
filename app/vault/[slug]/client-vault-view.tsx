@@ -106,14 +106,18 @@ export default function ClientVaultView({
 
             </div>
 
-            <DetailSheet
-                key={selectedBookmark?.id || 'empty'}
-                bookmark={selectedBookmark}
-                isOpen={isDetailOpen}
-                onClose={() => setIsDetailOpen(false)}
-                isOwner={isOwner}
-                isMember={isMember}
-            />
+
+            {selectedBookmark && (
+                <DetailSheet
+                    key={selectedBookmark.id}
+                    bookmark={selectedBookmark}
+                    isOpen={isDetailOpen}
+                    onClose={() => setIsDetailOpen(false)}
+                    isOwner={isOwner}
+                    isMember={isMember}
+                />
+            )
+            }
 
             <NewBookmarkSheet
                 isOpen={isNewBookmarkOpen}
@@ -122,6 +126,6 @@ export default function ClientVaultView({
                 categories={categoryNames}
             />
 
-        </div>
+        </div >
     );
 }

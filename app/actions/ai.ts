@@ -1,6 +1,6 @@
 "use server";
 
-import * as cheerio from "cheerio";
+import getMetadata from "metadata-scraper";
 import { OpenAI } from "openai";
 import { env } from "@/lib/env";
 import { z } from "zod";
@@ -30,37 +30,15 @@ export async function generatePreview(url: string): Promise<ActionState<PreviewD
     const targetUrl = normalizeUrl(url);
 
     try {
-        // 1. Fetch Metadata
-        const res = await fetch(targetUrl, {
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-                'Accept-Language': 'en-US,en;q=0.5',
-                'Accept-Encoding': 'gzip, deflate, br',
-                'DNT': '1',
-                'Connection': 'keep-alive',
-                'Upgrade-Insecure-Requests': '1',
-                'Sec-Fetch-Dest': 'document',
-                'Sec-Fetch-Mode': 'navigate',
-                'Sec-Fetch-Site': 'none',
-                'Cache-Control': 'max-age=0',
-            },
-            signal: AbortSignal.timeout(5000) // 5s timeout
-        });
+        // 1. Fetch Metadata using metadata-scraper
+        const metadata = await getMetadata(targetUrl);
 
-        if (!res.ok) {
-            throw new Error(`Failed to fetch page: ${res.statusText}`);
-        }
+        const title = metadata.title || metadata.provider || new URL(targetUrl).hostname;
+        const metaDesc = metadata.description || "";
+        const faviconUrl = metadata.icon || metadata.image || `https://www.google.com/s2/favicons?domain=${targetUrl}&sz=64`;
 
-        const html = await res.text();
-        const $ = cheerio.load(html);
-
-        const title = $('title').text() || $('meta[property="og:title"]').attr('content') || new URL(targetUrl).hostname;
-        const metaDesc = $('meta[name="description"]').attr('content') || $('meta[property="og:description"]').attr('content') || "";
-        const faviconUrl = `https://www.google.com/s2/favicons?domain=${targetUrl}&sz=64`;
-
-        // Extract snippet (first meaningful paragraph)
-        const snippet = $('p').first().text().substring(0, 300) || metaDesc;
+        // Use meta description as the snippet since we don't scrape full body content anymore
+        const snippet = metaDesc;
 
         let aiDescription = "";
 
