@@ -13,7 +13,8 @@ const nextConfig: NextConfig = {
         ]
       }
     ]
-  }
+  },
+  serverExternalPackages: ["metadata-scraper", "keyv"],
 };
 
 export default nextConfig;
