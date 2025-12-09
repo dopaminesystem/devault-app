@@ -10,10 +10,28 @@ import { useActionState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { FaDiscord } from "react-icons/fa"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { enableEmailSignInAction } from "@/app/actions/auth"
 
 export default function SignUpForm() {
     const [isRegister, setIsRegister] = useState(true)
     const [state, formAction, pending] = useActionState(signUpAction, { error: "", success: false })
+
+    // Controlled inputs to pass to the enable dialog
+    const [email, setEmail] = useState("")
+    const [password, setPassword] = useState("")
+
+    const [enableState, enableAction, enablePending] = useActionState(enableEmailSignInAction, { error: "", success: false })
+
     const router = useRouter()
 
     useEffect(() => {
@@ -81,14 +99,14 @@ export default function SignUpForm() {
                     </div>
                     <div className="space-y-1.5">
                         <label className="text-xs font-medium text-zinc-400 ml-1">Email</label>
-                        <input name="email" type="email" placeholder="design@engineer.com" className={TOKENS.input} required />
+                        <input name="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="design@engineer.com" className={TOKENS.input} required />
                         {state?.fieldErrors?.email && (
                             <p className="text-xs text-red-500 ml-1">{state.fieldErrors.email[0]}</p>
                         )}
                     </div>
                     <div className="space-y-1.5">
                         <label className="text-xs font-medium text-zinc-400 ml-1">Password</label>
-                        <input name="password" type="password" placeholder="••••••••" className={TOKENS.input} required />
+                        <input name="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className={TOKENS.input} required />
                         {state?.fieldErrors?.password && (
                             <p className="text-xs text-red-500 ml-1">{state.fieldErrors.password[0]}</p>
                         )}
@@ -131,6 +149,30 @@ export default function SignUpForm() {
                 </a>
                 .
             </p>
+
+
+            <AlertDialog open={state?.error === "AccountExistsViaProvider"}>
+                <AlertDialogContent className="bg-zinc-950 border-zinc-800 text-zinc-100">
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Existing Account Found</AlertDialogTitle>
+                        <AlertDialogDescription className="text-zinc-400">
+                            {state?.message || "There is already an account associated with this email via Discord."}
+                            <br /><br />
+                            Do you want to enable password sign-in for this account? This will set the password you just entered.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel className="bg-zinc-900 border-zinc-800 hover:bg-zinc-800 text-zinc-300">Cancel</AlertDialogCancel>
+                        <form action={enableAction}>
+                            <input type="hidden" name="email" value={email} />
+                            <input type="hidden" name="password" value={password} />
+                            <Button type="submit" disabled={enablePending} className="bg-indigo-600 hover:bg-indigo-700 text-white border-0">
+                                {enablePending ? "Enabling..." : "Enable & Sign In"}
+                            </Button>
+                        </form>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     )
 }
