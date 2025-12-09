@@ -50,7 +50,7 @@ export default function ClientVaultView({
     };
 
     const categoryNames = initialCategories.map(c => c.name);
-    const canEdit = isOwner || isMember;
+    const canEdit = isOwner;
 
     return (
         <div className="min-h-screen bg-zinc-950 text-zinc-100 font-sans selection:bg-indigo-500/30 flex justify-center overflow-hidden">
