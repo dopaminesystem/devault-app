@@ -27,6 +27,13 @@ export async function createVault(prevState: ActionState, formData: FormData): P
         };
     }
 
+    if (!session.user.emailVerified) {
+        return {
+            success: false,
+            message: "Email not verified",
+        };
+    }
+
     const validatedFields = createVaultSchema.safeParse({
         name: formData.get("name"),
         slug: formData.get("slug"),
@@ -176,6 +183,10 @@ export async function updateVaultSettings(prevState: any, formData: FormData) {
         return { message: "Unauthorized" };
     }
 
+    if (!session.user.emailVerified) {
+        return { message: "Email not verified" };
+    }
+
     const validatedFields = updateVaultSettingsSchema.safeParse({
         vaultId: formData.get("vaultId"),
         accessType: formData.get("accessType"),
@@ -241,6 +252,10 @@ export async function joinVault(prevState: any, formData: FormData) {
         return { success: false, message: "Unauthorized" };
     }
 
+    if (!session.user.emailVerified) {
+        return { success: false, message: "Email not verified" };
+    }
+
     const vaultId = formData.get("vaultId") as string;
     const password = formData.get("password") as string;
 
@@ -301,6 +316,10 @@ export async function updateVault(prevState: any, formData: FormData) {
         return { message: "Unauthorized" };
     }
 
+    if (!session.user.emailVerified) {
+        return { message: "Email not verified" };
+    }
+
     const validatedFields = updateVaultSchema.safeParse({
         vaultId: formData.get("vaultId"),
         name: formData.get("name"),
@@ -345,6 +364,10 @@ export async function deleteVault(prevState: any, formData: FormData) {
 
     if (!session?.user) {
         return { message: "Unauthorized" };
+    }
+
+    if (!session.user.emailVerified) {
+        return { message: "Email not verified" };
     }
 
     const vaultId = formData.get("vaultId") as string;

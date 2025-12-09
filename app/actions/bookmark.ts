@@ -47,6 +47,10 @@ export async function createBookmark(prevState: ActionState, formData: FormData)
         return { success: false, message: "Unauthorized" };
     }
 
+    if (!session.user.emailVerified) {
+        return { success: false, message: "Email not verified" };
+    }
+
     const rawUrl = formData.get("url") as string;
     const normalizedUrl = rawUrl ? normalizeUrl(rawUrl) : "";
 
@@ -156,6 +160,10 @@ export async function updateBookmark(prevState: ActionState, formData: FormData)
         return { success: false, message: "Unauthorized" };
     }
 
+    if (!session.user.emailVerified) {
+        return { success: false, message: "Email not verified" };
+    }
+
     const rawUrl = formData.get("url") as string;
     const normalizedUrl = rawUrl ? normalizeUrl(rawUrl) : "";
 
@@ -223,6 +231,10 @@ export async function deleteBookmark(prevState: ActionState, formData: FormData)
 
     if (!session?.user) {
         return { success: false, message: "Unauthorized" };
+    }
+
+    if (!session.user.emailVerified) {
+        return { success: false, message: "Email not verified" };
     }
 
     const bookmarkId = formData.get("bookmarkId") as string;
