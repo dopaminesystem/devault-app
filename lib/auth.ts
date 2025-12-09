@@ -22,13 +22,16 @@ export const auth = betterAuth({
                 subject: "Verify your email address",
                 html: `
                     <div style="font-family: sans-serif; font-size: 16px; color: #333;">
-                        <h1>Verify your email address</h1>
+                        <h1>Verify your email address in Devault</h1>
                         <p>Click the link below to verify your email address:</p>
                         <a href="${url}" style="display: inline-block; background: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">Verify Email</a>
                         <p style="margin-top: 20px; font-size: 14px; color: #666;">If you didn't request this, please ignore this email.</p>
                     </div>
                 `,
             });
+        },
+        afterEmailVerification: async (user) => {
+            console.log(`✅ Email verified for user: ${user.email}`);
         },
     },
     socialProviders: {

@@ -42,7 +42,10 @@ export async function signUpAction(
 
     try {
         await auth.api.signUpEmail({
-            body: validation.data,
+            body: {
+                ...validation.data,
+                callbackURL: "/dashboard",
+            },
         });
     } catch (error) {
         if (error instanceof Error) {
