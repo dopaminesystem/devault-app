@@ -127,86 +127,64 @@ export async function enableEmailSignInAction(
     prevState: ActionState,
     formData: FormData
 ): Promise<ActionState> {
-    const rawData = {
-        email: (formData.get("email") as string).toLowerCase(),
-        password: formData.get("password") as string,
-    };
+    const email = (formData.get("email") as string)?.toLowerCase().trim();
+    const password = formData.get("password") as string;
 
-    const validation = signInSchema.safeParse(rawData);
-
-    if (!validation.success) {
+    if (!email || !password) {
         return {
             success: false,
-            error: "Validation failed",
-            fieldErrors: validation.error.flatten().fieldErrors,
+            error: "Email and password are required",
         };
     }
 
     try {
-        const user = await prisma.user.findUnique({
-            where: { email: validation.data.email },
-            include: { accounts: true }
-        });
+        // Get current session
+        const session = await getSession();
 
-        if (!user) {
-            return { success: false, error: "User not found" };
+        if (!session?.user) {
+            return {
+                success: false,
+                error: "You must be logged in to enable email sign-in",
+            };
         }
 
-        const hasEmail = user.accounts.some(acc => acc.providerId === "credential");
-        if (hasEmail) {
-            return { success: false, error: "Email sign-in already enabled" };
+        // Verify email matches
+        if (session.user.email?.toLowerCase() !== email) {
+            return {
+                success: false,
+                error: "Email must match your account",
+            };
         }
 
-        // Create credential account
-        // Note: better-auth usually uses Scrypt/Argon2. We'll use auth.api.signUpEmail on a dummy and see or assumes compat.
-        // Actually, to update properly without session, we manually insert account.
-        // BEWARE: If better-auth config expects Argon2 and we us bcrypt, login might fail if better-auth doesn't support bcrypt upgrade.
-        // However, standard prisma adapter usually just reads the password string.
-        // We will assume better-auth is configurable or compatible. 
-        // For built-in email/password, better-auth often handles hashing internally.
-
-        // BETTER APPROACH: Use `auth.api.changePassword` -> Requires session.
-        // FALLBACK: We manually mock the account creation.
-
-        // Since we can't easily get better-auth's internal hasher here without importing from inside the package which might not be exported,
-        // we will try to use `auth.api.signUpEmail` but that fails on duplicate email.
-
-        // We will use bcryptjs for now as it's a common default and standard.
-        // If better-auth fails to verify, we might need to adjust.
-        const hashedPassword = await hash(validation.data.password, 10);
-
-        await prisma.account.create({
-            data: {
-                userId: user.id,
-                accountId: user.email, // Common convention for email provider
+        // Use better-auth's linkAccount to add credential provider
+        // @ts-ignore - linkAccount might not be in types yet or is dynamic
+        await (auth.api as any).linkAccount({
+            body: {
+                email,
+                password,
                 providerId: "credential",
-                password: hashedPassword,
-                createdAt: new Date(),
-                updatedAt: new Date(),
-            }
+            },
+            headers: await headers(),
         });
 
-        // We also need to verify email if not verified? Discord usually verifies.
-        // If not verified, we should probably set it?
-        // await prisma.user.update({ where: { id: user.id }, data: { emailVerified: true } });
-
-    } catch (error) {
+        return {
+            success: true,
+            message: "Email sign-in enabled successfully!",
+        };
+    } catch (error: any) {
         console.error("Failed to enable email sign-in:", error);
-        return { success: false, error: "Failed to enable email sign-in" };
-    }
 
-    // Attempt sign in after enabling
-    try {
-        await auth.api.signInEmail({
-            body: validation.data,
-        });
-    } catch (error) {
-        // If auto-login fails, redirect to sign-in
-        // But we can just cascade and let the redirect handle it if headers are set?
-        // Server action to server action calls might verify cookie setting?
-        // Let's assume sign-in works or we redirect to sign-in page.
-    }
+        // Handle specific better-auth errors
+        if (error?.message?.includes("already linked") || error?.body?.message?.includes("already linked")) {
+            return {
+                success: false,
+                error: "Email sign-in is already enabled",
+            };
+        }
 
-    redirect("/dashboard");
-    return { success: true, message: "Email sign-in enabled" };
+        return {
+            success: false,
+            error: error?.message || "Failed to enable email sign-in. Please try again.",
+        };
+    }
 }
