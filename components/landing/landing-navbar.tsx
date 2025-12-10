@@ -1,11 +1,11 @@
 "use client"
 
-import { authClient } from "@/lib/auth-client"
 import { DashboardButton } from "./dashboard-button"
 import { AuthButtons } from "./auth-buttons"
+import { useSession } from "@/lib/auth-client"
 
 export function LandingNavbar() {
-    const { data: session } = authClient.useSession()
+    const { data: session } = useSession()
 
     return (
         <header className="flex items-center justify-between px-6 py-6 max-w-7xl mx-auto w-full z-50">

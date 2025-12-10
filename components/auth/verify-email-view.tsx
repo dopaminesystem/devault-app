@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button"
 import { Mail, Send, LogOut } from "lucide-react"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { useSession } from "@/lib/auth-client"
 
 export function VerifyEmailView() {
-    const { data: session } = authClient.useSession()
+    const { data: session } = useSession()
     const [pending, setPending] = useState(false)
     const [sent, setSent] = useState(false)
     const router = useRouter()

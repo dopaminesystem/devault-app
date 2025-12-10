@@ -188,3 +188,32 @@ export async function enableEmailSignInAction(
         };
     }
 }
+
+export async function resendVerificationEmailAction(): Promise<ActionState> {
+    const session = await getSession();
+
+    if (!session?.user) {
+        return { success: false, error: "Unauthorized" };
+    }
+
+    if (session.user.emailVerified) {
+        return { success: false, error: "Email already verified" };
+    }
+
+    try {
+        await auth.api.sendVerificationEmail({
+            body: {
+                email: session.user.email,
+                callbackURL: "/dashboard",
+            },
+        });
+
+        return { success: true, message: "Verification email sent!" };
+    } catch (error: any) {
+        console.error("Failed to send verification email:", error);
+        return {
+            success: false,
+            error: error?.message || "Failed to send verification email"
+        };
+    }
+}
