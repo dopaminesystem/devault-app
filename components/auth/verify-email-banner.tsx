@@ -3,8 +3,8 @@
 import { useSession } from "@/lib/auth-client"
 import { resendVerificationEmailAction } from "@/app/actions/auth"
 import { AlertCircle, Send } from "lucide-react"
-import { useActionState, useEffect } from "react"
-import { toast } from "sonner"
+import { useActionState } from "react"
+import { useActionToast } from "@/hooks/use-action-toast"
 
 const initialState = { success: false, error: "", message: "" }
 
@@ -12,18 +12,11 @@ export function VerifyEmailBanner() {
     const { data: session } = useSession()
     const [state, formAction, pending] = useActionState(resendVerificationEmailAction, initialState)
 
-    useEffect(() => {
-        if (state.success && state.message) {
-            toast.success(state.message, {
-                description: "Please check your inbox."
-            })
-        }
-        if (!state.success && state.error) {
-            toast.error("Failed to send email", {
-                description: state.error
-            })
-        }
-    }, [state])
+    useActionToast(state, {
+        successMessage: "Verification email sent!",
+        successDescription: "Please check your inbox.",
+        errorMessage: "Failed to send email",
+    })
 
     if (!session?.user) return null
     if (session.user.emailVerified) return null
