@@ -131,7 +131,7 @@ export function DetailSheet({ bookmark, isOpen, onClose, isOwner, isMember }: De
             </div>
 
             <div className="p-6 border-t border-zinc-800/50 bg-zinc-900/30 flex justify-between items-center rounded-b-2xl mt-auto">
-                {(isOwner || isMember) ? (
+                {isOwner ? (
                     <form action={formAction}>
                         <input type="hidden" name="bookmarkId" value={bookmark.id} />
                         <Button
@@ -154,7 +154,7 @@ export function DetailSheet({ bookmark, isOpen, onClose, isOwner, isMember }: De
                     </form>
                 ) : <div />}
                 <div className="flex gap-3">
-                    {(isOwner || isMember) && (
+                    {isOwner && (
                         <Button variant="ghost" className="text-zinc-300 hover:text-white hover:bg-zinc-800 rounded-full">
                             Edit
                         </Button>

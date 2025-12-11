@@ -1,9 +1,11 @@
 "use server";
 
-import { auth } from "@/lib/auth";
+import { auth, getSession } from "@/lib/auth";
 import { z } from "zod";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
+import { prisma } from "@/lib/prisma";
+import { hash } from "bcryptjs";
 
 import { ActionState } from "@/lib/types";
 
@@ -23,7 +25,7 @@ export async function signUpAction(
     formData: FormData
 ): Promise<ActionState> {
     const rawData = {
-        email: formData.get("email") as string,
+        email: (formData.get("email") as string).toLowerCase(),
         password: formData.get("password") as string,
         name: formData.get("name") as string,
     };
@@ -40,11 +42,33 @@ export async function signUpAction(
 
     try {
         await auth.api.signUpEmail({
-            body: validation.data,
+            body: {
+                ...validation.data,
+                callbackURL: "/dashboard",
+            },
         });
     } catch (error) {
         if (error instanceof Error) {
             if (error.message.includes("already exists")) {
+                const existingUser = await prisma.user.findUnique({
+                    where: { email: validation.data.email },
+                    include: { accounts: true }
+                });
+
+                if (existingUser) {
+                    const hasDiscord = existingUser.accounts.some(acc => acc.providerId === "discord");
+                    const hasEmail = existingUser.accounts.some(acc => acc.providerId === "credential");
+
+                    if (hasDiscord && !hasEmail) {
+                        return {
+                            success: false,
+                            error: "AccountExistsViaProvider",
+                            message: "An account with this email already exists via Discord",
+                            // We can use this in UI to show the dialog
+                        };
+                    }
+                }
+
                 return { success: false, error: "An account with this email already exists" };
             }
             return { success: false, error: error.message };
@@ -97,4 +121,99 @@ export async function signOutAction() {
         console.error("Sign out error:", error);
     }
     redirect("/");
+}
+
+export async function enableEmailSignInAction(
+    prevState: ActionState,
+    formData: FormData
+): Promise<ActionState> {
+    const email = (formData.get("email") as string)?.toLowerCase().trim();
+    const password = formData.get("password") as string;
+
+    if (!email || !password) {
+        return {
+            success: false,
+            error: "Email and password are required",
+        };
+    }
+
+    try {
+        // Get current session
+        const session = await getSession();
+
+        if (!session?.user) {
+            return {
+                success: false,
+                error: "You must be logged in to enable email sign-in",
+            };
+        }
+
+        // Verify email matches
+        if (session.user.email?.toLowerCase() !== email) {
+            return {
+                success: false,
+                error: "Email must match your account",
+            };
+        }
+
+        // Use better-auth's linkAccount to add credential provider
+        // @ts-ignore - linkAccount might not be in types yet or is dynamic
+        await (auth.api as any).linkAccount({
+            body: {
+                email,
+                password,
+                providerId: "credential",
+            },
+            headers: await headers(),
+        });
+
+        return {
+            success: true,
+            message: "Email sign-in enabled successfully!",
+        };
+    } catch (error: any) {
+        console.error("Failed to enable email sign-in:", error);
+
+        // Handle specific better-auth errors
+        if (error?.message?.includes("already linked") || error?.body?.message?.includes("already linked")) {
+            return {
+                success: false,
+                error: "Email sign-in is already enabled",
+            };
+        }
+
+        return {
+            success: false,
+            error: error?.message || "Failed to enable email sign-in. Please try again.",
+        };
+    }
+}
+
+export async function resendVerificationEmailAction(): Promise<ActionState> {
+    const session = await getSession();
+
+    if (!session?.user) {
+        return { success: false, error: "Unauthorized" };
+    }
+
+    if (session.user.emailVerified) {
+        return { success: false, error: "Email already verified" };
+    }
+
+    try {
+        await auth.api.sendVerificationEmail({
+            body: {
+                email: session.user.email,
+                callbackURL: "/dashboard",
+            },
+        });
+
+        return { success: true, message: "Verification email sent!" };
+    } catch (error: any) {
+        console.error("Failed to send verification email:", error);
+        return {
+            success: false,
+            error: error?.message || "Failed to send verification email"
+        };
+    }
 }

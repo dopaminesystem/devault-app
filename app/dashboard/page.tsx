@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { SignOutButton } from "@/components/auth/sign-out-button";
+import { VerifyEmailView } from "@/components/auth/verify-email-view";
 import { Settings as SettingsIcon } from "lucide-react";
 
 // Sub-components
@@ -15,6 +16,10 @@ export default async function DashboardPage() {
 
     if (!session?.user) {
         redirect("/sign-in");
+    }
+
+    if (!session.user.emailVerified) {
+        return <VerifyEmailView />;
     }
 
     const vaults = await prisma.vault.findMany({
@@ -34,6 +39,8 @@ export default async function DashboardPage() {
             {/* Decorative Gradients */}
             <div className="fixed top-0 left-0 w-full h-[500px] bg-gradient-to-b from-indigo-950/20 to-transparent pointer-events-none" />
             <div className="fixed bottom-0 right-0 w-[500px] h-[500px] bg-radial-gradient from-blue-900/10 to-transparent rounded-full blur-3xl pointer-events-none" />
+
+
 
             <div className="relative z-10 p-8 max-w-5xl mx-auto space-y-12">
                 <div className="flex justify-between items-end border-b border-white/5 pb-8">

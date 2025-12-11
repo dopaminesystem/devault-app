@@ -18,6 +18,10 @@ export async function createCategory(prevState: any, formData: FormData) {
         return { success: false, message: "Unauthorized" };
     }
 
+    if (!session.user.emailVerified) {
+        return { success: false, message: "Email not verified" };
+    }
+
     const validatedFields = createCategorySchema.safeParse({
         vaultId: formData.get("vaultId"),
         name: formData.get("name"),
@@ -98,6 +102,10 @@ export async function updateCategory(prevState: any, formData: FormData) {
         return { success: false, message: "Unauthorized" };
     }
 
+    if (!session.user.emailVerified) {
+        return { success: false, message: "Email not verified" };
+    }
+
     const validatedFields = updateCategorySchema.safeParse({
         categoryId: formData.get("categoryId"),
         name: formData.get("name"),
@@ -139,6 +147,10 @@ export async function deleteCategory(prevState: any, formData: FormData) {
 
     if (!session?.user) {
         return { success: false, message: "Unauthorized" };
+    }
+
+    if (!session.user.emailVerified) {
+        return { success: false, message: "Email not verified" };
     }
 
     const categoryId = formData.get("categoryId") as string;

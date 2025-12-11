@@ -6,7 +6,7 @@ import { env } from "@/lib/env";
 import { z } from "zod";
 import { ActionState } from "@/lib/types";
 import { normalizeUrl } from "@/lib/utils";
-
+import { getSession } from "@/lib/auth"; // Need to import getSession
 
 const generatePreviewSchema = z.object({
     url: z.string().url("Invalid URL"),
@@ -21,6 +21,16 @@ export type PreviewData = {
 };
 
 export async function generatePreview(url: string): Promise<ActionState<PreviewData>> {
+    const session = await getSession();
+
+    if (!session?.user) {
+        return { success: false, message: "Unauthorized" };
+    }
+
+    if (!session.user.emailVerified) {
+        return { success: false, message: "Email not verified" };
+    }
+
     const validated = generatePreviewSchema.safeParse({ url });
 
     if (!validated.success) {
@@ -111,6 +121,15 @@ export async function generatePreview(url: string): Promise<ActionState<PreviewD
 }
 
 export async function regenerateDescription(data: PreviewData): Promise<ActionState<string>> {
+    const session = await getSession();
+
+    if (!session?.user.emailVerified) {
+        return {
+            success: false,
+            message: "Email not verified"
+        };
+    }
+
     if (!env.OPENAI_API_KEY) {
         return {
             success: false,

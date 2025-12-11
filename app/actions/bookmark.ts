@@ -47,6 +47,10 @@ export async function createBookmark(prevState: ActionState, formData: FormData)
         return { success: false, message: "Unauthorized" };
     }
 
+    if (!session.user.emailVerified) {
+        return { success: false, message: "Email not verified" };
+    }
+
     const rawUrl = formData.get("url") as string;
     const normalizedUrl = rawUrl ? normalizeUrl(rawUrl) : "";
 
@@ -88,9 +92,8 @@ export async function createBookmark(prevState: ActionState, formData: FormData)
     }
 
     const isOwner = vault.ownerId === session.user.id;
-    const isMember = vault.members.some((m: VaultMember) => m.userId === session.user.id);
 
-    if (!isOwner && !isMember) {
+    if (!isOwner) {
         return { success: false, message: "You do not have permission to add bookmarks to this vault" };
     }
 
@@ -157,6 +160,10 @@ export async function updateBookmark(prevState: ActionState, formData: FormData)
         return { success: false, message: "Unauthorized" };
     }
 
+    if (!session.user.emailVerified) {
+        return { success: false, message: "Email not verified" };
+    }
+
     const rawUrl = formData.get("url") as string;
     const normalizedUrl = rawUrl ? normalizeUrl(rawUrl) : "";
 
@@ -190,9 +197,8 @@ export async function updateBookmark(prevState: ActionState, formData: FormData)
     }
 
     const isOwner = bookmark.category.vault.ownerId === session.user.id;
-    const isMember = bookmark.category.vault.members.some((m: VaultMember) => m.userId === session.user.id);
 
-    if (!isOwner && !isMember) {
+    if (!isOwner) {
         return { success: false, message: "Unauthorized" };
     }
 
@@ -227,6 +233,10 @@ export async function deleteBookmark(prevState: ActionState, formData: FormData)
         return { success: false, message: "Unauthorized" };
     }
 
+    if (!session.user.emailVerified) {
+        return { success: false, message: "Email not verified" };
+    }
+
     const bookmarkId = formData.get("bookmarkId") as string;
 
     if (!bookmarkId) {
@@ -243,9 +253,8 @@ export async function deleteBookmark(prevState: ActionState, formData: FormData)
     }
 
     const isOwner = bookmark.category.vault.ownerId === session.user.id;
-    const isMember = bookmark.category.vault.members.some((m: VaultMember) => m.userId === session.user.id);
 
-    if (!isOwner && !isMember) {
+    if (!isOwner) {
         return { success: false, message: "Unauthorized" };
     }
 
