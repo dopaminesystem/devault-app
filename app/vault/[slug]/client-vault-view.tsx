@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Vault, Category } from '@prisma/client';
 import { Sidebar } from '@/components/dashboard/sidebar';
 import { DetailSheet } from '@/components/dashboard/detail-sheet';
@@ -9,6 +9,8 @@ import { BookmarkWithCategory } from '@/lib/types';
 import { VaultHeader } from '@/components/dashboard/vault-view/vault-header';
 import { BookmarkGrid } from '@/components/dashboard/vault-view/bookmark-grid';
 import { VaultEmptyState } from '@/components/dashboard/vault-view/vault-empty-state';
+import { CreateCategoryDialog } from '@/components/dashboard/create-category-dialog';
+import { deleteCategory } from '@/app/actions/category';
 
 interface ClientVaultViewProps {
     vault: Vault;
@@ -32,6 +34,26 @@ export default function ClientVaultView({
     const [selectedBookmark, setSelectedBookmark] = useState<BookmarkWithCategory | null>(null);
     const [isDetailOpen, setIsDetailOpen] = useState(false);
     const [isNewBookmarkOpen, setIsNewBookmarkOpen] = useState(false);
+    const [isCreateCategoryOpen, setIsCreateCategoryOpen] = useState(false);
+
+    const searchInputRef = useRef<HTMLInputElement>(null);
+
+    // Filter bookmarks
+    // ... (keep filtering logic)
+
+    // ... (keep handlers)
+
+    // Listen for Cmd+K to focus search
+    useEffect(() => {
+        const down = (e: KeyboardEvent) => {
+            if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
+                e.preventDefault();
+                searchInputRef.current?.focus();
+            }
+        };
+        document.addEventListener("keydown", down);
+        return () => document.removeEventListener("keydown", down);
+    }, []);
 
     // Filter bookmarks
     const filteredBookmarks = initialBookmarks.filter(b => {
@@ -49,8 +71,18 @@ export default function ClientVaultView({
         setIsDetailOpen(true);
     };
 
-    const categoryNames = initialCategories.map(c => c.name);
+    const handleDeleteCategory = async (category: Category) => {
+        if (confirm(`Are you sure you want to delete category "${category.name}"? This will delete all bookmarks in it.`)) {
+            const formData = new FormData();
+            formData.append('categoryId', category.id);
+            await deleteCategory(null, formData);
+        }
+    };
+
     const canEdit = isOwner;
+
+    // Listen for Cmd+K to toggle CMDK
+
 
     return (
         <div className="min-h-screen bg-zinc-950 text-zinc-100 font-sans selection:bg-indigo-500/30 flex justify-center overflow-hidden">
@@ -66,10 +98,12 @@ export default function ClientVaultView({
                 <Sidebar
                     vaults={allVaults}
                     activeVault={vault}
-                    categories={categoryNames}
+                    categories={initialCategories}
                     selectedCategory={activeCategoryFilter}
                     onSelectCategory={setActiveCategoryFilter}
                     totalBookmarks={initialBookmarks.length}
+                    onOpenCreateCategory={() => setIsCreateCategoryOpen(true)}
+                    onDeleteCategory={isOwner ? handleDeleteCategory : undefined}
                 />
 
                 {/* Main Content Area */}
@@ -83,6 +117,8 @@ export default function ClientVaultView({
                         search={search}
                         setSearch={setSearch}
                         isOwner={isOwner}
+                        onOpenCMDK={() => searchInputRef.current?.focus()}
+                        searchInputRef={searchInputRef}
                     />
 
                     {/* Content Grid */}
@@ -123,8 +159,17 @@ export default function ClientVaultView({
                 isOpen={isNewBookmarkOpen}
                 onClose={() => setIsNewBookmarkOpen(false)}
                 vaultId={vault.id}
-                categories={categoryNames}
+                categories={initialCategories.map(c => c.name)}
             />
+
+            <CreateCategoryDialog
+                vaultId={vault.id}
+                open={isCreateCategoryOpen}
+                onOpenChange={setIsCreateCategoryOpen}
+            />
+
+
+
 
         </div>
     );

@@ -51,6 +51,26 @@ export async function createBookmark(prevState: ActionState, formData: FormData)
         return { success: false, message: "Email not verified" };
     }
 
+    // Check Free Tier Limit (100 bookmarks total)
+    // NOTE: This assumes all users are on free tier currently. 
+    // If premium exists, check subscription status here.
+    const totalBookmarks = await prisma.bookmark.count({
+        where: {
+            category: {
+                vault: {
+                    ownerId: session.user.id
+                }
+            }
+        }
+    });
+
+    if (totalBookmarks >= 100) {
+        return {
+            success: false,
+            message: "Free tier limit reached (100 bookmarks). Please upgrade to add more."
+        };
+    }
+
     const rawUrl = formData.get("url") as string;
     const normalizedUrl = rawUrl ? normalizeUrl(rawUrl) : "";
 
