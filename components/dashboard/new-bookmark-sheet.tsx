@@ -6,7 +6,6 @@ import { ActionState } from '@/lib/types';
 import { createBookmark } from '@/app/actions/bookmark';
 import { useActionState } from 'react';
 import { SheetShell } from "@/components/ui/sheet-shell";
-import { generatePreview } from "@/app/actions/ai";
 import { normalizeUrl, cn } from "@/lib/utils";
 import { URLInputSection } from './new-bookmark/url-input-section';
 import { CategorySelector } from './new-bookmark/category-selector';
@@ -31,6 +30,7 @@ export function NewBookmarkSheet({ isOpen, onClose, vaultId, categories: initial
     const [url, setUrl] = useState("");
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
+    const [tags, setTags] = useState("");
 
     const [isGenerating, startGeneration] = useTransition();
     const initialState: ActionState = { message: "", success: false };
@@ -50,6 +50,7 @@ export function NewBookmarkSheet({ isOpen, onClose, vaultId, categories: initial
         setUrl("");
         setTitle("");
         setDescription("");
+        setTags("");
         setSelectedCategory(null);
         onClose();
     };
@@ -74,10 +75,27 @@ export function NewBookmarkSheet({ isOpen, onClose, vaultId, categories: initial
         if (urlToGenerate !== url) setUrl(urlToGenerate);
 
         startGeneration(async () => {
-            const result = await generatePreview(urlToGenerate);
-            if (result.success && result.data) {
-                setTitle(result.data.title || "");
-                setDescription(result.data.aiDescription || "");
+            // Dynamically import to ensure we use the explicit action
+            const { magicGenerate } = await import("@/app/actions/ai");
+            const result = await magicGenerate(urlToGenerate, vaultId);
+
+            if (result.success) {
+                if (result.title) setTitle(result.title);
+                if (result.description) setDescription(result.description);
+
+                // Handle Category
+                if (result.category && result.category !== "General") {
+                    // Check if category exists or just set it
+                    if (!categories.includes(result.category)) {
+                        setCategories([...categories, result.category]);
+                    }
+                    setSelectedCategory(result.category);
+                }
+
+                // Handle Tags (max 3, comma separated)
+                if (result.tags && result.tags.length > 0) {
+                    setTags(result.tags.join(", "));
+                }
             }
         });
     };
@@ -108,6 +126,8 @@ export function NewBookmarkSheet({ isOpen, onClose, vaultId, categories: initial
                         onTitleChange={setTitle}
                         description={description}
                         onDescriptionChange={setDescription}
+                        tags={tags}
+                        onTagsChange={setTags}
                         isPending={isPending}
                         isGenerating={isGenerating}
                     />

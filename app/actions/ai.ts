@@ -1,175 +1,55 @@
 "use server";
 
-import getMetadata from "metadata-scraper";
-import { OpenAI } from "openai";
-import { env } from "@/lib/env";
-import { z } from "zod";
-import { ActionState } from "@/lib/types";
 import { normalizeUrl } from "@/lib/utils";
-import { getSession } from "@/lib/auth"; // Need to import getSession
+import { suggestCategory } from "@/lib/ai";
+import { getSession } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import metadata from "metadata-scraper";
 
-const generatePreviewSchema = z.object({
-    url: z.string().url("Invalid URL"),
-});
-
-export type PreviewData = {
-    url: string;
-    title: string;
-    aiDescription: string;
-    metaDescription: string;
-    faviconUrl: string;
-};
-
-export async function generatePreview(url: string): Promise<ActionState<PreviewData>> {
+export async function magicGenerate(url: string, vaultId: string) {
     const session = await getSession();
-
-    if (!session?.user) {
-        return { success: false, message: "Unauthorized" };
-    }
-
-    if (!session.user.emailVerified) {
-        return { success: false, message: "Email not verified" };
-    }
-
-    const validated = generatePreviewSchema.safeParse({ url });
-
-    if (!validated.success) {
-        return { success: false, message: "Invalid URL", fieldErrors: validated.error.flatten().fieldErrors };
-    }
-
-    const targetUrl = normalizeUrl(url);
+    if (!session?.user) return { error: "Unauthorized" };
 
     try {
-        // 1. Fetch Metadata using metadata-scraper
-        const metadata = await getMetadata(targetUrl);
+        const normalizedUrl = normalizeUrl(url);
 
-        const title = metadata.title || metadata.provider || new URL(targetUrl).hostname;
-        const metaDesc = metadata.description || "";
-        const faviconUrl = metadata.icon || metadata.image || `https://www.google.com/s2/favicons?domain=${targetUrl}&sz=64`;
+        // 1. Scrape Metadata with Fail-Fast Timeout (3s)
+        // Note: metadata-scraper might fail on some sites, so we fail fast to let AI take over.
+        let title = "";
+        let description = "";
+        try {
+            const scrapePromise = metadata(normalizedUrl);
+            const timeoutPromise = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error("Scrape timeout")), 3000)
+            );
 
-        // Use meta description as the snippet since we don't scrape full body content anymore
-        const snippet = metaDesc;
-
-        let aiDescription = "";
-
-        // 2. Call LLM (Only if Key exists)
-        if (env.OPENAI_API_KEY) {
-            const openai = new OpenAI({
-                apiKey: env.OPENAI_API_KEY,
-            });
-
-            const prompt = `
-            Buatkan deskripsi singkat (2-3 kalimat) dalam Bahasa Indonesia untuk bookmark ini:
-            
-            URL: ${targetUrl}
-            Judul: ${title}
-            Meta Description: ${metaDesc}
-            Konten: ${snippet}
-            
-            Deskripsi harus:
-            - Informatif dan jelas
-            - Menjelaskan isi/tujuan halaman
-            - Membantu user mengingat konten ini nanti
-            - Maksimal 3 kalimat
-            `;
-
-            const completion = await openai.chat.completions.create({
-                model: "gpt-4o-mini",
-                messages: [{ role: "user", content: prompt }],
-                max_tokens: 200,
-                temperature: 0.7,
-            });
-
-            aiDescription = completion.choices[0].message.content?.trim() || "";
-        } else {
-            console.warn("OPENAI_API_KEY missing, skipping AI generation.");
+            const data = await Promise.race([scrapePromise, timeoutPromise]) as any;
+            title = data.title || "";
+            description = data.description || "";
+        } catch (e) {
+            console.log("Metadata scrape skipped (fail-fast or error):", e instanceof Error ? e.message : e);
         }
 
-        // Use AI description if available, otherwise fallback to meta description or empty
-        const finalDescription = aiDescription || metaDesc || "No description available.";
-
-        return {
-            success: true,
-            data: {
-                url: targetUrl,
-                title: title.trim(),
-                aiDescription: finalDescription,
-                metaDescription: metaDesc,
-                faviconUrl
-            }
-        };
-
-    } catch (error) {
-        console.error("AI Generation Error:", error);
-
-        // Fallback: Return basic data without AI
-        const fallbackTitle = new URL(targetUrl).hostname;
-        const fallbackFavicon = `https://www.google.com/s2/favicons?domain=${targetUrl}&sz=64`;
-
-        return {
-            success: true,
-            message: "AI generation failed, using basic info.",
-            data: {
-                url: targetUrl,
-                title: fallbackTitle,
-                aiDescription: "",
-                metaDescription: "",
-                faviconUrl: fallbackFavicon
-            }
-        };
-    }
-}
-
-export async function regenerateDescription(data: PreviewData): Promise<ActionState<string>> {
-    const session = await getSession();
-
-    if (!session?.user.emailVerified) {
-        return {
-            success: false,
-            message: "Email not verified"
-        };
-    }
-
-    if (!env.OPENAI_API_KEY) {
-        return {
-            success: false,
-            message: "AI config missing (OPENAI_API_KEY)"
-        };
-    }
-
-    const openai = new OpenAI({
-        apiKey: env.OPENAI_API_KEY,
-    });
-
-    try {
-        const prompt = `
-        Tulis ulang deskripsi ini agar lebih menarik dan jelas (Bahasa Indonesia):
-        
-        Judul: ${data.title}
-        Deskripsi Lama: ${data.aiDescription}
-        Meta: ${data.metaDescription}
-        
-        Buat variasi yang berbeda.
-        `;
-
-        const completion = await openai.chat.completions.create({
-            model: "gpt-4o-mini",
-            messages: [{ role: "user", content: prompt }],
-            max_tokens: 200,
-            temperature: 0.9, // Higher temperature for variety
+        // 2. Fetch Existing Categories
+        const existingCategories = await prisma.category.findMany({
+            where: { vaultId },
+            select: { name: true }
         });
+        const categoryNames = existingCategories.map(c => c.name);
 
-        const newDescription = completion.choices[0].message.content?.trim() || data.aiDescription;
+        // 3. AI Magic
+        const aiResult = await suggestCategory(normalizedUrl, title, description, categoryNames);
 
         return {
-            success: true,
-            data: newDescription
+            title: aiResult?.title || title,
+            description: aiResult?.description || description,
+            category: aiResult?.category || "General",
+            tags: aiResult?.tags || [],
+            success: true
         };
 
     } catch (error) {
-        return {
-            success: false,
-            message: "Failed to regenerate description"
-        };
+        console.error("Magic generation failed:", error);
+        return { error: "Failed to generate data" };
     }
 }

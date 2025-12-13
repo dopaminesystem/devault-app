@@ -13,6 +13,8 @@ interface BookmarkFormFieldsProps {
     onDescriptionChange: (value: string) => void;
     isPending: boolean;
     isGenerating: boolean;
+    tags: string;
+    onTagsChange: (value: string) => void;
 }
 
 export function BookmarkFormFields({
@@ -21,7 +23,9 @@ export function BookmarkFormFields({
     description,
     onDescriptionChange,
     isPending,
-    isGenerating
+    isGenerating,
+    tags,
+    onTagsChange
 }: BookmarkFormFieldsProps) {
     return (
         <>
@@ -77,13 +81,25 @@ export function BookmarkFormFields({
                 <label className="flex items-center gap-2 text-xs font-medium text-zinc-500 uppercase tracking-wider">
                     <Hash size={12} /> Tags
                 </label>
-                <Input
-                    name="tags"
-                    type="text"
-                    placeholder="design, tools, inspiration (comma separated)"
-                    disabled={isPending || isGenerating}
-                    className={TOKENS.input}
-                />
+                <div className="relative group rounded-md">
+                    <Input
+                        name="tags"
+                        type="text"
+                        placeholder="design, tools, inspiration (comma separated)"
+                        disabled={isPending || isGenerating}
+                        value={tags}
+                        onChange={(e) => onTagsChange(e.target.value)}
+                        className={`${TOKENS.input} relative z-10 transition-all duration-300 ${isGenerating ? 'border-transparent focus:border-transparent' : ''}`}
+                    />
+                    {isGenerating && (
+                        <ShineBorder
+                            className="absolute inset-0 z-0 rounded-md"
+                            shineColor={["#6366f1", "#a855f7", "#ec4899"]} // Indigo, Purple, Pink
+                            duration={8}
+                            borderWidth={1.5}
+                        />
+                    )}
+                </div>
             </div>
         </>
     );

@@ -119,7 +119,42 @@ export async function createBookmark(prevState: ActionState, formData: FormData)
 
     try {
         // Find or create category
-        const targetCategoryName = categoryName?.trim() || "General";
+        let targetCategoryName = categoryName?.trim() || "General";
+
+        // AI Magic: If category is General/Empty, try to auto-categorize
+        if (targetCategoryName === "General" || !targetCategoryName) {
+            try {
+                // Fetch all existing categories for context
+                const existingCategories = await prisma.category.findMany({
+                    where: { vaultId },
+                    select: { name: true }
+                });
+
+                const categoryNames = existingCategories.map(c => c.name).filter(n => n !== "General");
+
+                // Only call AI if we have the AI module and key
+                // Dynamic import to avoid issues if file doesn't exist yet in some envs
+                const { suggestCategory } = await import("@/lib/ai");
+
+                // We use title, description, and url for context
+                const aiSuggestion = await suggestCategory(
+                    url,
+                    title || url,
+                    description,
+                    categoryNames
+                );
+
+                if (aiSuggestion) {
+                    targetCategoryName = aiSuggestion.category;
+                    // Note: We currently don't use the tags in this auto-cat flow, 
+                    // but we could add them if we wanted to auto-tag excessively.
+                    // For now, just fix the type error.
+                }
+            } catch (err) {
+                console.error("Auto-categorization skipped:", err);
+                // Fallback to "General" silently
+            }
+        }
 
         let category = await prisma.category.findFirst({
             where: {
