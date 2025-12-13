@@ -65,7 +65,7 @@ export function BookmarkSheet({ isOpen, onClose, vaultId, categories: initialCat
     useEffect(() => {
         if (isOpen && bookmarkToEdit) {
             setUrl(bookmarkToEdit.url);
-            setTitle(bookmarkToEdit.title);
+            setTitle(bookmarkToEdit.title || "");
             setDescription(bookmarkToEdit.description || "");
             setTags(bookmarkToEdit.tags.join(", "));
 
