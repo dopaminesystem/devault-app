@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { Layout, Folder, Plus, Trash2, LogOut } from 'lucide-react';
+import { Layout, Folder, Plus, LogOut, Settings } from 'lucide-react';
 import { VaultSwitcher } from './vault-switcher';
 import { Vault, Category } from '@prisma/client';
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ interface SidebarProps {
     totalBookmarks: number;
     onVaultChange?: (vault: Vault) => void;
     onOpenCreateCategory?: () => void;
-    onDeleteCategory?: (category: Category) => void;
+    onOpenSettings?: (category: Category) => void;
 }
 
 export function Sidebar({
@@ -27,7 +27,7 @@ export function Sidebar({
     totalBookmarks,
     onVaultChange,
     onOpenCreateCategory,
-    onDeleteCategory
+    onOpenSettings
 }: SidebarProps) {
     const handleSignOut = async () => {
         const { authClient } = await import("@/lib/auth-client");
@@ -98,15 +98,15 @@ export function Sidebar({
                                     <Folder size={16} className={`transition-colors ${selectedCategory === cat.name ? 'text-indigo-400 fill-indigo-500/20' : 'text-zinc-600 group-hover:text-zinc-500'}`} />
                                     <span className="truncate">{cat.name}</span>
                                 </Button>
-                                {onDeleteCategory && (
+                                {onOpenSettings && (
                                     <button
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            onDeleteCategory(cat);
+                                            onOpenSettings(cat);
                                         }}
-                                        className="absolute right-2 opacity-0 group-hover:opacity-100 text-zinc-500 hover:text-red-400 transition-all"
+                                        className="absolute right-2 opacity-0 group-hover:opacity-100 text-zinc-500 hover:text-zinc-300 transition-all p-1 hover:bg-zinc-800 rounded"
                                     >
-                                        <Trash2 size={14} />
+                                        <Settings size={12} />
                                     </button>
                                 )}
                             </div>

@@ -1,4 +1,4 @@
-import { Plus, Globe } from 'lucide-react';
+import { Plus, Globe, Edit2 } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { BookmarkWithCategory } from "@/lib/types";
@@ -9,13 +9,15 @@ interface BookmarkGridProps {
     canEdit: boolean; // isOwner || isMember
     onOpenNew: () => void;
     onOpenDetail: (bookmark: BookmarkWithCategory) => void;
+    onEdit?: (bookmark: BookmarkWithCategory) => void;
 }
 
 export function BookmarkGrid({
     bookmarks,
     canEdit,
     onOpenNew,
-    onOpenDetail
+    onOpenDetail,
+    onEdit
 }: BookmarkGridProps) {
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -56,6 +58,17 @@ export function BookmarkGrid({
                                 <Badge className={`${categoryColor} border opacity-70 group-hover:opacity-100`}>
                                     {bookmark.category.name}
                                 </Badge>
+                                {canEdit && onEdit && (
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onEdit(bookmark);
+                                        }}
+                                        className="p-1.5 rounded-full hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 transition-colors opacity-0 group-hover:opacity-100"
+                                    >
+                                        <Edit2 size={12} />
+                                    </button>
+                                )}
                             </div>
 
                             <div className="mt-2">

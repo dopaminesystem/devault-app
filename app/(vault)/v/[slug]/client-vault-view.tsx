@@ -4,13 +4,13 @@ import { useState, useEffect, useRef } from 'react';
 import { Vault, Category } from '@prisma/client';
 import { Sidebar } from '@/components/dashboard/sidebar';
 import { DetailSheet } from '@/components/dashboard/detail-sheet';
-import { NewBookmarkSheet } from '@/components/dashboard/new-bookmark-sheet';
+import { BookmarkSheet } from '@/components/dashboard/bookmark-sheet';
 import { BookmarkWithCategory } from '@/lib/types';
 import { VaultHeader } from '@/components/dashboard/vault-view/vault-header';
 import { BookmarkGrid } from '@/components/dashboard/vault-view/bookmark-grid';
 import { VaultEmptyState } from '@/components/dashboard/vault-view/vault-empty-state';
 import { CreateCategoryDialog } from '@/components/dashboard/create-category-dialog';
-import { deleteCategory } from '@/app/actions/category';
+import { CategorySettingsDialog } from '@/components/dashboard/category-settings-dialog';
 
 interface ClientVaultViewProps {
     vault: Vault;
@@ -35,6 +35,8 @@ export default function ClientVaultView({
     const [isDetailOpen, setIsDetailOpen] = useState(false);
     const [isNewBookmarkOpen, setIsNewBookmarkOpen] = useState(false);
     const [isCreateCategoryOpen, setIsCreateCategoryOpen] = useState(false);
+    const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+    const [editingBookmark, setEditingBookmark] = useState<BookmarkWithCategory | null>(null);
 
     const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -71,13 +73,7 @@ export default function ClientVaultView({
         setIsDetailOpen(true);
     };
 
-    const handleDeleteCategory = async (category: Category) => {
-        if (confirm(`Are you sure you want to delete category "${category.name}"? This will delete all bookmarks in it.`)) {
-            const formData = new FormData();
-            formData.append('categoryId', category.id);
-            await deleteCategory(null, formData);
-        }
-    };
+
 
     const canEdit = isOwner;
 
@@ -103,7 +99,7 @@ export default function ClientVaultView({
                     onSelectCategory={setActiveCategoryFilter}
                     totalBookmarks={initialBookmarks.length}
                     onOpenCreateCategory={() => setIsCreateCategoryOpen(true)}
-                    onDeleteCategory={isOwner ? handleDeleteCategory : undefined}
+                    onOpenSettings={isOwner ? setEditingCategory : undefined}
                 />
 
                 {/* Main Content Area */}
@@ -128,6 +124,10 @@ export default function ClientVaultView({
                             canEdit={canEdit}
                             onOpenNew={() => setIsNewBookmarkOpen(true)}
                             onOpenDetail={openDetail}
+                            onEdit={(b) => {
+                                setEditingBookmark(b);
+                                setIsNewBookmarkOpen(true);
+                            }}
                         />
                     ) : (
                         <VaultEmptyState
@@ -155,17 +155,27 @@ export default function ClientVaultView({
             )
             }
 
-            <NewBookmarkSheet
+            <BookmarkSheet
                 isOpen={isNewBookmarkOpen}
-                onClose={() => setIsNewBookmarkOpen(false)}
+                onClose={() => {
+                    setIsNewBookmarkOpen(false);
+                    setEditingBookmark(null);
+                }}
                 vaultId={vault.id}
-                categories={initialCategories.map(c => c.name)}
+                categories={initialCategories}
+                bookmarkToEdit={editingBookmark}
             />
 
             <CreateCategoryDialog
                 vaultId={vault.id}
                 open={isCreateCategoryOpen}
                 onOpenChange={setIsCreateCategoryOpen}
+            />
+
+            <CategorySettingsDialog
+                category={editingCategory}
+                open={!!editingCategory}
+                onOpenChange={(open) => !open && setEditingCategory(null)}
             />
 
 
