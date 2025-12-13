@@ -177,11 +177,13 @@ export default function ClientVaultView({
                 onOpenChange={setIsCreateCategoryOpen}
             />
 
-            <CategorySettingsDialog
-                category={editingCategory}
-                open={!!editingCategory}
-                onOpenChange={(open) => !open && setEditingCategory(null)}
-            />
+            {editingCategory && (
+                <CategorySettingsDialog
+                    category={editingCategory}
+                    open={true}
+                    onOpenChange={(open) => !open && setEditingCategory(null)}
+                />
+            )}
 
 
 
