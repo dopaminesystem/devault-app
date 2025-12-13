@@ -55,9 +55,26 @@ export function BookmarkGrid({
                                         className="w-5 h-5 opacity-70 group-hover:opacity-100 transition-opacity grayscale group-hover:grayscale-0"
                                     />
                                 </div>
+
                                 <Badge className={`${categoryColor} border opacity-70 group-hover:opacity-100`}>
                                     {bookmark.category.name}
                                 </Badge>
+                            </div>
+
+                            <div className="mt-2">
+                                <h3 className="font-semibold text-zinc-200 group-hover:text-white transition-colors line-clamp-1">
+                                    {bookmark.title}
+                                </h3>
+                                <p className="text-sm text-zinc-500 mt-1 line-clamp-2 group-hover:text-zinc-400 transition-colors">
+                                    {bookmark.description}
+                                </p>
+                            </div>
+
+                            <div className="flex items-center justify-between mt-auto pt-2">
+                                <div className="flex items-center gap-1 text-xs text-zinc-600 group-hover:text-indigo-400 transition-colors">
+                                    <Globe size={10} />
+                                    <span className="truncate max-w-[150px]">{hostname}</span>
+                                </div>
                                 {canEdit && onEdit && (
                                     <button
                                         onClick={(e) => {
@@ -70,24 +87,10 @@ export function BookmarkGrid({
                                     </button>
                                 )}
                             </div>
-
-                            <div className="mt-2">
-                                <h3 className="font-semibold text-zinc-200 group-hover:text-white transition-colors line-clamp-1">
-                                    {bookmark.title}
-                                </h3>
-                                <p className="text-sm text-zinc-500 mt-1 line-clamp-2 group-hover:text-zinc-400 transition-colors">
-                                    {bookmark.description}
-                                </p>
-                            </div>
-
-                            <div className="flex items-center gap-1 text-xs text-zinc-600 group-hover:text-indigo-400 transition-colors mt-auto pt-2">
-                                <Globe size={10} />
-                                <span className="truncate">{hostname}</span>
-                            </div>
                         </CardContent>
                     </Card>
                 );
             })}
-        </div>
+        </div >
     );
 }

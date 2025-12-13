@@ -151,6 +151,11 @@ export default function ClientVaultView({
                     onClose={() => setIsDetailOpen(false)}
                     isOwner={isOwner}
                     isMember={isMember}
+                    onEdit={(b) => {
+                        setEditingBookmark(b);
+                        setIsNewBookmarkOpen(true);
+                        setIsDetailOpen(false); // also close detail so they don't overlap awkwardly
+                    }}
                 />
             )
             }

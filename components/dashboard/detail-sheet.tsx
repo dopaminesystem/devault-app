@@ -29,11 +29,12 @@ interface DetailSheetProps {
     bookmark: BookmarkWithCategory | null;
     isOpen: boolean;
     onClose: () => void;
+    onEdit: (bookmark: BookmarkWithCategory) => void;
     isOwner: boolean;
     isMember: boolean;
 }
 
-export function DetailSheet({ bookmark, isOpen, onClose, isOwner, isMember }: DetailSheetProps) {
+export function DetailSheet({ bookmark, isOpen, onClose, onEdit, isOwner, isMember }: DetailSheetProps) {
     const initialState: ActionState = { message: "", success: false };
     const [state, formAction, isPending] = useActionState(deleteBookmark, initialState);
 
@@ -155,7 +156,11 @@ export function DetailSheet({ bookmark, isOpen, onClose, isOwner, isMember }: De
                 ) : <div />}
                 <div className="flex gap-3">
                     {isOwner && (
-                        <Button variant="ghost" className="text-zinc-300 hover:text-white hover:bg-zinc-800 rounded-full">
+                        <Button
+                            variant="ghost"
+                            onClick={() => onEdit(bookmark)}
+                            className="text-zinc-300 hover:text-white hover:bg-zinc-800 rounded-full"
+                        >
                             Edit
                         </Button>
                     )}
