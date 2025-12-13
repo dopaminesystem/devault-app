@@ -42,7 +42,7 @@ export function VaultHeader({
             <div className="w-full flex flex-col md:flex-row gap-6 md:items-end justify-between">
                 <div>
                     <h1 className="text-3xl md:text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-white to-zinc-500">
-                        {activeCategory ? `${activeCategory} Collection` : 'My Collection'}
+                        {activeCategory ? activeCategory : 'All Bookmarks'}
                     </h1>
                     <p className="text-zinc-500 mt-2 text-sm">
                         Showing {bookmarkCount} bookmarks
@@ -71,7 +71,7 @@ export function VaultHeader({
                     </div>
                     {isOwner && (
                         <Button variant="outline" size="icon" asChild className="shrink-0 bg-zinc-900/80 border-zinc-800 hover:bg-zinc-900 hover:text-zinc-100">
-                            <a href={`/vault/${vaultSlug}/settings`}>
+                            <a href={`/v/${vaultSlug}/settings`}>
                                 <SettingsIcon size={18} />
                             </a>
                         </Button>

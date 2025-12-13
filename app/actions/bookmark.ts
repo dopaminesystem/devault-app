@@ -155,7 +155,7 @@ export async function createBookmark(prevState: ActionState, formData: FormData)
             },
         });
 
-        revalidatePath(`/vault/${vault.slug}`);
+        revalidatePath(`/v/${vault.slug}`);
         return { success: true, message: "Bookmark added successfully" };
 
     } catch (error) {
@@ -242,7 +242,7 @@ export async function updateBookmark(prevState: ActionState, formData: FormData)
         },
     });
 
-    revalidatePath(`/vault/${bookmark.category.vault.slug}`);
+    revalidatePath(`/v/${bookmark.category.vault.slug}`);
     return { success: true, message: "Bookmark updated" };
 }
 
@@ -282,6 +282,6 @@ export async function deleteBookmark(prevState: ActionState, formData: FormData)
         where: { id: bookmarkId },
     });
 
-    revalidatePath(`/vault/${bookmark.category.vault.slug}`);
+    revalidatePath(`/v/${bookmark.category.vault.slug}`);
     return { success: true, message: "Bookmark deleted" };
 }

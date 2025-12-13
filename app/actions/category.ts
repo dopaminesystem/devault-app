@@ -59,7 +59,7 @@ export async function createCategory(prevState: any, formData: FormData) {
             },
         });
 
-        revalidatePath(`/vault/${vault.slug}`);
+        revalidatePath(`/v/${vault.slug}`);
         return { success: true, message: "Category created successfully" };
 
     } catch (error) {
@@ -138,7 +138,7 @@ export async function updateCategory(prevState: any, formData: FormData) {
         data: { name },
     });
 
-    revalidatePath(`/vault/${category.vault.slug}`);
+    revalidatePath(`/v/${category.vault.slug}`);
     return { success: true, message: "Category updated" };
 }
 
@@ -179,6 +179,6 @@ export async function deleteCategory(prevState: any, formData: FormData) {
         where: { id: categoryId },
     });
 
-    revalidatePath(`/vault/${category.vault.slug}`);
+    revalidatePath(`/v/${category.vault.slug}`);
     return { success: true, message: "Category deleted" };
 }

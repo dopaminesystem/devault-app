@@ -42,9 +42,9 @@ export function CreateCategoryDialog({ vaultId, open, onOpenChange }: CreateCate
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>Create Collection</DialogTitle>
+                    <DialogTitle>Create Category</DialogTitle>
                     <DialogDescription>
-                        Create a new collection to organize your bookmarks.
+                        Create a new category to organize your bookmarks.
                     </DialogDescription>
                 </DialogHeader>
                 <form action={formAction}>

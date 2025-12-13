@@ -65,10 +65,10 @@ export function VaultSidebar({ vaultId, slug, categories, canEdit }: VaultSideba
                     <div className="space-y-1">
                         <Button
                             asChild
-                            variant={pathname === `/vault/${slug}` && !searchParams.get("category") ? "secondary" : "ghost"}
+                            variant={pathname === `/v/${slug}` && !searchParams.get("category") ? "secondary" : "ghost"}
                             className="w-full justify-start"
                         >
-                            <Link href={`/vault/${slug}`}>
+                            <Link href={`/v/${slug}`}>
                                 <Folder className="mr-2 h-4 w-4" />
                                 All Bookmarks
                             </Link>
@@ -83,7 +83,7 @@ export function VaultSidebar({ vaultId, slug, categories, canEdit }: VaultSideba
                                         searchParams.get("category") === category.id && "bg-accent text-accent-foreground"
                                     )}
                                 >
-                                    <Link href={`/vault/${slug}?category=${category.id}`} className="flex-1 truncate">
+                                    <Link href={`/v/${slug}?category=${category.id}`} className="flex-1 truncate">
                                         <Folder className="mr-2 h-4 w-4 flex-shrink-0" />
                                         <span className="truncate">{category.name}</span>
                                         <span className="ml-auto text-xs text-muted-foreground">

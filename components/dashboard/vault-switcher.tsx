@@ -47,7 +47,7 @@ export function VaultSwitcher({
         if (onVaultChange) {
             onVaultChange(vault);
         }
-        router.push(`/vault/${vault.slug}`);
+        router.push(`/v/${vault.slug}`);
         setIsOpen(false);
     };
 

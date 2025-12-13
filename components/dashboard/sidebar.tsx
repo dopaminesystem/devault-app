@@ -76,7 +76,7 @@ export function Sidebar({
                 {/* Categories */}
                 <div className="space-y-1">
                     <h3 className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider px-3 mb-2 flex items-center justify-between">
-                        Collections
+                        Categories
                         <button
                             onClick={onOpenCreateCategory}
                             className="hover:text-zinc-300 transition-colors"
