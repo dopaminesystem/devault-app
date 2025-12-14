@@ -23,8 +23,9 @@ model User {
   memberships VaultMember[]
 
   defaultVaultId String?
-  defaultVault   Vault? @relation("UserDefaultVault", fields: [defaultVaultId], references: [id])
+  defaultVault   Vault?  @relation("UserDefaultVault", fields: [defaultVaultId], references: [id])
 
+  @@index([defaultVaultId])
   @@map("user")
 }
 
@@ -40,6 +41,7 @@ model Session {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([token])
+  @@index([userId])
   @@map("session")
 }
 
@@ -59,6 +61,7 @@ model Account {
   createdAt             DateTime
   updatedAt             DateTime
 
+  @@index([userId])
   @@map("account")
 }
 
@@ -94,6 +97,7 @@ model Vault {
 
   defaultForUsers User[] @relation("UserDefaultVault")
 
+  @@index([ownerId])
   @@map("vault")
 }
 
@@ -114,6 +118,7 @@ model VaultMember {
   user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([vaultId, userId])
+  @@index([userId])
   @@map("vault_member")
 }
 
@@ -132,6 +137,7 @@ model Category {
   vault     Vault      @relation(fields: [vaultId], references: [id], onDelete: Cascade)
   bookmarks Bookmark[]
 
+  @@index([vaultId])
   @@map("category")
 }
 
@@ -150,6 +156,7 @@ model Bookmark {
 
   category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
+  @@index([categoryId])
   @@map("bookmark")
 }
 
