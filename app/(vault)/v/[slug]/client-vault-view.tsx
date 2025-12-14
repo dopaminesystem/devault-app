@@ -8,6 +8,7 @@ import { BookmarkSheet } from '@/components/dashboard/bookmark-sheet';
 import { BookmarkWithCategory } from '@/lib/types';
 import { VaultHeader } from '@/components/dashboard/vault-view/vault-header';
 import { BookmarkGrid } from '@/components/dashboard/vault-view/bookmark-grid';
+import { BookmarkList } from '@/components/dashboard/vault-view/bookmark-list';
 import { VaultEmptyState } from '@/components/dashboard/vault-view/vault-empty-state';
 import { CreateCategoryDialog } from '@/components/dashboard/create-category-dialog';
 import { CategorySettingsDialog } from '@/components/dashboard/category-settings-dialog';
@@ -37,6 +38,7 @@ export default function ClientVaultView({
     const [isCreateCategoryOpen, setIsCreateCategoryOpen] = useState(false);
     const [editingCategory, setEditingCategory] = useState<Category | null>(null);
     const [editingBookmark, setEditingBookmark] = useState<BookmarkWithCategory | null>(null);
+    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
     const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -115,20 +117,35 @@ export default function ClientVaultView({
                         isOwner={isOwner}
                         onOpenCMDK={() => searchInputRef.current?.focus()}
                         searchInputRef={searchInputRef}
+                        viewMode={viewMode}
+                        setViewMode={setViewMode}
                     />
 
-                    {/* Content Grid */}
+                    {/* Content Grid/List */}
                     {filteredBookmarks.length > 0 ? (
-                        <BookmarkGrid
-                            bookmarks={filteredBookmarks}
-                            canEdit={canEdit}
-                            onOpenNew={() => setIsNewBookmarkOpen(true)}
-                            onOpenDetail={openDetail}
-                            onEdit={(b) => {
-                                setEditingBookmark(b);
-                                setIsNewBookmarkOpen(true);
-                            }}
-                        />
+                        viewMode === 'grid' ? (
+                            <BookmarkGrid
+                                bookmarks={filteredBookmarks}
+                                canEdit={canEdit}
+                                onOpenNew={() => setIsNewBookmarkOpen(true)}
+                                onOpenDetail={openDetail}
+                                onEdit={(b) => {
+                                    setEditingBookmark(b);
+                                    setIsNewBookmarkOpen(true);
+                                }}
+                            />
+                        ) : (
+                            <BookmarkList
+                                bookmarks={filteredBookmarks}
+                                canEdit={canEdit}
+                                onOpenNew={() => setIsNewBookmarkOpen(true)}
+                                onOpenDetail={openDetail}
+                                onEdit={(b) => {
+                                    setEditingBookmark(b);
+                                    setIsNewBookmarkOpen(true);
+                                }}
+                            />
+                        )
                     ) : (
                         <VaultEmptyState
                             search={search}

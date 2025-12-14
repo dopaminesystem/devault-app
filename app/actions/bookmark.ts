@@ -225,11 +225,11 @@ export async function updateBookmark(prevState: ActionState, formData: FormData)
     const validatedFields = updateBookmarkSchema.safeParse({
         bookmarkId: formData.get("bookmarkId"),
         url: normalizedUrl,
-        title: formData.get("title"),
-        description: formData.get("description"),
-        categoryName: formData.get("categoryName"),
-        categoryId: formData.get("categoryId"),
-        tags: formData.get("tags"),
+        title: formData.get("title") || undefined,
+        description: formData.get("description") || undefined,
+        categoryName: formData.get("categoryName") || undefined,
+        categoryId: formData.get("categoryId") || undefined,
+        tags: formData.get("tags") || undefined,
     });
 
     if (!validatedFields.success) {
