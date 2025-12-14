@@ -35,15 +35,7 @@ export function BookmarkList({
             )}
 
             <div className="w-full">
-                {/* List Header */}
-                {bookmarks.length > 0 && (
-                    <div className="grid grid-cols-12 px-4 py-3 border-b border-zinc-800 text-[11px] font-semibold text-zinc-500 uppercase tracking-wider">
-                        <div className="col-span-12 md:col-span-5 flex items-center">Bookmark</div>
-                        <div className="hidden md:flex col-span-3 items-center">Category</div>
-                        <div className="hidden md:flex col-span-3 items-center">URL</div>
-                        <div className="hidden md:flex col-span-1 items-center justify-end">Actions</div>
-                    </div>
-                )}
+
 
                 {/* Render Bookmarks */}
                 <div className="flex flex-col divide-y divide-zinc-900/50">
@@ -56,7 +48,7 @@ export function BookmarkList({
                             <div
                                 key={bookmark.id}
                                 onClick={() => onOpenDetail(bookmark)}
-                                className="group grid grid-cols-12 items-center px-4 py-3 hover:bg-zinc-900/40 transition-colors cursor-pointer"
+                                className="group grid grid-cols-12 items-center px-4 py-3 hover:bg-zinc-900/40 transition-colors cursor-pointer rounded-xl"
                             >
                                 {/* Title & icon */}
                                 <div className="col-span-12 md:col-span-5 flex items-start gap-3 overflow-hidden pr-4">
