@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useState } from "react";
 import { createVault } from "@/app/actions/vault";
 import { ActionState } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -17,15 +17,25 @@ export function CreateVaultForm({ hideCardWrapper = false }: { hideCardWrapper?:
     const [state, formAction, isPending] = useActionState(createVault, initialState);
     const [name, setName] = useState("");
     const [slug, setSlug] = useState("");
+    const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(false);
 
-    // Auto-generate slug from name
-    useEffect(() => {
-        const generatedSlug = name
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, "-")
-            .replace(/^-+|-+$/g, "");
-        setSlug(generatedSlug);
-    }, [name]);
+    const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newName = e.target.value;
+        setName(newName);
+
+        if (!isSlugManuallyEdited) {
+            const generatedSlug = newName
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, "-")
+                .replace(/^-+|-+$/g, "");
+            setSlug(generatedSlug);
+        }
+    };
+
+    const handleSlugChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSlug(e.target.value);
+        setIsSlugManuallyEdited(true);
+    };
 
     const content = (
         <form action={formAction} className={hideCardWrapper ? "space-y-4" : ""}>
@@ -37,7 +47,7 @@ export function CreateVaultForm({ hideCardWrapper = false }: { hideCardWrapper?:
                         name="name"
                         placeholder="My Awesome Vault"
                         value={name}
-                        onChange={(e) => setName(e.target.value)}
+                        onChange={handleNameChange}
                         required
                         minLength={3}
                         maxLength={50}
@@ -56,7 +66,7 @@ export function CreateVaultForm({ hideCardWrapper = false }: { hideCardWrapper?:
                             name="slug"
                             placeholder="my-awesome-vault"
                             value={slug}
-                            onChange={(e) => setSlug(e.target.value)}
+                            onChange={handleSlugChange}
                             required
                             minLength={3}
                             maxLength={50}

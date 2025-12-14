@@ -8,8 +8,20 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { CreateVaultForm } from "./create-vault-form";
-import { Plus } from "lucide-react";
+import { Plus, Loader2 } from "lucide-react";
+import dynamic from "next/dynamic";
+
+const CreateVaultForm = dynamic(
+    () => import("./create-vault-form").then((mod) => mod.CreateVaultForm),
+    {
+        loading: () => (
+            <div className="flex flex-col items-center justify-center py-10 space-y-4">
+                <Loader2 className="h-8 w-8 animate-spin text-zinc-500" />
+                <p className="text-sm text-zinc-500">Loading form...</p>
+            </div>
+        ),
+    }
+);
 
 export function CreateVaultDialog() {
     return (
