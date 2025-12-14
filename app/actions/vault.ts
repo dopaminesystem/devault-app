@@ -239,8 +239,8 @@ export async function updateVaultSettings(prevState: any, formData: FormData) {
         },
     });
 
-    revalidatePath(`/vault/${vault.slug}`);
-    revalidatePath(`/vault/${vault.slug}/settings`);
+    revalidatePath(`/v/${vault.slug}`);
+    revalidatePath(`/v/${vault.slug}/settings`);
 
     return { message: "Settings updated successfully" };
 }
@@ -299,7 +299,7 @@ export async function joinVault(prevState: any, formData: FormData) {
         console.log("User might already be a member", error);
     }
 
-    revalidatePath(`/vault/${vault.slug}`);
+    revalidatePath(`/v/${vault.slug}`);
     return { success: true, message: "Joined successfully" };
 }
 
@@ -352,8 +352,8 @@ export async function updateVault(prevState: any, formData: FormData) {
         },
     });
 
-    revalidatePath(`/vault/${vault.slug}`);
-    revalidatePath(`/vault/${vault.slug}/settings`);
+    revalidatePath(`/v/${vault.slug}`);
+    revalidatePath(`/v/${vault.slug}/settings`);
     revalidatePath("/dashboard");
 
     return { message: "Vault updated successfully" };

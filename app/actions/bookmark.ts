@@ -51,6 +51,26 @@ export async function createBookmark(prevState: ActionState, formData: FormData)
         return { success: false, message: "Email not verified" };
     }
 
+    // Check Free Tier Limit (100 bookmarks total)
+    // NOTE: This assumes all users are on free tier currently. 
+    // If premium exists, check subscription status here.
+    const totalBookmarks = await prisma.bookmark.count({
+        where: {
+            category: {
+                vault: {
+                    ownerId: session.user.id
+                }
+            }
+        }
+    });
+
+    if (totalBookmarks >= 100) {
+        return {
+            success: false,
+            message: "Free tier limit reached (100 bookmarks). Please upgrade to add more."
+        };
+    }
+
     const rawUrl = formData.get("url") as string;
     const normalizedUrl = rawUrl ? normalizeUrl(rawUrl) : "";
 
@@ -70,17 +90,6 @@ export async function createBookmark(prevState: ActionState, formData: FormData)
 
     let { vaultId, url, title, description, tags, category: categoryName } = validatedFields.data;
 
-    // Fallback for new category if passed separately
-    const newCategoryName = formData.get("newCategoryName") as string;
-    if (!categoryName && newCategoryName) {
-        categoryName = newCategoryName;
-    }
-
-    // Parse tags
-    const tagsArray = tags
-        ? tags.split(",").map((tag) => tag.trim()).filter((tag) => tag.length > 0)
-        : [];
-
     // Check access
     const vault = await prisma.vault.findUnique({
         where: { id: vaultId },
@@ -97,45 +106,90 @@ export async function createBookmark(prevState: ActionState, formData: FormData)
         return { success: false, message: "You do not have permission to add bookmarks to this vault" };
     }
 
+    // Parse tags
+    const tagsArray = tags
+        ? tags.split(",").map((tag) => tag.trim()).filter((tag) => tag.length > 0)
+        : [];
+
     try {
-        // Find or create category
-        const targetCategoryName = categoryName?.trim() || "General";
+        // DUAL FIELD LOGIC (Option 2)
+        const categoryId = formData.get("categoryId") as string;
+        const newCategoryName = formData.get("newCategoryName") as string;
 
-        let category = await prisma.category.findFirst({
-            where: {
-                vaultId,
-                name: targetCategoryName,
-            },
-        });
+        let info_categoryId: string | null = categoryId || null;
 
-        if (!category) {
-            // Get max order
-            const lastCategory = await prisma.category.findFirst({
-                where: { vaultId },
-                orderBy: { order: 'desc' },
+        // If no ID provided, but we have a new name, create it
+        if (!info_categoryId && newCategoryName) {
+            const targetName = newCategoryName.trim();
+
+            // Reuse existing if found by name (safety check)
+            const existing = await prisma.category.findFirst({
+                where: { vaultId, name: targetName }
             });
-            const newOrder = (lastCategory?.order ?? -1) + 1;
 
-            category = await prisma.category.create({
-                data: {
-                    vaultId,
-                    name: targetCategoryName,
-                    order: newOrder,
-                },
-            });
+            if (existing) {
+                info_categoryId = existing.id;
+            } else {
+                // Create real new one
+                const lastCategory = await prisma.category.findFirst({
+                    where: { vaultId },
+                    orderBy: { order: 'desc' },
+                });
+                const newOrder = (lastCategory?.order ?? -1) + 1;
+
+                const newCat = await prisma.category.create({
+                    data: {
+                        vaultId,
+                        name: targetName,
+                        order: newOrder,
+                    },
+                });
+                info_categoryId = newCat.id;
+            }
+        } else if (!info_categoryId) {
+            // Fallback: If logic 1 & 2 failed, maybe Zod 'category' field was used (e.g. from old code path or fallback)
+            // Or use "General" / AI.
+
+            let targetCategoryName = newCategoryName || categoryName || "General";
+
+            // AI Magic Fallback only if we really have no category
+            if (!categoryId && !newCategoryName && !categoryName) {
+                try {
+                    const existingCategories = await prisma.category.findMany({
+                        where: { vaultId },
+                        select: { name: true }
+                    });
+                    const categoryNames = existingCategories.map(c => c.name).filter(n => n !== "General");
+                    const { enrichBookmark } = await import("@/lib/ai");
+                    const aiSuggestion = await enrichBookmark(url, title || url, description || "", categoryNames);
+                    if (aiSuggestion) targetCategoryName = aiSuggestion.category;
+                } catch (e) { }
+            }
+
+            // Find or create "General" or AI suggestion or Legacy name
+            let cat = await prisma.category.findFirst({ where: { vaultId, name: targetCategoryName } });
+            if (!cat) {
+                const lastCategory = await prisma.category.findFirst({ where: { vaultId }, orderBy: { order: 'desc' } });
+                cat = await prisma.category.create({
+                    data: { vaultId, name: targetCategoryName, order: (lastCategory?.order ?? -1) + 1 },
+                });
+            }
+            info_categoryId = cat.id;
         }
+
+        if (!info_categoryId) throw new Error("Category resolution failed");
 
         await prisma.bookmark.create({
             data: {
-                categoryId: category.id,
+                categoryId: info_categoryId,
                 url,
-                title: title || url, // Default title to URL if empty
+                title: title || url,
                 description,
                 tags: tagsArray,
             },
         });
 
-        revalidatePath(`/vault/${vault.slug}`);
+        revalidatePath(`/v/${vault.slug}`);
         return { success: true, message: "Bookmark added successfully" };
 
     } catch (error) {
@@ -149,7 +203,8 @@ const updateBookmarkSchema = z.object({
     url: z.string().url("Please enter a valid URL"),
     title: z.string().optional(),
     description: z.string().optional(),
-    categoryId: z.string().min(1, "Category is required"),
+    categoryName: z.string().optional(),
+    categoryId: z.string().optional(),
     tags: z.string().optional(),
 });
 
@@ -170,22 +225,18 @@ export async function updateBookmark(prevState: ActionState, formData: FormData)
     const validatedFields = updateBookmarkSchema.safeParse({
         bookmarkId: formData.get("bookmarkId"),
         url: normalizedUrl,
-        title: formData.get("title"),
-        description: formData.get("description"),
-        categoryId: formData.get("categoryId"),
-        tags: formData.get("tags"),
+        title: formData.get("title") || undefined,
+        description: formData.get("description") || undefined,
+        categoryName: formData.get("categoryName") || undefined,
+        categoryId: formData.get("categoryId") || undefined,
+        tags: formData.get("tags") || undefined,
     });
 
     if (!validatedFields.success) {
         return { success: false, message: "Invalid fields" };
     }
 
-    const { bookmarkId, url, title, description, categoryId, tags } = validatedFields.data;
-
-    // Parse tags
-    const tagsArray = tags
-        ? tags.split(",").map((tag) => tag.trim()).filter((tag) => tag.length > 0)
-        : [];
+    const { bookmarkId, url, title, description, categoryName, categoryId, tags } = validatedFields.data;
 
     const bookmark = await prisma.bookmark.findUnique({
         where: { id: bookmarkId },
@@ -202,13 +253,59 @@ export async function updateBookmark(prevState: ActionState, formData: FormData)
         return { success: false, message: "Unauthorized" };
     }
 
-    // Verify new category belongs to same vault
-    const newCategory = await prisma.category.findUnique({
-        where: { id: categoryId },
-    });
+    // Parse tags
+    const tagsArray = tags
+        ? tags.split(",").map((tag) => tag.trim()).filter((tag) => tag.length > 0)
+        : [];
 
-    if (!newCategory || newCategory.vaultId !== bookmark.category.vaultId) {
-        return { success: false, message: "Invalid category" };
+    // DUAL FIELD LOGIC for Update
+    // 1. If categoryId provided -> link to it.
+    // 2. If newCategoryName provided -> create & link.
+    // 3. Else -> keep existing.
+
+    // Note: Zod parses them as optional strings logic above, but createBookmark handled it manually from formData
+    // because Zod schema names might not match form names perfectly in my previous step diffs. 
+    // Let's rely on manually getting from formData for consistency with createBookmark change
+
+    const targetCategoryId = formData.get("categoryId") as string;
+    const targetCategoryName = formData.get("newCategoryName") as string;
+
+    let finalCategoryId = bookmark.categoryId;
+
+    if (targetCategoryId) {
+        // Option A: User picked an existing category
+        // Verify it belongs to same vault
+        const cat = await prisma.category.findUnique({ where: { id: targetCategoryId } });
+        if (cat && cat.vaultId === bookmark.category.vaultId) {
+            finalCategoryId = targetCategoryId;
+        }
+    } else if (targetCategoryName) {
+        // Option B: User typed a new name
+        const vaultId = bookmark.category.vaultId;
+        // Reuse existing if found by name (safety check)
+        const existing = await prisma.category.findFirst({
+            where: { vaultId, name: targetCategoryName.trim() }
+        });
+
+        if (existing) {
+            finalCategoryId = existing.id;
+        } else {
+            // Create real new one
+            const lastCategory = await prisma.category.findFirst({
+                where: { vaultId },
+                orderBy: { order: 'desc' },
+            });
+            const newOrder = (lastCategory?.order ?? -1) + 1;
+
+            const newCat = await prisma.category.create({
+                data: {
+                    vaultId,
+                    name: targetCategoryName.trim(),
+                    order: newOrder,
+                },
+            });
+            finalCategoryId = newCat.id;
+        }
     }
 
     await prisma.bookmark.update({
@@ -217,12 +314,12 @@ export async function updateBookmark(prevState: ActionState, formData: FormData)
             url,
             title: title || url,
             description,
-            categoryId,
+            categoryId: finalCategoryId,
             tags: tagsArray,
         },
     });
 
-    revalidatePath(`/vault/${bookmark.category.vault.slug}`);
+    revalidatePath(`/v/${bookmark.category.vault.slug}`);
     return { success: true, message: "Bookmark updated" };
 }
 
@@ -262,6 +359,6 @@ export async function deleteBookmark(prevState: ActionState, formData: FormData)
         where: { id: bookmarkId },
     });
 
-    revalidatePath(`/vault/${bookmark.category.vault.slug}`);
+    revalidatePath(`/v/${bookmark.category.vault.slug}`);
     return { success: true, message: "Bookmark deleted" };
 }

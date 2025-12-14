@@ -21,7 +21,7 @@ export default async function VaultSettingsPage({ params }: { params: Promise<{ 
     const { vault } = result;
 
     if (vault.ownerId !== session?.user?.id) {
-        redirect(`/vault/${slug}`);
+        redirect(`/v/${slug}`);
     }
 
     return (
@@ -33,7 +33,7 @@ export default async function VaultSettingsPage({ params }: { params: Promise<{ 
                 {/* Header */}
                 <div className="flex flex-col gap-6 border-b border-white/5 pb-8">
                     <Button variant="ghost" size="sm" asChild className="w-fit text-zinc-400 hover:text-zinc-100 -ml-2">
-                        <Link href={`/vault/${slug}`}>
+                        <Link href={`/v/${slug}`}>
                             <ArrowLeft className="h-4 w-4 mr-2" />
                             Back to Vault
                         </Link>

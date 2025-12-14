@@ -23,6 +23,17 @@ interface VaultSwitcherProps {
     onVaultChange?: (vault: Vault) => void;
 }
 
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
 export function VaultSwitcher({
     vaults,
     activeVault,
@@ -30,12 +41,13 @@ export function VaultSwitcher({
 }: VaultSwitcherProps) {
     const router = useRouter();
     const [isOpen, setIsOpen] = useState(false);
+    const [showLimitAlert, setShowLimitAlert] = useState(false);
 
     const handleVaultChange = (vault: Vault) => {
         if (onVaultChange) {
             onVaultChange(vault);
         }
-        router.push(`/vault/${vault.slug}`);
+        router.push(`/v/${vault.slug}`);
         setIsOpen(false);
     };
 
@@ -98,7 +110,10 @@ export function VaultSwitcher({
                     })}
                     <div className="h-px bg-zinc-800 my-1" />
                     <button
-                        onClick={() => router.push('/dashboard?newVault=true')}
+                        onClick={() => {
+                            setIsOpen(false);
+                            setShowLimitAlert(true);
+                        }}
                         className="w-full flex items-center gap-2 px-2 py-2 rounded-lg text-sm text-zinc-500 hover:text-zinc-200 hover:bg-zinc-900 transition-all"
                     >
                         <Plus size={14} />
@@ -106,6 +121,22 @@ export function VaultSwitcher({
                     </button>
                 </div>
             )}
+
+            <AlertDialog open={showLimitAlert} onOpenChange={setShowLimitAlert}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Free Tier Limit Reached</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            You have reached the limit of vaults for the Free tier.
+                            Please upgrade to the Pro plan to create unlimited vaults.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction className="bg-indigo-600 hover:bg-indigo-700">Upgrade to Pro</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

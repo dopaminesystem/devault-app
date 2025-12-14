@@ -42,7 +42,7 @@ export function VaultGrid({ vaults }: VaultGridProps) {
                             {vault.description || "No description provided."}
                         </p>
                         <div className="mt-auto pt-4">
-                            <Link href={`/vault/${vault.slug}`} passHref>
+                            <Link href={`/v/${vault.slug}`} className="block h-full">
                                 <Button className="w-full bg-zinc-100 text-zinc-950 hover:bg-white shadow-[0_0_20px_rgba(255,255,255,0.1)]">
                                     Open Vault
                                 </Button>

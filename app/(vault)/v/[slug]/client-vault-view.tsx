@@ -1,14 +1,17 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Vault, Category } from '@prisma/client';
 import { Sidebar } from '@/components/dashboard/sidebar';
 import { DetailSheet } from '@/components/dashboard/detail-sheet';
-import { NewBookmarkSheet } from '@/components/dashboard/new-bookmark-sheet';
+import { BookmarkSheet } from '@/components/dashboard/bookmark-sheet';
 import { BookmarkWithCategory } from '@/lib/types';
 import { VaultHeader } from '@/components/dashboard/vault-view/vault-header';
 import { BookmarkGrid } from '@/components/dashboard/vault-view/bookmark-grid';
+import { BookmarkList } from '@/components/dashboard/vault-view/bookmark-list';
 import { VaultEmptyState } from '@/components/dashboard/vault-view/vault-empty-state';
+import { CreateCategoryDialog } from '@/components/dashboard/create-category-dialog';
+import { CategorySettingsDialog } from '@/components/dashboard/category-settings-dialog';
 
 interface ClientVaultViewProps {
     vault: Vault;
@@ -32,6 +35,29 @@ export default function ClientVaultView({
     const [selectedBookmark, setSelectedBookmark] = useState<BookmarkWithCategory | null>(null);
     const [isDetailOpen, setIsDetailOpen] = useState(false);
     const [isNewBookmarkOpen, setIsNewBookmarkOpen] = useState(false);
+    const [isCreateCategoryOpen, setIsCreateCategoryOpen] = useState(false);
+    const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+    const [editingBookmark, setEditingBookmark] = useState<BookmarkWithCategory | null>(null);
+    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+
+    const searchInputRef = useRef<HTMLInputElement>(null);
+
+    // Filter bookmarks
+    // ... (keep filtering logic)
+
+    // ... (keep handlers)
+
+    // Listen for Cmd+K to focus search
+    useEffect(() => {
+        const down = (e: KeyboardEvent) => {
+            if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
+                e.preventDefault();
+                searchInputRef.current?.focus();
+            }
+        };
+        document.addEventListener("keydown", down);
+        return () => document.removeEventListener("keydown", down);
+    }, []);
 
     // Filter bookmarks
     const filteredBookmarks = initialBookmarks.filter(b => {
@@ -49,8 +75,12 @@ export default function ClientVaultView({
         setIsDetailOpen(true);
     };
 
-    const categoryNames = initialCategories.map(c => c.name);
+
+
     const canEdit = isOwner;
+
+    // Listen for Cmd+K to toggle CMDK
+
 
     return (
         <div className="min-h-screen bg-zinc-950 text-zinc-100 font-sans selection:bg-indigo-500/30 flex justify-center overflow-hidden">
@@ -66,10 +96,12 @@ export default function ClientVaultView({
                 <Sidebar
                     vaults={allVaults}
                     activeVault={vault}
-                    categories={categoryNames}
+                    categories={initialCategories}
                     selectedCategory={activeCategoryFilter}
                     onSelectCategory={setActiveCategoryFilter}
                     totalBookmarks={initialBookmarks.length}
+                    onOpenCreateCategory={() => setIsCreateCategoryOpen(true)}
+                    onOpenSettings={isOwner ? setEditingCategory : undefined}
                 />
 
                 {/* Main Content Area */}
@@ -83,16 +115,37 @@ export default function ClientVaultView({
                         search={search}
                         setSearch={setSearch}
                         isOwner={isOwner}
+                        onOpenCMDK={() => searchInputRef.current?.focus()}
+                        searchInputRef={searchInputRef}
+                        viewMode={viewMode}
+                        setViewMode={setViewMode}
                     />
 
-                    {/* Content Grid */}
+                    {/* Content Grid/List */}
                     {filteredBookmarks.length > 0 ? (
-                        <BookmarkGrid
-                            bookmarks={filteredBookmarks}
-                            canEdit={canEdit}
-                            onOpenNew={() => setIsNewBookmarkOpen(true)}
-                            onOpenDetail={openDetail}
-                        />
+                        viewMode === 'grid' ? (
+                            <BookmarkGrid
+                                bookmarks={filteredBookmarks}
+                                canEdit={canEdit}
+                                onOpenNew={() => setIsNewBookmarkOpen(true)}
+                                onOpenDetail={openDetail}
+                                onEdit={(b) => {
+                                    setEditingBookmark(b);
+                                    setIsNewBookmarkOpen(true);
+                                }}
+                            />
+                        ) : (
+                            <BookmarkList
+                                bookmarks={filteredBookmarks}
+                                canEdit={canEdit}
+                                onOpenNew={() => setIsNewBookmarkOpen(true)}
+                                onOpenDetail={openDetail}
+                                onEdit={(b) => {
+                                    setEditingBookmark(b);
+                                    setIsNewBookmarkOpen(true);
+                                }}
+                            />
+                        )
                     ) : (
                         <VaultEmptyState
                             search={search}
@@ -115,16 +168,42 @@ export default function ClientVaultView({
                     onClose={() => setIsDetailOpen(false)}
                     isOwner={isOwner}
                     isMember={isMember}
+                    onEdit={(b) => {
+                        setEditingBookmark(b);
+                        setIsNewBookmarkOpen(true);
+                        setIsDetailOpen(false); // also close detail so they don't overlap awkwardly
+                    }}
                 />
             )
             }
 
-            <NewBookmarkSheet
+            <BookmarkSheet
                 isOpen={isNewBookmarkOpen}
-                onClose={() => setIsNewBookmarkOpen(false)}
+                onClose={() => {
+                    setIsNewBookmarkOpen(false);
+                    setEditingBookmark(null);
+                }}
                 vaultId={vault.id}
-                categories={categoryNames}
+                categories={initialCategories}
+                bookmarkToEdit={editingBookmark}
             />
+
+            <CreateCategoryDialog
+                vaultId={vault.id}
+                open={isCreateCategoryOpen}
+                onOpenChange={setIsCreateCategoryOpen}
+            />
+
+            {editingCategory && (
+                <CategorySettingsDialog
+                    category={editingCategory}
+                    open={true}
+                    onOpenChange={(open) => !open && setEditingCategory(null)}
+                />
+            )}
+
+
+
 
         </div>
     );
