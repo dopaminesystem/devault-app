@@ -51,12 +51,23 @@ export async function createVault(prevState: ActionState, formData: FormData): P
     const { name, slug, description } = validatedFields.data;
 
     try {
-        // Enforce 1 vault per user limit
-        const existingVault = await prisma.vault.findFirst({
-            where: {
-                ownerId: session.user.id,
-            },
-        });
+        // Parallelize pre-checks: limit check, slug uniqueness, and user default vault status
+        const [existingVault, existingSlug, user] = await Promise.all([
+            prisma.vault.findFirst({
+                where: {
+                    ownerId: session.user.id,
+                },
+            }),
+            prisma.vault.findUnique({
+                where: {
+                    slug,
+                },
+            }),
+            prisma.user.findUnique({
+                where: { id: session.user.id },
+                select: { defaultVaultId: true }
+            })
+        ]);
 
         if (existingVault) {
             return {
@@ -64,13 +75,6 @@ export async function createVault(prevState: ActionState, formData: FormData): P
                 message: "You can only create one vault.",
             };
         }
-
-        // Check if slug is unique
-        const existingSlug = await prisma.vault.findUnique({
-            where: {
-                slug,
-            },
-        });
 
         if (existingSlug) {
             return {
@@ -97,12 +101,7 @@ export async function createVault(prevState: ActionState, formData: FormData): P
             },
         });
 
-        // Check if user has a default vault, if not set this one
-        const user = await prisma.user.findUnique({
-            where: { id: session.user.id },
-            select: { defaultVaultId: true }
-        });
-
+        // Use the pre-fetched user data to decide if we need to update the default vault
         if (!user?.defaultVaultId) {
             await prisma.user.update({
                 where: { id: session.user.id },
