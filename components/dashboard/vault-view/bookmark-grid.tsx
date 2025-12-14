@@ -51,7 +51,7 @@ export function BookmarkGrid({
                                 <div className="w-10 h-10 rounded-lg bg-zinc-950/50 border border-zinc-800/50 flex items-center justify-center group-hover:border-zinc-700 transition-colors">
                                     <img
                                         src={faviconUrl}
-                                        alt="icon"
+                                        alt={`${hostname} favicon`}
                                         className="w-5 h-5 opacity-70 group-hover:opacity-100 transition-opacity grayscale group-hover:grayscale-0"
                                     />
                                 </div>
@@ -81,7 +81,8 @@ export function BookmarkGrid({
                                             e.stopPropagation();
                                             onEdit(bookmark);
                                         }}
-                                        className="p-1.5 rounded-full hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 transition-colors opacity-0 group-hover:opacity-100"
+                                        className="p-1.5 rounded-full hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 transition-colors opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
+                                        aria-label="Edit bookmark"
                                     >
                                         <Edit2 size={12} />
                                     </button>
