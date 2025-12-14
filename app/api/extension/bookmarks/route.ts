@@ -49,30 +49,32 @@ export async function POST(req: Request) {
             );
         }
 
-        // Verify vault access (double check)
-        const vault = await prisma.vault.findUnique({
-            where: { id: user.defaultVaultId },
-            include: { members: true },
-        });
+        // Parallelize Vault Access Check and Category Check
+        const [vault, existingCategory] = await Promise.all([
+            // Efficient access check: find vault AND verify ownership/membership in one query
+            prisma.vault.findFirst({
+                where: {
+                    id: user.defaultVaultId,
+                    OR: [
+                        { ownerId: session.user.id },
+                        { members: { some: { userId: session.user.id } } },
+                    ],
+                },
+            }),
+            // Check for "General" category
+            prisma.category.findFirst({
+                where: {
+                    vaultId: user.defaultVaultId,
+                    name: "General",
+                },
+            }),
+        ]);
 
         if (!vault) {
-            return NextResponse.json({ message: "Default vault not found" }, { status: 404 });
+            return NextResponse.json({ message: "Default vault not found or access denied" }, { status: 403 });
         }
 
-        const isOwner = vault.ownerId === session.user.id;
-        const isMember = vault.members.some((m) => m.userId === session.user.id);
-
-        if (!isOwner && !isMember) {
-            return NextResponse.json({ message: "Access denied to default vault" }, { status: 403 });
-        }
-
-        // Find or create "General" category
-        let category = await prisma.category.findFirst({
-            where: {
-                vaultId: user.defaultVaultId,
-                name: "General",
-            },
-        });
+        let category = existingCategory;
 
         if (!category) {
             category = await prisma.category.create({
