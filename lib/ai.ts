@@ -1,12 +1,12 @@
 import OpenAI from 'openai';
+import { env } from "@/lib/env";
+import { ActionState } from '@/lib/types';
 
-// Initialize OpenAI client
-// Ensure OPENAI_API_KEY is set in your .env file
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY || 'dummy-key', // Fallback to avoid crash on init, but calls will fail if missing
-});
+const openai = env.OPENAI_API_KEY ? new OpenAI({
+    apiKey: env.OPENAI_API_KEY,
+}) : null;
 
-interface CategorizationResult {
+export interface EnrichedBookmark {
     category: string;
     tags: string[];
     title: string;
@@ -14,60 +14,56 @@ interface CategorizationResult {
     reasoning?: string;
 }
 
-export async function suggestCategory(
+export async function enrichBookmark(
     url: string,
-    title: string,
-    description: string | undefined,
+    scrapedTitle: string,
+    scrapedDescription: string,
     existingCategories: string[]
-): Promise<CategorizationResult | null> {
+): Promise<EnrichedBookmark | null> {
     try {
-        if (!process.env.OPENAI_API_KEY) {
-            console.warn("OPENAI_API_KEY is not set. Skipping auto-categorization.");
+        if (!openai) {
+            console.warn("OPENAI_API_KEY is not set. Skipping AI enrichment.");
             return null;
         }
 
         const prompt = `
 You are an intelligent bookmark organizer.
 I will provide a bookmark (URL, Title, Description) and a list of existing categories.
-The provided Title and Description might be empty or poor quality (e.g. from a scraper).
+The provided metadata might be poor quality.
 
 Your task is to:
 1. Assign the BEST category for this bookmark.
 2. Generate max 3 relevant tags (lowercase).
-3. Provide a CLEAN, improved Title (if the provided one is empty/junk, infer from URL).
-4. Provide a SHORT, useful Description (if the provided one is empty/junk, infer from URL).
+3. Provide a CLEAN, improved Title.
+4. Provide a SHORT, useful Description in ENGLISH (2-3 sentences).
 
-Rules for Category:
-1. Prefer using an Existing Category if it is a strong match.
-2. If no Existing Category fits well, suggest a NEW, concise, and descriptive category name (Title Case, max 2-3 words).
-3. Avoid generic categories like "General", "Misc" unless absolutely necessary.
-
-Rules for Tags:
-1. Max 3 tags.
-2. Lowercase, single words or short phrases.
-3. Relevant to the content (e.g. "design", "tools", "nextjs").
-
-Bookmark:
+Input Data:
 URL: ${url}
-Title: ${title || "MISSING"}
-Description: ${description || "MISSING"}
+Title: ${scrapedTitle || "MISSING"}
+Meta Description: ${scrapedDescription || "MISSING"}
 
 Existing Categories:
 ${existingCategories.join(", ")}
 
-Respond in JSON format:
+Rules:
+- Category: Prefer existing if matches, else suggest new (Title Case, max 2 words).
+- Tags: Lowercase, relevant.
+- Title: Keep it concise.
+- Description: ENGLISH language, informative, max 3 sentences.
+
+Respond in JSON:
 {
-  "category": "Name of the category",
+  "category": "Name",
   "tags": ["tag1", "tag2"],
-  "title": "Improved Title",
-  "description": "Improved Description",
-  "reasoning": "Brief explanation"
+  "title": "Clean Title",
+  "description": "Description in English",
+  "reasoning": "Why this category"
 }
 `;
 
         const completion = await openai.chat.completions.create({
             messages: [{ role: "user", content: prompt }],
-            model: "gpt-4o-mini", // Use a fast/cheap model
+            model: "gpt-4o-mini",
             response_format: { type: "json_object" },
             temperature: 0.3,
         });
@@ -75,17 +71,59 @@ Respond in JSON format:
         const content = completion.choices[0].message.content;
         if (!content) return null;
 
-        const result = JSON.parse(content) as CategorizationResult;
+        const result = JSON.parse(content) as EnrichedBookmark;
         return {
-            category: result.category.trim(),
-            tags: result.tags.slice(0, 3).map(t => t.toLowerCase().trim()),
-            title: result.title?.trim() || title || "",
-            description: result.description?.trim() || description || "",
+            category: result.category?.trim() || "General",
+            tags: result.tags?.slice(0, 3).map(t => t.toLowerCase().trim()) || [],
+            title: result.title?.trim() || scrapedTitle || "",
+            description: result.description?.trim() || scrapedDescription || "",
             reasoning: result.reasoning
         };
 
     } catch (error) {
-        console.error("AI Categorization failed:", error);
-        return null;
+        console.error("AI Enrichment failed:", error);
+        return null; // Fallback to basic scraped data
+    }
+}
+
+export async function regenerateDescription(title: string, currentDescription: string, metaDescription: string): Promise<ActionState<string>> {
+    if (!openai) {
+        return {
+            success: false,
+            message: "AI config missing (OPENAI_API_KEY)"
+        };
+    }
+
+    try {
+        const prompt = `
+        Rewrite this description to be more engaging and clear (in English):
+        
+        Title: ${title}
+        Old Description: ${currentDescription}
+        Meta: ${metaDescription}
+        
+        Make it different and unique.
+        `;
+
+        const completion = await openai.chat.completions.create({
+            model: "gpt-4o-mini",
+            messages: [{ role: "user", content: prompt }],
+            max_tokens: 200,
+            temperature: 0.9,
+        });
+
+        const newDescription = completion.choices[0].message.content?.trim() || currentDescription;
+
+        return {
+            success: true,
+            data: newDescription,
+            message: "Description regenerated"
+        };
+
+    } catch (error) {
+        return {
+            success: false,
+            message: "Failed to regenerate description"
+        };
     }
 }

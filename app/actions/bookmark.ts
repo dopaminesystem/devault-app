@@ -160,8 +160,8 @@ export async function createBookmark(prevState: ActionState, formData: FormData)
                         select: { name: true }
                     });
                     const categoryNames = existingCategories.map(c => c.name).filter(n => n !== "General");
-                    const { suggestCategory } = await import("@/lib/ai");
-                    const aiSuggestion = await suggestCategory(url, title || url, description, categoryNames);
+                    const { enrichBookmark } = await import("@/lib/ai");
+                    const aiSuggestion = await enrichBookmark(url, title || url, description || "", categoryNames);
                     if (aiSuggestion) targetCategoryName = aiSuggestion.category;
                 } catch (e) { }
             }

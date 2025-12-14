@@ -9,12 +9,13 @@ import Link from "next/link";
 import { getSession } from "@/lib/auth";
 import { VaultMember } from "@prisma/client";
 import ClientVaultView from "./client-vault-view";
+import { prisma } from "@/lib/prisma";
 
 export default async function VaultPage({ params, searchParams }: { params: Promise<{ slug: string }>, searchParams: Promise<{ category?: string }> }) {
     const { slug } = await params;
     const result = await getVault(slug);
+
     const session = await getSession();
-    const { prisma } = await import("@/lib/prisma");
 
     if (result.error === "Vault not found") {
         return (

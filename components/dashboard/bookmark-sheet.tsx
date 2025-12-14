@@ -4,6 +4,7 @@ import { useState, useEffect, useTransition } from 'react';
 import { Save, X } from 'lucide-react';
 import { ActionState } from '@/lib/types';
 import { createBookmark, updateBookmark } from '@/app/actions/bookmark';
+import { magicGenerate } from "@/app/actions/ai";
 import { useActionState } from 'react';
 import { SheetShell } from "@/components/ui/sheet-shell";
 import { normalizeUrl, cn } from "@/lib/utils";
@@ -121,7 +122,6 @@ export function BookmarkSheet({ isOpen, onClose, vaultId, categories: initialCat
         if (urlToGenerate !== url) setUrl(urlToGenerate);
 
         startGeneration(async () => {
-            const { magicGenerate } = await import("@/app/actions/ai");
             const result = await magicGenerate(urlToGenerate, vaultId);
 
             if (result.success) {
