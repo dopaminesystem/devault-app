@@ -3,6 +3,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { BookmarkWithCategory } from "@/lib/types";
 import { getCategoryColor } from '@/lib/utils';
+import Image from 'next/image';
+import { memo } from 'react';
 
 interface BookmarkGridProps {
     bookmarks: BookmarkWithCategory[];
@@ -11,6 +13,74 @@ interface BookmarkGridProps {
     onOpenDetail: (bookmark: BookmarkWithCategory) => void;
     onEdit?: (bookmark: BookmarkWithCategory) => void;
 }
+
+const BookmarkGridItem = memo(function BookmarkGridItem({
+    bookmark,
+    canEdit,
+    onOpenDetail,
+    onEdit
+}: {
+    bookmark: BookmarkWithCategory;
+    canEdit: boolean;
+    onOpenDetail: (bookmark: BookmarkWithCategory) => void;
+    onEdit?: (bookmark: BookmarkWithCategory) => void;
+}) {
+    const hostname = new URL(bookmark.url).hostname;
+    const faviconUrl = `https://www.google.com/s2/favicons?domain=${bookmark.url}&sz=64`;
+    const categoryColor = getCategoryColor(bookmark.category.name);
+
+    return (
+        <Card
+            onClick={() => onOpenDetail(bookmark)}
+            className="h-[180px] p-0 gap-0 group hover:-translate-y-1 hover:shadow-indigo-500/10"
+        >
+            <CardContent className="p-5 h-full flex flex-col justify-between">
+                <div className="flex items-start justify-between">
+                    <div className="w-10 h-10 rounded-lg bg-zinc-950/50 border border-zinc-800/50 flex items-center justify-center group-hover:border-zinc-700 transition-colors">
+                        <Image
+                            src={faviconUrl}
+                            alt={`${hostname} icon`}
+                            width={20}
+                            height={20}
+                            className="opacity-70 group-hover:opacity-100 transition-opacity grayscale group-hover:grayscale-0"
+                        />
+                    </div>
+
+                    <Badge className={`${categoryColor} border opacity-70 group-hover:opacity-100`}>
+                        {bookmark.category.name}
+                    </Badge>
+                </div>
+
+                <div className="mt-2">
+                    <h3 className="font-semibold text-zinc-200 group-hover:text-white transition-colors line-clamp-1">
+                        {bookmark.title}
+                    </h3>
+                    <p className="text-sm text-zinc-500 mt-1 line-clamp-2 group-hover:text-zinc-400 transition-colors">
+                        {bookmark.description}
+                    </p>
+                </div>
+
+                <div className="flex items-center justify-between mt-auto pt-2">
+                    <div className="flex items-center gap-1 text-xs text-zinc-600 group-hover:text-indigo-400 transition-colors">
+                        <Globe size={10} />
+                        <span className="truncate max-w-[150px]">{hostname}</span>
+                    </div>
+                    {canEdit && onEdit && (
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onEdit(bookmark);
+                            }}
+                            className="p-1.5 rounded-full hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 transition-colors opacity-0 group-hover:opacity-100"
+                        >
+                            <Edit2 size={12} />
+                        </button>
+                    )}
+                </div>
+            </CardContent>
+        </Card>
+    );
+});
 
 export function BookmarkGrid({
     bookmarks,
@@ -35,62 +105,15 @@ export function BookmarkGrid({
             )}
 
             {/* Render Bookmarks */}
-            {bookmarks.map((bookmark) => {
-                const hostname = new URL(bookmark.url).hostname;
-                const faviconUrl = `https://www.google.com/s2/favicons?domain=${bookmark.url}&sz=64`;
-                const categoryColor = getCategoryColor(bookmark.category.name);
-
-                return (
-                    <Card
-                        key={bookmark.id}
-                        onClick={() => onOpenDetail(bookmark)}
-                        className="h-[180px] p-0 gap-0 group hover:-translate-y-1 hover:shadow-indigo-500/10"
-                    >
-                        <CardContent className="p-5 h-full flex flex-col justify-between">
-                            <div className="flex items-start justify-between">
-                                <div className="w-10 h-10 rounded-lg bg-zinc-950/50 border border-zinc-800/50 flex items-center justify-center group-hover:border-zinc-700 transition-colors">
-                                    <img
-                                        src={faviconUrl}
-                                        alt="icon"
-                                        className="w-5 h-5 opacity-70 group-hover:opacity-100 transition-opacity grayscale group-hover:grayscale-0"
-                                    />
-                                </div>
-
-                                <Badge className={`${categoryColor} border opacity-70 group-hover:opacity-100`}>
-                                    {bookmark.category.name}
-                                </Badge>
-                            </div>
-
-                            <div className="mt-2">
-                                <h3 className="font-semibold text-zinc-200 group-hover:text-white transition-colors line-clamp-1">
-                                    {bookmark.title}
-                                </h3>
-                                <p className="text-sm text-zinc-500 mt-1 line-clamp-2 group-hover:text-zinc-400 transition-colors">
-                                    {bookmark.description}
-                                </p>
-                            </div>
-
-                            <div className="flex items-center justify-between mt-auto pt-2">
-                                <div className="flex items-center gap-1 text-xs text-zinc-600 group-hover:text-indigo-400 transition-colors">
-                                    <Globe size={10} />
-                                    <span className="truncate max-w-[150px]">{hostname}</span>
-                                </div>
-                                {canEdit && onEdit && (
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            onEdit(bookmark);
-                                        }}
-                                        className="p-1.5 rounded-full hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 transition-colors opacity-0 group-hover:opacity-100"
-                                    >
-                                        <Edit2 size={12} />
-                                    </button>
-                                )}
-                            </div>
-                        </CardContent>
-                    </Card>
-                );
-            })}
-        </div >
+            {bookmarks.map((bookmark) => (
+                <BookmarkGridItem
+                    key={bookmark.id}
+                    bookmark={bookmark}
+                    canEdit={canEdit}
+                    onOpenDetail={onOpenDetail}
+                    onEdit={onEdit}
+                />
+            ))}
+        </div>
     );
 }
