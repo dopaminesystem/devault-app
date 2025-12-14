@@ -1,5 +1,6 @@
 import React from 'react';
-import { Search, Settings as SettingsIcon, LayoutGrid, List } from 'lucide-react';
+import { Search, Settings as SettingsIcon, LayoutGrid, List, Share2 } from 'lucide-react';
+import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -30,6 +31,11 @@ export function VaultHeader({
     viewMode,
     setViewMode
 }: VaultHeaderProps) {
+    const handleShare = () => {
+        navigator.clipboard.writeText(window.location.href);
+        toast.success("Vault link copied to clipboard");
+    };
+
     return (
         <div className="flex flex-col items-start justify-center mb-10 space-y-6">
             {/* Greeting / Breadcrumb */}
@@ -70,6 +76,15 @@ export function VaultHeader({
                             <List size={16} />
                         </button>
                     </div>
+
+                    {/* Share URL */}
+                    <button
+                        onClick={handleShare}
+                        title="Share Vault"
+                        className="p-1.5 rounded-md text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900 border border-transparent hover:border-zinc-800 transition-all"
+                    >
+                        <Share2 size={16} />
+                    </button>
 
                     <div className="relative group flex-1">
                         <div className="absolute inset-0 bg-indigo-500/20 rounded-xl blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
