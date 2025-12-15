@@ -16,6 +16,7 @@ interface SidebarProps {
     onVaultChange?: (vault: Vault) => void;
     onOpenCreateCategory?: () => void;
     onOpenSettings?: (category: Category) => void;
+    isLoggedIn: boolean;
 }
 
 export function Sidebar({
@@ -27,7 +28,8 @@ export function Sidebar({
     totalBookmarks,
     onVaultChange,
     onOpenCreateCategory,
-    onOpenSettings
+    onOpenSettings,
+    isLoggedIn
 }: SidebarProps) {
     const handleSignOut = async () => {
         const { authClient } = await import("@/lib/auth-client");
@@ -44,11 +46,12 @@ export function Sidebar({
         <aside className="hidden lg:block w-72 shrink-0 pt-8 pl-6">
             <div className="sticky top-8 space-y-6">
 
-                {/* Vault Switcher */}
+                {/* Vault Switcher - shows login modal for guests on create */}
                 <VaultSwitcher
                     vaults={vaults}
                     activeVault={activeVault}
                     onVaultChange={onVaultChange}
+                    isLoggedIn={isLoggedIn}
                 />
 
                 {/* Main Navigation */}
@@ -116,17 +119,19 @@ export function Sidebar({
                     )}
                 </div>
 
-                {/* Bottom Actions */}
-                <div className="pt-8 border-t border-zinc-800/50">
-                    <Button
-                        variant="ghost"
-                        onClick={handleSignOut}
-                        className="w-full justify-start gap-3 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900/50"
-                    >
-                        <LogOut size={16} />
-                        Sign Out
-                    </Button>
-                </div>
+                {/* Bottom Actions - only show for logged in users */}
+                {isLoggedIn && (
+                    <div className="pt-8 border-t border-zinc-800/50">
+                        <Button
+                            variant="ghost"
+                            onClick={handleSignOut}
+                            className="w-full justify-start gap-3 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900/50"
+                        >
+                            <LogOut size={16} />
+                            Sign Out
+                        </Button>
+                    </div>
+                )}
             </div>
         </aside>
     );

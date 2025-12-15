@@ -113,6 +113,7 @@ export default function ClientVaultView({
                     totalBookmarks={initialBookmarks.length}
                     onOpenCreateCategory={() => setIsCreateCategoryOpen(true)}
                     onOpenSettings={isOwner ? setEditingCategory : undefined}
+                    isLoggedIn={isLoggedIn}
                 />
 
                 {/* Main Content Area */}
