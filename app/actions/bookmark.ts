@@ -93,7 +93,7 @@ export async function createBookmark(prevState: ActionState, formData: FormData)
     // Check access
     const vault = await prisma.vault.findUnique({
         where: { id: vaultId },
-        include: { members: true },
+        select: { ownerId: true, slug: true },
     });
 
     if (!vault) {
@@ -240,7 +240,19 @@ export async function updateBookmark(prevState: ActionState, formData: FormData)
 
     const bookmark = await prisma.bookmark.findUnique({
         where: { id: bookmarkId },
-        include: { category: { include: { vault: { include: { members: true } } } } },
+        include: {
+            category: {
+                select: {
+                    vaultId: true,
+                    vault: {
+                        select: {
+                            ownerId: true,
+                            slug: true,
+                        },
+                    },
+                },
+            },
+        },
     });
 
     if (!bookmark) {
@@ -342,7 +354,18 @@ export async function deleteBookmark(prevState: ActionState, formData: FormData)
 
     const bookmark = await prisma.bookmark.findUnique({
         where: { id: bookmarkId },
-        include: { category: { include: { vault: { include: { members: true } } } } },
+        select: {
+            category: {
+                select: {
+                    vault: {
+                        select: {
+                            ownerId: true,
+                            slug: true,
+                        },
+                    },
+                },
+            },
+        },
     });
 
     if (!bookmark) {
