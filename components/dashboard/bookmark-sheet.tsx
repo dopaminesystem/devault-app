@@ -75,7 +75,10 @@ export function BookmarkSheet({ isOpen, onClose, vaultId, categories: initialCat
     const handleSelectId = (id: string) => {
         setSelectedCategoryId(id);
         setNewCategoryName("");
-        setIsAddingCategory(false);
+        // Only close "Add New" input if we are actually selecting a category (not just clearing)
+        if (id) {
+            setIsAddingCategory(false);
+        }
     };
 
     // When adding a new name (just confirms the input, doesn't add to list yet)

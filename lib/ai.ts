@@ -50,6 +50,7 @@ Rules:
 - Tags: Lowercase, relevant.
 - Title: Keep it concise.
 - Description: ENGLISH language, informative, max 3 sentences.
+- IMPORTANT: If Title/Description are MISSING, you MUST generate them based strictly on the URL and your knowledge of the site. Do not return "MISSING" or empty strings.
 
 Respond in JSON:
 {

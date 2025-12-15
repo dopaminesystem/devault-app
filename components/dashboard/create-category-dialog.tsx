@@ -42,8 +42,12 @@ export function CreateCategoryDialog({ vaultId, open, onOpenChange }: CreateCate
     );
 }
 
+import { ActionState } from "@/lib/types";
+
+// ... existing imports
+
 function CreateCategoryFormContent({ vaultId, onSuccess, onCancel }: { vaultId: string, onSuccess: () => void, onCancel: () => void }) {
-    const [state, formAction, isPending] = useActionState(createCategory, initialState);
+    const [state, formAction, isPending] = useActionState<ActionState, FormData>(createCategory, initialState);
     const [name, setName] = useState("");
 
     // Close on success
