@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { useDebounce } from '@/hooks/use-debounce';
 import { Vault, Category } from '@prisma/client';
 import { Sidebar } from '@/components/dashboard/sidebar';
 import { DetailSheet } from '@/components/dashboard/detail-sheet';
@@ -20,6 +21,7 @@ interface ClientVaultViewProps {
     initialCategories: Category[];
     isOwner: boolean;
     isMember: boolean;
+    isLoggedIn: boolean;
 }
 
 export default function ClientVaultView({
@@ -28,7 +30,8 @@ export default function ClientVaultView({
     initialBookmarks,
     initialCategories,
     isOwner,
-    isMember
+    isMember,
+    isLoggedIn
 }: ClientVaultViewProps) {
     const [search, setSearch] = useState('');
     const [activeCategoryFilter, setActiveCategoryFilter] = useState<string | null>(null);
@@ -59,16 +62,24 @@ export default function ClientVaultView({
         return () => document.removeEventListener("keydown", down);
     }, []);
 
-    // Filter bookmarks
-    const filteredBookmarks = initialBookmarks.filter(b => {
-        const matchesSearch = (b.title?.toLowerCase() || '').includes(search.toLowerCase()) ||
-            (b.description && b.description.toLowerCase().includes(search.toLowerCase())) ||
-            b.url.toLowerCase().includes(search.toLowerCase());
+    // ⚡ PERF: Debounce search to reduce filtering during rapid typing
+    // 150ms delay provides snappy feel while avoiding excessive recalculations
+    const debouncedSearch = useDebounce(search, 150);
 
-        const matchesCategory = activeCategoryFilter ? b.category.name === activeCategoryFilter : true;
+    // Filter bookmarks - memoized to prevent unnecessary recalculations
+    // ⚡ PERF: Only recomputes when dependencies change, not on every render
+    // Uses debounced search to avoid filtering on every keystroke
+    const filteredBookmarks = useMemo(() => {
+        return initialBookmarks.filter(b => {
+            const matchesSearch = (b.title?.toLowerCase() || '').includes(debouncedSearch.toLowerCase()) ||
+                (b.description && b.description.toLowerCase().includes(debouncedSearch.toLowerCase())) ||
+                b.url.toLowerCase().includes(debouncedSearch.toLowerCase());
 
-        return matchesSearch && matchesCategory;
-    });
+            const matchesCategory = activeCategoryFilter ? b.category.name === activeCategoryFilter : true;
+
+            return matchesSearch && matchesCategory;
+        });
+    }, [initialBookmarks, debouncedSearch, activeCategoryFilter]);
 
     const openDetail = (bookmark: BookmarkWithCategory) => {
         setSelectedBookmark(bookmark);
@@ -102,6 +113,7 @@ export default function ClientVaultView({
                     totalBookmarks={initialBookmarks.length}
                     onOpenCreateCategory={() => setIsCreateCategoryOpen(true)}
                     onOpenSettings={isOwner ? setEditingCategory : undefined}
+                    isLoggedIn={isLoggedIn}
                 />
 
                 {/* Main Content Area */}
@@ -110,11 +122,15 @@ export default function ClientVaultView({
                     <VaultHeader
                         vaultName={vault.name}
                         vaultSlug={vault.slug}
+                        vaultId={vault.id}
+                        accessType={vault.accessType}
                         activeCategory={activeCategoryFilter}
                         bookmarkCount={filteredBookmarks.length}
                         search={search}
                         setSearch={setSearch}
                         isOwner={isOwner}
+                        isMember={isMember}
+                        isLoggedIn={isLoggedIn}
                         onOpenCMDK={() => searchInputRef.current?.focus()}
                         searchInputRef={searchInputRef}
                         viewMode={viewMode}

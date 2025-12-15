@@ -28,8 +28,8 @@ export async function magicGenerate(url: string, vaultId: string) {
             scrapedTitle = data.title || "";
             scrapedDescription = data.description || "";
             scrapedFavicon = data.icon || "";
-        } catch (e) {
-            console.log("Metadata scrape skipped/failed:", e instanceof Error ? e.message : e);
+        } catch {
+            // Metadata scrape failed or timed out - continue with empty values
         }
 
         // 2. Fetch Existing Categories for Context
@@ -53,7 +53,7 @@ export async function magicGenerate(url: string, vaultId: string) {
             description: aiResult?.description || scrapedDescription || "",
             category: aiResult?.category || "General",
             tags: aiResult?.tags || [],
-            favicon: scrapedFavicon, // Pass this back if UI wants it (optional)
+            favicon: scrapedFavicon,
             success: true
         };
 

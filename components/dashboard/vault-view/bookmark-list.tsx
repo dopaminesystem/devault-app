@@ -1,8 +1,6 @@
-import { Plus, Globe, Edit2, ExternalLink } from 'lucide-react';
-import { Badge } from "@/components/ui/badge";
+import { Plus, Edit2, ExternalLink } from 'lucide-react';
 import { BookmarkWithCategory } from "@/lib/types";
-import { getCategoryColor } from '@/lib/utils';
-import { Button } from "@/components/ui/button";
+import { getCategoryColor, getHostname } from '@/lib/utils';
 
 interface BookmarkListProps {
     bookmarks: BookmarkWithCategory[];
@@ -40,7 +38,8 @@ export function BookmarkList({
                 {/* Render Bookmarks */}
                 <div className="flex flex-col divide-y divide-zinc-900/50">
                     {bookmarks.map((bookmark) => {
-                        const hostname = new URL(bookmark.url).hostname;
+                        // ⚡ PERF: Use cached hostname parsing instead of new URL() on every render
+                        const hostname = getHostname(bookmark.url);
                         const faviconUrl = `https://www.google.com/s2/favicons?domain=${bookmark.url}&sz=64`;
                         const categoryColor = getCategoryColor(bookmark.category.name);
 
@@ -53,9 +52,11 @@ export function BookmarkList({
                                 {/* Title & icon */}
                                 <div className="col-span-12 md:col-span-5 flex items-start gap-3 overflow-hidden pr-4">
                                     <div className="w-8 h-8 shrink-0 rounded-lg bg-zinc-900 border border-zinc-800/50 flex items-center justify-center mt-0.5">
+                                        {/* ⚡ PERF: Lazy load favicons for bookmarks below the fold */}
                                         <img
                                             src={faviconUrl}
                                             alt="icon"
+                                            loading="lazy"
                                             className="w-4 h-4 opacity-60 group-hover:opacity-100 transition-opacity grayscale group-hover:grayscale-0"
                                         />
                                     </div>

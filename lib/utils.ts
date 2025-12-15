@@ -26,3 +26,34 @@ export const getCategoryColor = (categoryName: string) => {
   const index = categoryName.length % colors.length;
   return colors[index];
 };
+
+/**
+ * ⚡ PERF: Cache for parsed hostnames to avoid repeated URL parsing.
+ * URL parsing is relatively expensive, so we cache results.
+ */
+const hostnameCache = new Map<string, string>();
+
+/**
+ * ⚡ PERF: Safely extract hostname from URL with caching.
+ * Falls back to the URL itself if parsing fails.
+ * 
+ * @param url - The URL to parse
+ * @returns The hostname or fallback string
+ */
+export function getHostname(url: string): string {
+  // Check cache first
+  const cached = hostnameCache.get(url);
+  if (cached) return cached;
+
+  try {
+    const hostname = new URL(url).hostname;
+    // Cache the result (limit cache size to prevent memory issues)
+    if (hostnameCache.size < 1000) {
+      hostnameCache.set(url, hostname);
+    }
+    return hostname;
+  } catch {
+    // Return a fallback for invalid URLs
+    return url.replace(/^https?:\/\//, '').split('/')[0] || 'unknown';
+  }
+}

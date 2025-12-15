@@ -49,3 +49,5 @@ prisma/migrations/
 
 #agent
 .agent
+.jules
+.github

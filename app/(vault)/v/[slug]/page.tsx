@@ -1,6 +1,4 @@
-import { getBookmarks } from "@/app/actions/bookmark";
-import { getVault } from "@/app/actions/vault";
-import { getCategories } from "@/app/actions/category";
+import { getVault, getVaultPageData } from "@/app/actions/vault";
 import { JoinVaultForm } from "@/components/vault/join-vault-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -80,35 +78,26 @@ export default async function VaultPage({ params, searchParams }: { params: Prom
     const { vault } = result;
     if (!vault) return null;
 
-    // Fetch bookmarks and categories
-    const { bookmarks } = await getBookmarks(vault.id);
-    const { categories } = await getCategories(vault.id);
-
-    // Fetch all user vaults for the switcher
-    let allVaults: any[] = [];
-    if (session?.user) {
-        allVaults = await prisma.vault.findMany({
-            where: {
-                OR: [
-                    { ownerId: session.user.id },
-                    { members: { some: { userId: session.user.id } } }
-                ]
-            },
-            orderBy: { createdAt: "desc" }
-        });
-    }
+    // ⚡ PERF: Fetch bookmarks, categories, and user vaults in PARALLEL
+    // Now using a dedicated function for cleaner code and reusability
+    const { bookmarks, categories, allVaults } = await getVaultPageData(
+        vault.id,
+        session?.user?.id
+    );
 
     const isOwner = session?.user?.id === vault.ownerId;
     const isMember = vault.members.some((m: VaultMember) => m.userId === session?.user?.id);
+    const isLoggedIn = !!session?.user;
 
     return (
         <ClientVaultView
             vault={vault}
             allVaults={allVaults}
-            initialBookmarks={bookmarks || []}
-            initialCategories={categories || []}
+            initialBookmarks={bookmarks}
+            initialCategories={categories}
             isOwner={isOwner}
             isMember={isMember}
+            isLoggedIn={isLoggedIn}
         />
     );
 }

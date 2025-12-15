@@ -1,26 +1,27 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { ChevronsUpDown, Check, Plus, Box, Briefcase, Lock } from 'lucide-react';
 import { Vault } from '@prisma/client';
 import { useRouter } from 'next/navigation';
+import Link from "next/link";
 
-// Helper to get icon and color based on vault index or hash
-const getVaultStyle = (index: number) => {
-    const styles = [
-        { icon: Box, color: 'bg-emerald-500', shadow: 'shadow-[0_0_10px_rgba(16,185,129,0.5)]' },
-        { icon: Briefcase, color: 'bg-blue-500', shadow: 'shadow-[0_0_10px_rgba(59,130,246,0.5)]' },
-        { icon: Lock, color: 'bg-rose-500', shadow: 'shadow-[0_0_10px_rgba(244,63,94,0.5)]' },
-        { icon: Box, color: 'bg-purple-500', shadow: 'shadow-[0_0_10px_rgba(168,85,247,0.5)]' },
-        { icon: Briefcase, color: 'bg-amber-500', shadow: 'shadow-[0_0_10px_rgba(245,158,11,0.5)]' },
-    ];
-    return styles[index % styles.length];
-};
+// ⚡ PERF: Module-level constant (created once, not on every render)
+const VAULT_STYLES = [
+    { icon: Box, color: 'bg-emerald-500', shadow: 'shadow-[0_0_10px_rgba(16,185,129,0.5)]' },
+    { icon: Briefcase, color: 'bg-blue-500', shadow: 'shadow-[0_0_10px_rgba(59,130,246,0.5)]' },
+    { icon: Lock, color: 'bg-rose-500', shadow: 'shadow-[0_0_10px_rgba(244,63,94,0.5)]' },
+    { icon: Box, color: 'bg-purple-500', shadow: 'shadow-[0_0_10px_rgba(168,85,247,0.5)]' },
+    { icon: Briefcase, color: 'bg-amber-500', shadow: 'shadow-[0_0_10px_rgba(245,158,11,0.5)]' },
+] as const;
+
+const getVaultStyle = (index: number) => VAULT_STYLES[index % VAULT_STYLES.length];
 
 interface VaultSwitcherProps {
     vaults: Vault[];
     activeVault: Vault | null;
     onVaultChange?: (vault: Vault) => void;
+    isLoggedIn?: boolean;
 }
 
 import {
@@ -37,23 +38,38 @@ import {
 export function VaultSwitcher({
     vaults,
     activeVault,
-    onVaultChange
+    onVaultChange,
+    isLoggedIn = true
 }: VaultSwitcherProps) {
     const router = useRouter();
     const [isOpen, setIsOpen] = useState(false);
     const [showLimitAlert, setShowLimitAlert] = useState(false);
+    const [showLoginModal, setShowLoginModal] = useState(false);
 
-    const handleVaultChange = (vault: Vault) => {
+    // ⚡ PERF: useCallback to prevent function recreation
+    const handleVaultChange = useCallback((vault: Vault) => {
         if (onVaultChange) {
             onVaultChange(vault);
         }
         router.push(`/v/${vault.slug}`);
         setIsOpen(false);
+    }, [onVaultChange, router]);
+
+    const handleCreateVault = () => {
+        setIsOpen(false);
+        if (!isLoggedIn) {
+            setShowLoginModal(true);
+        } else {
+            setShowLimitAlert(true);
+        }
     };
 
-    const vaultIndex = activeVault ? vaults.findIndex(v => v.id === activeVault.id) : -1;
-    const activeStyle = activeVault ? getVaultStyle(vaultIndex >= 0 ? vaultIndex : 0) : getVaultStyle(0);
-    const ActiveIcon = activeStyle.icon;
+    // ⚡ PERF: useMemo for computed values
+    const { vaultIndex, activeStyle, ActiveIcon } = useMemo(() => {
+        const idx = activeVault ? vaults.findIndex(v => v.id === activeVault.id) : -1;
+        const style = getVaultStyle(idx >= 0 ? idx : 0);
+        return { vaultIndex: idx, activeStyle: style, ActiveIcon: style.icon };
+    }, [activeVault, vaults]);
 
     return (
         <div className="relative mb-8">
@@ -110,10 +126,7 @@ export function VaultSwitcher({
                     })}
                     <div className="h-px bg-zinc-800 my-1" />
                     <button
-                        onClick={() => {
-                            setIsOpen(false);
-                            setShowLimitAlert(true);
-                        }}
+                        onClick={handleCreateVault}
                         className="w-full flex items-center gap-2 px-2 py-2 rounded-lg text-sm text-zinc-500 hover:text-zinc-200 hover:bg-zinc-900 transition-all"
                     >
                         <Plus size={14} />
@@ -122,6 +135,7 @@ export function VaultSwitcher({
                 </div>
             )}
 
+            {/* Limit Alert for logged-in users */}
             <AlertDialog open={showLimitAlert} onOpenChange={setShowLimitAlert}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
@@ -137,6 +151,31 @@ export function VaultSwitcher({
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
+
+            {/* Login Modal for guests */}
+            <AlertDialog open={showLoginModal} onOpenChange={setShowLoginModal}>
+                <AlertDialogContent showCloseButton>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Sign in to create a vault</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Create a free account to start saving bookmarks
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel asChild>
+                            <Link href="/sign-in">
+                                Sign In
+                            </Link>
+                        </AlertDialogCancel>
+                        <AlertDialogAction asChild>
+                            <Link href="/sign-up">
+                                Create Account
+                            </Link>
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }
+

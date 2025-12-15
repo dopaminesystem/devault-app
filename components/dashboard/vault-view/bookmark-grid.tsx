@@ -2,7 +2,7 @@ import { Plus, Globe, Edit2 } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { BookmarkWithCategory } from "@/lib/types";
-import { getCategoryColor } from '@/lib/utils';
+import { getCategoryColor, getHostname } from '@/lib/utils';
 
 interface BookmarkGridProps {
     bookmarks: BookmarkWithCategory[];
@@ -36,7 +36,8 @@ export function BookmarkGrid({
 
             {/* Render Bookmarks */}
             {bookmarks.map((bookmark) => {
-                const hostname = new URL(bookmark.url).hostname;
+                // ⚡ PERF: Use cached hostname parsing instead of new URL() on every render
+                const hostname = getHostname(bookmark.url);
                 const faviconUrl = `https://www.google.com/s2/favicons?domain=${bookmark.url}&sz=64`;
                 const categoryColor = getCategoryColor(bookmark.category.name);
 
@@ -49,9 +50,11 @@ export function BookmarkGrid({
                         <CardContent className="p-5 h-full flex flex-col justify-between">
                             <div className="flex items-start justify-between">
                                 <div className="w-10 h-10 rounded-lg bg-zinc-950/50 border border-zinc-800/50 flex items-center justify-center group-hover:border-zinc-700 transition-colors">
+                                    {/* ⚡ PERF: Lazy load favicons for bookmarks below the fold */}
                                     <img
                                         src={faviconUrl}
                                         alt="icon"
+                                        loading="lazy"
                                         className="w-5 h-5 opacity-70 group-hover:opacity-100 transition-opacity grayscale group-hover:grayscale-0"
                                     />
                                 </div>

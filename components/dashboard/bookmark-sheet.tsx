@@ -124,28 +124,33 @@ export function BookmarkSheet({ isOpen, onClose, vaultId, categories: initialCat
         startGeneration(async () => {
             const result = await magicGenerate(urlToGenerate, vaultId);
 
-            if (result.success) {
-                if (result.title) setTitle(result.title);
-                if (result.description) setDescription(result.description);
+            // Type narrowing: check for error first
+            if ('error' in result) {
+                console.error("Magic generate failed:", result.error);
+                return;
+            }
 
-                // Handle Category AI Suggestion
-                if (result.category && result.category.toLowerCase() !== "general") {
-                    // Check if matched by name in existing list
-                    const matched = categories.find(c => c.name.toLowerCase() === result.category!.toLowerCase());
+            // Now TypeScript knows result has success properties
+            if (result.title) setTitle(result.title);
+            if (result.description) setDescription(result.description);
 
-                    if (matched) {
-                        setSelectedCategoryId(matched.id);
-                        setNewCategoryName("");
-                    } else {
-                        // New Category Suggestion
-                        setSelectedCategoryId(null);
-                        setNewCategoryName(result.category);
-                    }
+            // Handle Category - always try to set it
+            if (result.category) {
+                const matched = categories.find(c => c.name.toLowerCase() === result.category.toLowerCase());
+
+                if (matched) {
+                    setSelectedCategoryId(matched.id);
+                    setNewCategoryName("");
+                } else {
+                    // New Category Suggestion from AI
+                    setSelectedCategoryId(null);
+                    setNewCategoryName(result.category);
                 }
+            }
 
-                if (result.tags && result.tags.length > 0) {
-                    setTags(result.tags.join(", "));
-                }
+            // Always try to set tags if available
+            if (result.tags && result.tags.length > 0) {
+                setTags(result.tags.join(", "));
             }
         });
     };
