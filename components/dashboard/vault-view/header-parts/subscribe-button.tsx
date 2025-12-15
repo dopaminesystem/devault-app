@@ -3,22 +3,22 @@ import { UserPlus } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 
 interface SubscribeButtonProps {
-    isSubscribing: boolean;
+    isLoadingSubscription: boolean;
     onClick: () => void;
 }
 
 export function SubscribeButton({
-    isSubscribing,
+    isLoadingSubscription,
     onClick
 }: SubscribeButtonProps) {
     return (
         <Button
             onClick={onClick}
-            disabled={isSubscribing}
+            disabled={isLoadingSubscription}
             variant="outline"
             className="rounded-lg"
         >
-            {isSubscribing ? (
+            {isLoadingSubscription ? (
                 <>
                     <div className="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent" />
                     <span>Subscribing...</span>

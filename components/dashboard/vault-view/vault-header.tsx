@@ -4,7 +4,6 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { subscribeToVault } from "@/app/actions/vault";
 import { AccessType } from "@prisma/client";
-
 import { VaultBreadcrumb } from "./header-parts/vault-breadcrumb";
 import { ViewToggle } from "./header-parts/view-toggle";
 import { SubscribeButton } from "./header-parts/subscribe-button";
@@ -110,12 +109,11 @@ export function VaultHeader({
                     <div className="flex items-center gap-3 w-full max-w-md">
                         {showSubscribeButton && (
                             <SubscribeButton
-                                isSubscribing={isSubscribing}
+                                isLoadingSubscription={isSubscribing}
                                 onClick={handleSubscribe}
                             />
                         )}
                         <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
-
 
 
                         {/* Share Button */}
