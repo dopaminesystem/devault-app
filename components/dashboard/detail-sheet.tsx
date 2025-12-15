@@ -16,7 +16,7 @@ import { format } from 'date-fns';
 import { SheetShell } from "@/components/ui/sheet-shell";
 import { Button } from "@/components/ui/button";
 import { deleteBookmark } from '@/app/actions/bookmark';
-import { normalizeUrl, getCategoryColor } from '@/lib/utils';
+import { getCategoryColor, getHostname } from '@/lib/utils';
 import { useActionState } from 'react';
 
 const Badge = ({ children, className }: { children: React.ReactNode, className?: string }) => (
@@ -47,7 +47,8 @@ export function DetailSheet({ bookmark, isOpen, onClose, onEdit, isOwner, isMemb
     if (!bookmark) return null;
 
     const categoryColor = getCategoryColor(bookmark.category.name);
-    const hostname = new URL(bookmark.url).hostname;
+    // ⚡ PERF: Use cached hostname parsing instead of new URL() on every render
+    const hostname = getHostname(bookmark.url);
     const faviconUrl = `https://www.google.com/s2/favicons?domain=${bookmark.url}&sz=64`;
 
     return (
@@ -58,6 +59,7 @@ export function DetailSheet({ bookmark, isOpen, onClose, onEdit, isOwner, isMemb
                         <img
                             src={faviconUrl}
                             alt="favicon"
+                            loading="lazy"
                             className="w-6 h-6 opacity-80"
                         />
                     </div>
