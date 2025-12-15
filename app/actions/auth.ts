@@ -3,9 +3,8 @@
 import { auth, getSession } from "@/lib/auth";
 import { z } from "zod";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
-
-
 import { ActionState } from "@/lib/types";
 
 const signUpSchema = z.object({
@@ -161,9 +160,12 @@ export async function enableEmailSignInAction(
             body: {
                 email,
                 password,
-                name,
+                providerId: "credential",
             },
-        }); return {
+            headers: await headers(),
+        });
+
+        return {
             success: true,
             message: "Email sign-in enabled successfully!",
         };
