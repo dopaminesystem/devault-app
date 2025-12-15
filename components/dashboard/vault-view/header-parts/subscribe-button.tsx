@@ -15,8 +15,8 @@ export function SubscribeButton({
         <Button
             onClick={onClick}
             disabled={isSubscribing}
-            size="sm"
-            className="shrink-0 bg-indigo-600 hover:bg-indigo-700 text-white border-0 gap-1.5"
+            variant="outline"
+            className="rounded-lg"
         >
             {isSubscribing ? (
                 <>

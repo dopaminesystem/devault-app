@@ -108,14 +108,15 @@ export function VaultHeader({
 
                     {/* Actions Row */}
                     <div className="flex items-center gap-3 w-full max-w-md">
-                        <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
-
                         {showSubscribeButton && (
                             <SubscribeButton
                                 isSubscribing={isSubscribing}
                                 onClick={handleSubscribe}
                             />
                         )}
+                        <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+
+
 
                         {/* Share Button */}
                         <button
