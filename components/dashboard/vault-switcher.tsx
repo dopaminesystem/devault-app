@@ -154,21 +154,20 @@ export function VaultSwitcher({
 
             {/* Login Modal for guests */}
             <AlertDialog open={showLoginModal} onOpenChange={setShowLoginModal}>
-                <AlertDialogContent>
+                <AlertDialogContent showCloseButton>
                     <AlertDialogHeader>
                         <AlertDialogTitle>Sign in to create a vault</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Create a free account to make your own vault and start saving bookmarks.
+                            Create a free account to start saving bookmarks
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction asChild>
+                        <AlertDialogCancel asChild>
                             <Link href="/sign-in">
                                 Sign In
                             </Link>
-                        </AlertDialogAction>
-                        <AlertDialogAction asChild className="bg-indigo-600 hover:bg-indigo-700">
+                        </AlertDialogCancel>
+                        <AlertDialogAction asChild>
                             <Link href="/sign-up">
                                 Create Account
                             </Link>

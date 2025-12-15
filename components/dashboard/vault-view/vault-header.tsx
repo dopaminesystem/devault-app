@@ -196,21 +196,20 @@ export function VaultHeader({
 
             {/* Login Modal for Subscribe */}
             <AlertDialog open={showLoginModal} onOpenChange={setShowLoginModal}>
-                <AlertDialogContent>
+                <AlertDialogContent showCloseButton>
                     <AlertDialogHeader>
                         <AlertDialogTitle>Sign in to subscribe</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Create a free account to save <strong>{vaultName}</strong> to your dashboard and access it anytime.
+                            Save <span className="text-zinc-200 font-medium">{vaultName}</span> to your dashboard
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction asChild>
+                        <AlertDialogCancel asChild>
                             <Link href={`/sign-in?callbackURL=${callbackUrl}`}>
                                 Sign In
                             </Link>
-                        </AlertDialogAction>
-                        <AlertDialogAction asChild className="bg-indigo-600 hover:bg-indigo-700">
+                        </AlertDialogCancel>
+                        <AlertDialogAction asChild>
                             <Link href={`/sign-up?callbackURL=${callbackUrl}`}>
                                 Create Account
                             </Link>
