@@ -55,14 +55,14 @@ export function VaultSwitcher({
         setIsOpen(false);
     }, [onVaultChange, router]);
 
-    const handleCreateVault = useCallback(() => {
+    const handleCreateVault = () => {
         setIsOpen(false);
         if (!isLoggedIn) {
             setShowLoginModal(true);
         } else {
             setShowLimitAlert(true);
         }
-    }, [isLoggedIn]);
+    };
 
     // ⚡ PERF: useMemo for computed values
     const { vaultIndex, activeStyle, ActiveIcon } = useMemo(() => {
