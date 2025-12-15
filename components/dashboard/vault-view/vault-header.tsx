@@ -1,17 +1,23 @@
 import React from 'react';
-import { Search, Settings as SettingsIcon, LayoutGrid, List, Share2 } from 'lucide-react';
+import { Search, Settings as SettingsIcon, LayoutGrid, List, Share2, UserPlus } from 'lucide-react';
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { subscribeToVault } from "@/app/actions/vault";
+import { AccessType } from "@prisma/client";
 
 interface VaultHeaderProps {
     vaultName: string;
     vaultSlug: string;
+    vaultId: string;
+    accessType: AccessType;
     activeCategory: string | null;
     bookmarkCount: number;
     search: string;
     setSearch: (value: string) => void;
     isOwner: boolean;
+    isMember: boolean;
+    isLoggedIn: boolean;
     onOpenCMDK?: () => void;
     searchInputRef?: React.RefObject<HTMLInputElement | null>;
     viewMode: 'grid' | 'list';
@@ -21,19 +27,44 @@ interface VaultHeaderProps {
 export function VaultHeader({
     vaultName,
     vaultSlug,
+    vaultId,
+    accessType,
     activeCategory,
     bookmarkCount,
     search,
     setSearch,
     isOwner,
+    isMember,
+    isLoggedIn,
     onOpenCMDK,
     searchInputRef,
     viewMode,
     setViewMode
 }: VaultHeaderProps) {
+    const [isSubscribing, setIsSubscribing] = React.useState(false);
+
     const handleShare = () => {
         navigator.clipboard.writeText(window.location.href);
         toast.success("Vault link copied to clipboard");
+    };
+
+    // ⚡ PERF: Only show Subscribe for public vaults when user is logged in, not owner, and not already a member
+    const showSubscribeButton = accessType === "PUBLIC" && isLoggedIn && !isOwner && !isMember;
+
+    const handleSubscribe = async () => {
+        setIsSubscribing(true);
+        try {
+            const result = await subscribeToVault(vaultId);
+            if (result.success) {
+                toast.success(result.message);
+            } else {
+                toast.error(result.message);
+            }
+        } catch {
+            toast.error("Failed to subscribe");
+        } finally {
+            setIsSubscribing(false);
+        }
     };
 
     return (
@@ -76,6 +107,28 @@ export function VaultHeader({
                             <List size={16} />
                         </button>
                     </div>
+
+                    {/* Subscribe Button - for public vaults */}
+                    {showSubscribeButton && (
+                        <Button
+                            onClick={handleSubscribe}
+                            disabled={isSubscribing}
+                            size="sm"
+                            className="shrink-0 bg-indigo-600 hover:bg-indigo-700 text-white border-0 gap-1.5"
+                        >
+                            {isSubscribing ? (
+                                <>
+                                    <div className="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                                    <span>Subscribing...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <UserPlus size={14} />
+                                    <span>Subscribe</span>
+                                </>
+                            )}
+                        </Button>
+                    )}
 
                     {/* Share URL */}
                     <button

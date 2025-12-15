@@ -303,6 +303,68 @@ export async function joinVault(prevState: any, formData: FormData) {
     return { success: true, message: "Joined successfully" };
 }
 
+/**
+ * ⚡ PERF: Subscribe to a PUBLIC vault (no password required)
+ * Uses upsert for single-query operation - idempotent and fast
+ */
+export async function subscribeToVault(vaultId: string): Promise<ActionState> {
+    const session = await getSession();
+
+    if (!session?.user) {
+        return { success: false, message: "Please sign in to subscribe" };
+    }
+
+    if (!session.user.emailVerified) {
+        return { success: false, message: "Please verify your email first" };
+    }
+
+    // ⚡ PERF: Use select to only fetch needed fields
+    const vault = await prisma.vault.findUnique({
+        where: { id: vaultId },
+        select: { id: true, slug: true, accessType: true, ownerId: true }
+    });
+
+    if (!vault) {
+        return { success: false, message: "Vault not found" };
+    }
+
+    if (vault.accessType !== "PUBLIC") {
+        return { success: false, message: "This vault is not public" };
+    }
+
+    // Don't allow owner to subscribe to their own vault
+    if (vault.ownerId === session.user.id) {
+        return { success: false, message: "You already own this vault" };
+    }
+
+    try {
+        // ⚡ PERF: Use upsert for single-query idempotent operation
+        // This handles both "already subscribed" and "new subscription" cases
+        await prisma.vaultMember.upsert({
+            where: {
+                vaultId_userId: {
+                    vaultId,
+                    userId: session.user.id
+                }
+            },
+            update: {}, // No update needed if exists
+            create: {
+                vaultId,
+                userId: session.user.id,
+                role: "MEMBER",
+            },
+        });
+
+        revalidatePath(`/v/${vault.slug}`);
+        revalidatePath("/dashboard");
+        return { success: true, message: "Subscribed! Vault added to your dashboard." };
+
+    } catch (error) {
+        console.error("Subscribe error:", error);
+        return { success: false, message: "Failed to subscribe" };
+    }
+}
+
 const updateVaultSchema = z.object({
     vaultId: z.string(),
     name: z.string().min(3, "Name must be at least 3 characters").max(50, "Name must be less than 50 characters"),
