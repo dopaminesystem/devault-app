@@ -326,9 +326,8 @@ export async function joinVault(prevState: ActionState, formData: FormData) {
                 role: "MEMBER",
             },
         });
-    } catch (error) {
+    } catch {
         // Ignore unique constraint error if already member
-
     }
 
     revalidatePath(`/v/${vault.slug}`);
