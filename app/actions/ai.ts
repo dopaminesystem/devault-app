@@ -28,8 +28,13 @@ export async function magicGenerate(url: string, vaultId: string) {
             scrapedTitle = data.title || "";
             scrapedDescription = data.description || "";
             scrapedFavicon = data.icon || "";
+
+            console.log("[MagicGen] Scraped metadata:", {
+                title: scrapedTitle?.slice(0, 50),
+                description: scrapedDescription?.slice(0, 50)
+            });
         } catch (e) {
-            console.log("Metadata scrape skipped/failed:", e instanceof Error ? e.message : e);
+            console.log("[MagicGen] Metadata scrape skipped/failed:", e instanceof Error ? e.message : e);
         }
 
         // 2. Fetch Existing Categories for Context
@@ -38,6 +43,7 @@ export async function magicGenerate(url: string, vaultId: string) {
             select: { name: true }
         });
         const categoryNames = existingCategories.map(c => c.name);
+        console.log("[MagicGen] Existing categories:", categoryNames);
 
         // 3. AI Enrichment (Scraped Data -> AI -> Final Data)
         const aiResult = await enrichBookmark(
@@ -47,18 +53,34 @@ export async function magicGenerate(url: string, vaultId: string) {
             categoryNames
         );
 
+        console.log("[MagicGen] AI result:", aiResult ? {
+            category: aiResult.category,
+            tags: aiResult.tags,
+            title: aiResult.title?.slice(0, 30),
+            description: aiResult.description?.slice(0, 30)
+        } : "null (AI failed or skipped)");
+
         // 4. Return Final Logic (AI > Scraped > Empty)
-        return {
+        const finalResult = {
             title: aiResult?.title || scrapedTitle || "",
             description: aiResult?.description || scrapedDescription || "",
             category: aiResult?.category || "General",
             tags: aiResult?.tags || [],
-            favicon: scrapedFavicon, // Pass this back if UI wants it (optional)
+            favicon: scrapedFavicon,
             success: true
         };
 
+        console.log("[MagicGen] Final result:", {
+            category: finalResult.category,
+            tags: finalResult.tags,
+            hasTitle: !!finalResult.title,
+            hasDescription: !!finalResult.description
+        });
+
+        return finalResult;
+
     } catch (error) {
-        console.error("Magic generation failed:", error);
+        console.error("[MagicGen] Failed:", error);
         return { error: "Failed to generate data" };
     }
 }
