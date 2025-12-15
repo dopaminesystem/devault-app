@@ -17,6 +17,38 @@ const createVaultSchema = z.object({
     description: z.string().max(200, "Description must be less than 200 characters").optional(),
 });
 
+import { getBookmarks } from "@/app/actions/bookmark";
+import { getCategories } from "@/app/actions/category";
+
+/**
+ * ⚡ PERF: Fetch all vault page data in parallel
+ * Extracts data fetching logic from the page component for reusability and cleanliness
+ */
+export async function getVaultPageData(vaultId: string, userId?: string) {
+    // Run these 3 independent queries in parallel
+    const [bookmarksResult, categoriesResult, userVaults] = await Promise.all([
+        getBookmarks(vaultId),
+        getCategories(vaultId),
+        userId
+            ? prisma.vault.findMany({
+                where: {
+                    OR: [
+                        { ownerId: userId },
+                        { members: { some: { userId: userId } } }
+                    ]
+                },
+                orderBy: { createdAt: "desc" }
+            })
+            : Promise.resolve([])
+    ]);
+
+    return {
+        bookmarks: bookmarksResult.bookmarks || [],
+        categories: categoriesResult.categories || [],
+        allVaults: userVaults
+    };
+}
+
 export async function createVault(prevState: ActionState, formData: FormData): Promise<ActionState> {
     const session = await getSession();
 

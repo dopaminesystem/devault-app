@@ -1,6 +1,4 @@
-import { getBookmarks } from "@/app/actions/bookmark";
-import { getVault } from "@/app/actions/vault";
-import { getCategories } from "@/app/actions/category";
+import { getVault, getVaultPageData } from "@/app/actions/vault";
 import { JoinVaultForm } from "@/components/vault/join-vault-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -81,26 +79,11 @@ export default async function VaultPage({ params, searchParams }: { params: Prom
     if (!vault) return null;
 
     // ⚡ PERF: Fetch bookmarks, categories, and user vaults in PARALLEL
-    // Previously these were sequential (wait -> wait -> wait)
-    // Now they run simultaneously, reducing page load time by ~40-60%
-    const [bookmarksResult, categoriesResult, allVaults] = await Promise.all([
-        getBookmarks(vault.id),
-        getCategories(vault.id),
-        session?.user
-            ? prisma.vault.findMany({
-                where: {
-                    OR: [
-                        { ownerId: session.user.id },
-                        { members: { some: { userId: session.user.id } } }
-                    ]
-                },
-                orderBy: { createdAt: "desc" }
-            })
-            : Promise.resolve([])
-    ]);
-
-    const bookmarks = bookmarksResult.bookmarks || [];
-    const categories = categoriesResult.categories || [];
+    // Now using a dedicated function for cleaner code and reusability
+    const { bookmarks, categories, allVaults } = await getVaultPageData(
+        vault.id,
+        session?.user?.id
+    );
 
     const isOwner = session?.user?.id === vault.ownerId;
     const isMember = vault.members.some((m: VaultMember) => m.userId === session?.user?.id);
