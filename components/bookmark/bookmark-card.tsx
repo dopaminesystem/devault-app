@@ -3,6 +3,7 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ExternalLink, MoreVertical, Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -84,10 +85,12 @@ export function BookmarkCard({ bookmark, categories, canEdit }: BookmarkCardProp
 
                 {bookmark.image && (
                     <div className="relative h-48 w-full overflow-hidden">
-                        <img
+                        <Image
                             src={bookmark.image}
                             alt={bookmark.title || "Bookmark image"}
-                            className="object-cover w-full h-full"
+                            fill
+                            className="object-cover"
+                            unoptimized
                         />
                     </div>
                 )}

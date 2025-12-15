@@ -1,18 +1,18 @@
 "use client";
 
-import { useState, useEffect, useTransition } from 'react';
-import { Save, X } from 'lucide-react';
+import { useState, useEffect, useTransition, useCallback } from 'react';
+
+import { X } from 'lucide-react';
 import { ActionState } from '@/lib/types';
 import { createBookmark, updateBookmark } from '@/app/actions/bookmark';
 import { magicGenerate } from "@/app/actions/ai";
 import { useActionState } from 'react';
 import { SheetShell } from "@/components/ui/sheet-shell";
-import { normalizeUrl, cn } from "@/lib/utils";
+import { normalizeUrl } from "@/lib/utils";
 import { URLInputSection } from './new-bookmark/url-input-section';
 import { CategorySelector } from './new-bookmark/category-selector';
 import { BookmarkFormFields } from './new-bookmark/bookmark-form-fields';
 import { Button } from '@/components/ui/button';
-import { TOKENS } from '@/lib/constants';
 import { BookmarkWithCategory } from '@/lib/types';
 
 import { Category } from '@prisma/client';
@@ -30,7 +30,7 @@ export function BookmarkSheet({ isOpen, onClose, vaultId, categories: initialCat
 
     // Manage Categories Locally (just in case they add one mid-flow, though redundant with dual-field)
     // Actually, for Dual Field, we just need to know if they selected an existing ID or typed a new name.
-    const [categories, setCategories] = useState<Category[]>(initialCategories);
+    const categories = initialCategories;
 
     // DUAL FIELD STATE
     const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
@@ -52,41 +52,7 @@ export function BookmarkSheet({ isOpen, onClose, vaultId, categories: initialCat
     const action = isEditMode ? updateBookmark : createBookmark;
     const [state, formAction, isPending] = useActionState(action, initialState);
 
-    useEffect(() => {
-        if (state?.success) {
-            handleClose();
-        }
-    }, [state]);
-
-    useEffect(() => {
-        setCategories(initialCategories);
-    }, [initialCategories]);
-
-    // Initialize fields when opening in edit mode
-    useEffect(() => {
-        if (isOpen && bookmarkToEdit) {
-            setUrl(bookmarkToEdit.url);
-            setTitle(bookmarkToEdit.title || "");
-            setDescription(bookmarkToEdit.description || "");
-            setTags(bookmarkToEdit.tags.join(", "));
-
-            // Pre-select existing category ID
-            if (bookmarkToEdit.categoryId) {
-                setSelectedCategoryId(bookmarkToEdit.categoryId);
-                setNewCategoryName("");
-            }
-        } else if (isOpen && !bookmarkToEdit) {
-            // Reset if opening in create mode
-            setUrl("");
-            setTitle("");
-            setDescription("");
-            setTags("");
-            setSelectedCategoryId(null);
-            setNewCategoryName("");
-        }
-    }, [isOpen, bookmarkToEdit]);
-
-    const handleClose = () => {
+    const handleClose = useCallback(() => {
         onClose();
         // Delay reset slightly to avoid UI flicker during close animation
         setTimeout(() => {
@@ -97,7 +63,13 @@ export function BookmarkSheet({ isOpen, onClose, vaultId, categories: initialCat
             setSelectedCategoryId(null);
             setNewCategoryName("");
         }, 300);
-    };
+    }, [onClose]);
+
+    useEffect(() => {
+        if (state?.success) {
+            handleClose();
+        }
+    }, [state?.success, handleClose]);
 
     // When selecting an existing ID
     const handleSelectId = (id: string) => {

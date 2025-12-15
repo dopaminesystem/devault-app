@@ -1,7 +1,8 @@
 "use server";
 
 import { z } from "zod";
-import { auth, getSession } from "@/lib/auth";
+import { ActionState } from "@/lib/types";
+import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { VaultMember } from "@prisma/client";
 import { revalidatePath } from "next/cache";
@@ -11,7 +12,7 @@ const createCategorySchema = z.object({
     name: z.string().min(1, "Name is required").max(50, "Name must be less than 50 characters"),
 });
 
-export async function createCategory(prevState: any, formData: FormData) {
+export async function createCategory(prevState: ActionState, formData: FormData) {
     const session = await getSession();
 
     if (!session?.user) {
@@ -95,7 +96,7 @@ const updateCategorySchema = z.object({
     name: z.string().min(1, "Name is required").max(50, "Name must be less than 50 characters"),
 });
 
-export async function updateCategory(prevState: any, formData: FormData) {
+export async function updateCategory(prevState: ActionState, formData: FormData) {
     const session = await getSession();
 
     if (!session?.user) {
@@ -142,7 +143,7 @@ export async function updateCategory(prevState: any, formData: FormData) {
     return { success: true, message: "Category updated" };
 }
 
-export async function deleteCategory(prevState: any, formData: FormData) {
+export async function deleteCategory(prevState: ActionState, formData: FormData) {
     const session = await getSession();
 
     if (!session?.user) {

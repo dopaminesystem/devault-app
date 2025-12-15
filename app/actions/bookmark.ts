@@ -1,12 +1,10 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { VaultMember } from "@prisma/client";
 import { z } from "zod";
-import { auth, getSession } from "@/lib/auth";
+import { getSession } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { normalizeUrl } from "@/lib/utils";
-
 import { ActionState } from "@/lib/types";
 
 export async function getBookmarks(vaultId: string) {
@@ -88,7 +86,7 @@ export async function createBookmark(prevState: ActionState, formData: FormData)
         return { success: false, message: "Invalid fields", fieldErrors: validatedFields.error.flatten().fieldErrors };
     }
 
-    let { vaultId, url, title, description, tags, category: categoryName } = validatedFields.data;
+    const { vaultId, url, title, description, tags, category: categoryName } = validatedFields.data;
 
     // Check access
     const vault = await prisma.vault.findUnique({
@@ -163,7 +161,7 @@ export async function createBookmark(prevState: ActionState, formData: FormData)
                     const { enrichBookmark } = await import("@/lib/ai");
                     const aiSuggestion = await enrichBookmark(url, title || url, description || "", categoryNames);
                     if (aiSuggestion) targetCategoryName = aiSuggestion.category;
-                } catch (e) { }
+                } catch { }
             }
 
             // Find or create "General" or AI suggestion or Legacy name
@@ -236,7 +234,7 @@ export async function updateBookmark(prevState: ActionState, formData: FormData)
         return { success: false, message: "Invalid fields" };
     }
 
-    const { bookmarkId, url, title, description, categoryName, categoryId, tags } = validatedFields.data;
+    const { bookmarkId, url, title, description, tags } = validatedFields.data;
 
     const bookmark = await prisma.bookmark.findUnique({
         where: { id: bookmarkId },

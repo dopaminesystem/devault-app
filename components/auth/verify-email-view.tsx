@@ -53,7 +53,7 @@ export function VerifyEmailView() {
                     <h1 className="text-2xl font-bold text-white">Verify your email</h1>
                     <p className="text-zinc-400">
                         You need to verify your email address to access the dashboard.
-                        We've sent a link to <span className="text-zinc-200 font-medium">{session.user.email}</span>.
+                        We&apos;ve sent a link to <span className="text-zinc-200 font-medium">{session.user.email}</span>.
                     </p>
                 </div>
 

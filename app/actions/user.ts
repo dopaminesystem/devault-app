@@ -4,12 +4,15 @@ import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { ActionState } from "@/lib/types";
+
 
 const updateDefaultVaultSchema = z.object({
     vaultId: z.string().min(1, "Vault ID is required"),
 });
 
-export async function updateDefaultVault(prevState: any, formData: FormData) {
+// This function logic matches updateDefaultVaultSchema
+export async function updateDefaultVault(prevState: ActionState, formData: FormData) {
     const session = await getSession();
 
     if (!session?.user) {
@@ -42,7 +45,8 @@ export async function updateDefaultVault(prevState: any, formData: FormData) {
         }
 
         const isOwner = vault.ownerId === session.user.id;
-        const isMember = vault.members.some((m: any) => m.userId === session.user.id);
+        // Fix any type here
+        const isMember = vault.members.some((m: { userId: string }) => m.userId === session.user.id);
 
         if (!isOwner && !isMember) {
             return { success: false, message: "You do not have access to this vault" };

@@ -25,7 +25,7 @@ export function VaultEmptyState({
                     <div className="space-y-1">
                         <h3 className="text-lg font-medium text-zinc-200">No results found</h3>
                         <p className="text-zinc-500">
-                            We couldn't find anything matching "{search}"
+                            We couldn&apos;t find anything matching &quot;{search}&quot;
                         </p>
                     </div>
                     <Button

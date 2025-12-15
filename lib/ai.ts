@@ -120,7 +120,7 @@ export async function regenerateDescription(title: string, currentDescription: s
             message: "Description regenerated"
         };
 
-    } catch (error) {
+    } catch {
         return {
             success: false,
             message: "Failed to regenerate description"

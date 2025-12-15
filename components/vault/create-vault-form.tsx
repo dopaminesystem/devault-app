@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useState } from "react";
 import { createVault } from "@/app/actions/vault";
 import { ActionState } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -14,18 +14,19 @@ const initialState: ActionState = {
 };
 
 export function CreateVaultForm({ hideCardWrapper = false }: { hideCardWrapper?: boolean }) {
-    const [state, formAction, isPending] = useActionState(createVault, initialState);
+    const [state, formAction, isPending] = useActionState<ActionState, FormData>(createVault, initialState);
     const [name, setName] = useState("");
     const [slug, setSlug] = useState("");
 
-    // Auto-generate slug from name
-    useEffect(() => {
-        const generatedSlug = name
+    const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newName = e.target.value;
+        setName(newName);
+        const generatedSlug = newName
             .toLowerCase()
             .replace(/[^a-z0-9]+/g, "-")
             .replace(/^-+|-+$/g, "");
         setSlug(generatedSlug);
-    }, [name]);
+    };
 
     const content = (
         <form action={formAction} className={hideCardWrapper ? "space-y-4" : ""}>
@@ -37,7 +38,7 @@ export function CreateVaultForm({ hideCardWrapper = false }: { hideCardWrapper?:
                         name="name"
                         placeholder="My Awesome Vault"
                         value={name}
-                        onChange={(e) => setName(e.target.value)}
+                        onChange={handleNameChange}
                         required
                         minLength={3}
                         maxLength={50}

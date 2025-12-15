@@ -25,9 +25,13 @@ const initialState = {
     success: false,
 };
 
+import { ActionState } from "@/lib/types";
+
+// ... (existing imports, but I need to be careful with replace)
+
 export function CreateCategoryForm({ vaultId }: CreateCategoryFormProps) {
     const [open, setOpen] = useState(false);
-    const [state, formAction, isPending] = useActionState(async (prev: any, formData: FormData) => {
+    const [state, formAction, isPending] = useActionState(async (prev: ActionState, formData: FormData) => {
         const result = await createCategory(prev, formData);
         if (result.success) {
             setOpen(false);

@@ -9,7 +9,7 @@ import { VaultMember } from "@prisma/client";
 import ClientVaultView from "./client-vault-view";
 import { prisma } from "@/lib/prisma";
 
-export default async function VaultPage({ params, searchParams }: { params: Promise<{ slug: string }>, searchParams: Promise<{ category?: string }> }) {
+export default async function VaultPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
     const result = await getVault(slug);
 

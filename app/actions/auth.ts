@@ -3,9 +3,8 @@
 import { auth, getSession } from "@/lib/auth";
 import { z } from "zod";
 import { redirect } from "next/navigation";
-import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
-import { hash } from "bcryptjs";
+
 
 import { ActionState } from "@/lib/types";
 
@@ -157,25 +156,24 @@ export async function enableEmailSignInAction(
         }
 
         // Use better-auth's linkAccount to add credential provider
-        // @ts-ignore - linkAccount might not be in types yet or is dynamic
-        await (auth.api as any).linkAccount({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (auth.api as any).signUpEmail({
             body: {
                 email,
                 password,
-                providerId: "credential",
+                name,
             },
-            headers: await headers(),
-        });
-
-        return {
+        }); return {
             success: true,
             message: "Email sign-in enabled successfully!",
         };
-    } catch (error: any) {
+    } catch (error) {
         console.error("Failed to enable email sign-in:", error);
 
+        const err = error as { message?: string; body?: { message?: string } };
+
         // Handle specific better-auth errors
-        if (error?.message?.includes("already linked") || error?.body?.message?.includes("already linked")) {
+        if (err?.message?.includes("already linked") || err?.body?.message?.includes("already linked")) {
             return {
                 success: false,
                 error: "Email sign-in is already enabled",
@@ -184,7 +182,7 @@ export async function enableEmailSignInAction(
 
         return {
             success: false,
-            error: error?.message || "Failed to enable email sign-in. Please try again.",
+            error: err?.message || "Failed to enable email sign-in. Please try again.",
         };
     }
 }
@@ -209,11 +207,12 @@ export async function resendVerificationEmailAction(): Promise<ActionState> {
         });
 
         return { success: true, message: "Verification email sent!" };
-    } catch (error: any) {
+    } catch (error) {
         console.error("Failed to send verification email:", error);
+        const err = error as { message?: string };
         return {
             success: false,
-            error: error?.message || "Failed to send verification email"
+            error: err?.message || "Failed to send verification email"
         };
     }
 }

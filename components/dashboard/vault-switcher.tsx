@@ -65,7 +65,7 @@ export function VaultSwitcher({
     };
 
     // ⚡ PERF: useMemo for computed values
-    const { vaultIndex, activeStyle, ActiveIcon } = useMemo(() => {
+    const { ActiveIcon } = useMemo(() => {
         const idx = activeVault ? vaults.findIndex(v => v.id === activeVault.id) : -1;
         const style = getVaultStyle(idx >= 0 ? idx : 0);
         return { vaultIndex: idx, activeStyle: style, ActiveIcon: style.icon };

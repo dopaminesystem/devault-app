@@ -24,7 +24,7 @@ export async function magicGenerate(url: string, vaultId: string) {
                 setTimeout(() => reject(new Error("Scrape timeout")), 5000)
             );
 
-            const data = await Promise.race([scrapePromise, timeoutPromise]) as any;
+            const data = await Promise.race([scrapePromise, timeoutPromise]) as { title?: string; description?: string; icon?: string };
             scrapedTitle = data.title || "";
             scrapedDescription = data.description || "";
             scrapedFavicon = data.icon || "";
