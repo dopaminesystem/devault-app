@@ -1,4 +1,13 @@
 
+export const SITE_CONFIG = {
+    name: "Devault",
+    tagline: "Vault for everyone",
+    description: "A secure, intelligent vault for your bookmarks, code snippets, and resources. Featuring AI organization, self-hosting capabilities, and seamless sync.",
+    url: process.env.NEXT_PUBLIC_APP_URL || "https://devault.app",
+    ogImage: "/api/og",
+    keywords: ["bookmarks", "vault", "organizer", "ai", "resources"],
+    themeColor: "#09090b", // zinc-950
+};
 
 export const TOKENS = {
     canvas: "bg-zinc-950 text-zinc-100 antialiased selection:bg-indigo-500/30 font-sans min-h-screen",

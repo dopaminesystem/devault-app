@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
+import { SITE_CONFIG } from "@/lib/constants";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -13,9 +14,51 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: SITE_CONFIG.themeColor,
+  colorScheme: "dark",
+};
+
 export const metadata: Metadata = {
-  title: "Devault | Vault for everyone",
-  description: "A secure, intelligent vault for your bookmarks, code snippets, and resources. Featuring AI organization, self-hosting capabilities, and seamless sync.",
+  title: `${SITE_CONFIG.name} | ${SITE_CONFIG.tagline}`,
+  description: SITE_CONFIG.description,
+  applicationName: SITE_CONFIG.name,
+  keywords: SITE_CONFIG.keywords,
+  generator: "Next.js",
+  robots: {
+    index: true,
+    follow: true,
+  },
+  formatDetection: {
+    telephone: false,
+  },
+  metadataBase: new URL(SITE_CONFIG.url),
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: `${SITE_CONFIG.name} | ${SITE_CONFIG.tagline}`,
+    description: SITE_CONFIG.description,
+    url: SITE_CONFIG.url,
+    siteName: SITE_CONFIG.name,
+    type: "website",
+    images: [
+      {
+        url: SITE_CONFIG.ogImage,
+        width: 1200,
+        height: 630,
+        alt: `${SITE_CONFIG.name} - ${SITE_CONFIG.tagline}`,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${SITE_CONFIG.name} | ${SITE_CONFIG.tagline}`,
+    description: SITE_CONFIG.description,
+    images: [SITE_CONFIG.ogImage],
+  },
 };
 
 export default function RootLayout({
