@@ -89,13 +89,13 @@ export function Sidebar({
                     </h3>
                     {categories.length > 0 ? (
                         categories.map(cat => (
-                            <div key={cat.id} className="group flex items-center relative">
+                            <div key={cat.id} className="group flex items-center relative rounded-md hover:bg-zinc-900/50">
                                 <Button
                                     variant="ghost"
                                     onClick={() => onSelectCategory(cat.name)}
-                                    className={`w-full justify-start gap-3 ${selectedCategory === cat.name
+                                    className={`w-full justify-start gap-3 hover:bg-transparent ${selectedCategory === cat.name
                                         ? 'bg-zinc-900 text-zinc-100'
-                                        : 'text-zinc-400 hover:text-zinc-200'
+                                        : 'text-zinc-400 group-hover:text-zinc-200'
                                         }`}
                                 >
                                     <Folder size={16} className={`transition-colors ${selectedCategory === cat.name ? 'text-indigo-400 fill-indigo-500/20' : 'text-zinc-600 group-hover:text-zinc-500'}`} />
@@ -107,9 +107,9 @@ export function Sidebar({
                                             e.stopPropagation();
                                             onOpenSettings(cat);
                                         }}
-                                        className="absolute right-2 opacity-0 group-hover:opacity-100 text-zinc-500 hover:text-zinc-300 transition-all p-1 hover:bg-zinc-800 rounded"
+                                        className="absolute right-2 opacity-0 group-hover:opacity-100 text-zinc-500 hover:text-zinc-300 transition-all p-1.5 rounded"
                                     >
-                                        <Settings size={12} />
+                                        <Settings size={16} />
                                     </button>
                                 )}
                             </div>

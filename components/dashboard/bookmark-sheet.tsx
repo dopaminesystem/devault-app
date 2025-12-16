@@ -33,17 +33,19 @@ export function BookmarkSheet({ isOpen, onClose, vaultId, categories: initialCat
     const categories = initialCategories;
 
     // DUAL FIELD STATE
-    const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+    const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
+        bookmarkToEdit?.categoryId ?? null
+    );
     const [newCategoryName, setNewCategoryName] = useState('');
 
     // UI Logic for adding
     const [isAddingCategory, setIsAddingCategory] = useState(false);
 
-    // Form State
-    const [url, setUrl] = useState("");
-    const [title, setTitle] = useState("");
-    const [description, setDescription] = useState("");
-    const [tags, setTags] = useState("");
+    // Form State - initialize from bookmarkToEdit if editing
+    const [url, setUrl] = useState(bookmarkToEdit?.url ?? "");
+    const [title, setTitle] = useState(bookmarkToEdit?.title ?? "");
+    const [description, setDescription] = useState(bookmarkToEdit?.description ?? "");
+    const [tags, setTags] = useState(bookmarkToEdit?.tags?.join(", ") ?? "");
 
     const [isGenerating, startGeneration] = useTransition();
     const initialState: ActionState = { message: "", success: false };
@@ -65,6 +67,7 @@ export function BookmarkSheet({ isOpen, onClose, vaultId, categories: initialCat
         }, 300);
     }, [onClose]);
 
+    // Close sheet on success
     useEffect(() => {
         if (state?.success) {
             handleClose();

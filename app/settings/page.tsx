@@ -186,6 +186,9 @@ export default async function SettingsPage() {
                                     <p className="text-sm text-zinc-500">
                                         Permanently delete your account and all data.
                                     </p>
+                                    <p className="text-xs text-amber-400 mt-2">
+                                        ⚠️ Delete account is currently unavailable. Please contact administrator.
+                                    </p>
                                 </div>
                                 <Button variant="destructive" disabled title="Contact support to delete account">
                                     Delete Account

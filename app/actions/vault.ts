@@ -396,6 +396,49 @@ export async function subscribeToVault(vaultId: string): Promise<ActionState> {
     }
 }
 
+/**
+ * Unsubscribe from a vault (for non-owner members only)
+ */
+export async function unsubscribeFromVault(vaultId: string): Promise<ActionState> {
+    const session = await getSession();
+
+    if (!session?.user) {
+        return { success: false, message: "Please sign in" };
+    }
+
+    const vault = await prisma.vault.findUnique({
+        where: { id: vaultId },
+        select: { id: true, slug: true, ownerId: true }
+    });
+
+    if (!vault) {
+        return { success: false, message: "Vault not found" };
+    }
+
+    // Owner cannot unsubscribe from their own vault
+    if (vault.ownerId === session.user.id) {
+        return { success: false, message: "You cannot unsubscribe from your own vault" };
+    }
+
+    try {
+        await prisma.vaultMember.delete({
+            where: {
+                vaultId_userId: {
+                    vaultId,
+                    userId: session.user.id
+                }
+            }
+        });
+
+        revalidatePath(`/v/${vault.slug}`);
+        revalidatePath("/dashboard");
+        return { success: true, message: "Unsubscribed from vault" };
+
+    } catch {
+        return { success: false, message: "Failed to unsubscribe" };
+    }
+}
+
 const updateVaultSchema = z.object({
     vaultId: z.string(),
     name: z.string().min(3, "Name must be at least 3 characters").max(50, "Name must be less than 50 characters"),

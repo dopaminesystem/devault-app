@@ -6,7 +6,6 @@ interface VaultBreadcrumbProps {
 }
 
 export function VaultBreadcrumb({
-    vaultName,
     activeCategory
 }: VaultBreadcrumbProps) {
     return (
@@ -14,8 +13,6 @@ export function VaultBreadcrumb({
             <a href="/dashboard" className="text-zinc-500 hover:text-zinc-300 transition-colors">
                 Dashboard
             </a>
-            <span className="text-zinc-700">/</span>
-            <span className="text-zinc-500">{vaultName}</span>
             <span className="text-zinc-700">/</span>
             <span className="text-zinc-200 font-medium">
                 {activeCategory || 'All Bookmarks'}

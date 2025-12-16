@@ -9,6 +9,8 @@ import { ViewToggle } from "./header-parts/view-toggle";
 import { SubscribeButton } from "./header-parts/subscribe-button";
 import { SearchInput } from "./header-parts/search-input";
 import { LoginPromptModal } from "./header-parts/login-prompt-modal";
+import { UnsubscribeButton } from "./header-parts/unsubscribe-button";
+import { ShareModal } from "@/components/vault/share-modal";
 
 // ============================================================================
 // Main Component
@@ -51,11 +53,11 @@ export function VaultHeader({
 }: VaultHeaderProps) {
     const [isSubscribing, setIsSubscribing] = React.useState(false);
     const [showLoginModal, setShowLoginModal] = React.useState(false);
+    const [showShareModal, setShowShareModal] = React.useState(false);
 
     // ⚡ PERF: useCallback for event handlers
     const handleShare = useCallback(() => {
-        navigator.clipboard.writeText(window.location.href);
-        toast.success("Vault link copied to clipboard");
+        setShowShareModal(true);
     }, []);
 
     // ⚡ PERF: useMemo for computed values
@@ -113,6 +115,10 @@ export function VaultHeader({
                                 onClick={handleSubscribe}
                             />
                         )}
+                        {/* Unsubscribe for non-owner members */}
+                        {!isOwner && isMember && (
+                            <UnsubscribeButton vaultId={vaultId} vaultName={vaultName} />
+                        )}
                         <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
 
 
@@ -155,6 +161,16 @@ export function VaultHeader({
                 onOpenChange={setShowLoginModal}
                 vaultName={vaultName}
                 callbackUrl={callbackUrl}
+            />
+
+            {/* Share Modal */}
+            <ShareModal
+                open={showShareModal}
+                onOpenChange={setShowShareModal}
+                vaultId={vaultId}
+                vaultSlug={vaultSlug}
+                accessType={accessType}
+                isOwner={isOwner}
             />
         </>
     );

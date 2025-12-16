@@ -8,6 +8,61 @@ import { getSession } from "@/lib/auth";
 import { VaultMember } from "@prisma/client";
 import ClientVaultView from "./client-vault-view";
 import { prisma } from "@/lib/prisma";
+import { Metadata } from "next";
+import { SITE_CONFIG } from "@/lib/constants";
+
+// Dynamic OG metadata for each vault
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+    const { slug } = await params;
+
+    const vault = await prisma.vault.findUnique({
+        where: { slug },
+        select: { name: true, description: true }
+    });
+
+    if (!vault) {
+        return {
+            title: "Vault Not Found | Devault",
+            description: "The vault you are looking for does not exist.",
+            robots: { index: false, follow: false },
+        };
+    }
+
+    const title = `${vault.name} | Devault`;
+    const description = vault.description || `Explore ${vault.name} on Devault - a curated collection of bookmarks.`;
+    const vaultUrl = `${SITE_CONFIG.url}/v/${slug}`;
+    const ogImageUrl = `/api/og/${slug}`;
+
+    return {
+        title,
+        description,
+        robots: { index: true, follow: true },
+        alternates: {
+            canonical: vaultUrl,
+        },
+        openGraph: {
+            title,
+            description,
+            url: vaultUrl,
+            siteName: SITE_CONFIG.name,
+            type: "website",
+            images: [
+                {
+                    url: ogImageUrl,
+                    width: 1200,
+                    height: 630,
+                    alt: vault.name,
+                },
+            ],
+        },
+        twitter: {
+            card: "summary_large_image",
+            title,
+            description,
+            images: [ogImageUrl],
+        },
+    };
+}
 
 export default async function VaultPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
