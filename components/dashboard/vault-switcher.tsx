@@ -4,7 +4,8 @@ import { useState, useCallback, useMemo } from 'react';
 import { ChevronsUpDown, Check, Plus, Box, Briefcase, Lock } from 'lucide-react';
 import { Vault } from '@prisma/client';
 import { useRouter } from 'next/navigation';
-import Link from "next/link";
+import { LimitAlertModal } from './modals/limit-alert-modal';
+import { LoginModal } from './modals/login-modal';
 
 // ⚡ PERF: Module-level constant (created once, not on every render)
 const VAULT_STYLES = [
@@ -23,17 +24,6 @@ interface VaultSwitcherProps {
     onVaultChange?: (vault: Vault) => void;
     isLoggedIn?: boolean;
 }
-
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 
 export function VaultSwitcher({
     vaults,
@@ -135,47 +125,16 @@ export function VaultSwitcher({
                 </div>
             )}
 
-            {/* Limit Alert for logged-in users */}
-            <AlertDialog open={showLimitAlert} onOpenChange={setShowLimitAlert}>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Free Tier Limit Reached</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            You have reached the limit of vaults for the Free tier.
-                            Please upgrade to the Pro plan to create unlimited vaults.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction className="bg-indigo-600 hover:bg-indigo-700">Upgrade to Pro</AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
+            {/* Limit Alert Modal */}
+            <LimitAlertModal open={showLimitAlert} onOpenChange={setShowLimitAlert} />
 
-            {/* Login Modal for guests */}
-            <AlertDialog open={showLoginModal} onOpenChange={setShowLoginModal}>
-                <AlertDialogContent showCloseButton>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Sign in to create a vault</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            Create a free account to start saving bookmarks
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel asChild>
-                            <Link href="/sign-in">
-                                Sign In
-                            </Link>
-                        </AlertDialogCancel>
-                        <AlertDialogAction asChild>
-                            <Link href="/sign-up">
-                                Create Account
-                            </Link>
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
+            {/* Login Modal */}
+            <LoginModal
+                open={showLoginModal}
+                onOpenChange={setShowLoginModal}
+                title="Sign in to create a vault"
+                description="Create a free account to start saving bookmarks"
+            />
         </div>
     );
 }
-
