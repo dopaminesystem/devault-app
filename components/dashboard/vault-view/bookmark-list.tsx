@@ -1,6 +1,10 @@
 import { Plus, Edit2, ExternalLink } from 'lucide-react';
 import { BookmarkWithCategory } from "@/lib/types";
+
+import Image from "next/image";
 import { getCategoryColor, getHostname } from '@/lib/utils';
+
+
 
 interface BookmarkListProps {
     bookmarks: BookmarkWithCategory[];
@@ -53,11 +57,13 @@ export function BookmarkList({
                                 <div className="col-span-12 md:col-span-5 flex items-start gap-3 overflow-hidden pr-4">
                                     <div className="w-8 h-8 shrink-0 rounded-lg bg-zinc-900 border border-zinc-800/50 flex items-center justify-center mt-0.5">
                                         {/* ⚡ PERF: Lazy load favicons for bookmarks below the fold */}
-                                        <img
+                                        <Image
                                             src={faviconUrl}
                                             alt="icon"
-                                            loading="lazy"
+                                            width={16}
+                                            height={16}
                                             className="w-4 h-4 opacity-60 group-hover:opacity-100 transition-opacity grayscale group-hover:grayscale-0"
+                                            unoptimized
                                         />
                                     </div>
                                     <div className="flex flex-col min-w-0">
@@ -114,8 +120,8 @@ export function BookmarkList({
                             </div>
                         );
                     })}
-                </div>
-            </div>
-        </div>
+                </div >
+            </div >
+        </div >
     );
 }

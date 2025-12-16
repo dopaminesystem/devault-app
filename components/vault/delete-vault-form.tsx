@@ -5,7 +5,8 @@ import { deleteVault } from "@/app/actions/vault";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-import { Loader2, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
+import { ActionState } from "@/lib/types";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -23,12 +24,13 @@ interface DeleteVaultFormProps {
     vaultName: string;
 }
 
-const initialState = {
+const initialState: ActionState = {
+    success: false,
     message: "",
 };
 
 export function DeleteVaultForm({ vaultId, vaultName }: DeleteVaultFormProps) {
-    const [state, action, isPending] = useActionState(deleteVault, initialState);
+    const [state, action, isPending] = useActionState<ActionState, FormData>(deleteVault, initialState);
     const [isOpen, setIsOpen] = useState(false);
     const [confirmText, setConfirmText] = useState("");
 

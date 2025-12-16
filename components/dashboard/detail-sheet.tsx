@@ -1,16 +1,8 @@
 "use client";
 
 import React, { useEffect } from 'react';
-import {
-    Globe,
-    Copy,
-    List,
-    Hash,
-    Calendar,
-    Trash2,
-    ExternalLink,
-    X
-} from 'lucide-react';
+import { X, ExternalLink, Calendar, Trash2, Globe, List, Hash, Copy } from 'lucide-react';
+import Image from "next/image";
 import { BookmarkWithCategory, ActionState } from '@/lib/types';
 import { format } from 'date-fns';
 import { SheetShell } from "@/components/ui/sheet-shell";
@@ -34,7 +26,7 @@ interface DetailSheetProps {
     isMember: boolean;
 }
 
-export function DetailSheet({ bookmark, isOpen, onClose, onEdit, isOwner, isMember }: DetailSheetProps) {
+export function DetailSheet({ bookmark, isOpen, onClose, onEdit, isOwner }: DetailSheetProps) {
     const initialState: ActionState = { message: "", success: false };
     const [state, formAction, isPending] = useActionState(deleteBookmark, initialState);
 
@@ -56,11 +48,13 @@ export function DetailSheet({ bookmark, isOpen, onClose, onEdit, isOwner, isMemb
             <div className="flex items-start justify-between p-6 border-b border-zinc-800/50">
                 <div className="flex gap-4 items-start">
                     <div className="w-12 h-12 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center shrink-0">
-                        <img
+                        <Image
                             src={faviconUrl}
                             alt="favicon"
-                            loading="lazy"
+                            width={24}
+                            height={24}
                             className="w-6 h-6 opacity-80"
+                            unoptimized
                         />
                     </div>
                     <div>

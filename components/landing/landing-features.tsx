@@ -171,7 +171,7 @@ export function LandingFeatures() {
                                     <div className="mt-1 text-emerald-400">✓ Running on localhost:3000</div>
                                 </div>
                                 <div className="bg-zinc-950 p-4 rounded-xl border border-zinc-800">
-                                    <div className="text-zinc-600 mb-1">// Contribute with us</div>
+                                    <div className="text-zinc-600 mb-1">{`// Contribute with us`}</div>
                                     <div className="flex items-center gap-2 mb-2">
                                         <div className="flex -space-x-2">
                                             {[1, 2, 3, 4].map((i) => (

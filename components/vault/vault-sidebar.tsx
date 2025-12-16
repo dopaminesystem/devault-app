@@ -139,7 +139,7 @@ export function VaultSidebar({ vaultId, slug, categories, canEdit }: VaultSideba
                     <AlertDialogHeader>
                         <AlertDialogTitle>Delete Category?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This will permanently delete the category "{deletingCategory?.name}".
+                            This will permanently delete the category &quot;{deletingCategory?.name}&quot;.
                             Bookmarks in this category will also be deleted.
                         </AlertDialogDescription>
                     </AlertDialogHeader>

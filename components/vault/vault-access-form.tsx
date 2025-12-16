@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { updateVaultSettings } from "@/app/actions/vault";
+import { ActionState } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,12 +18,13 @@ interface VaultAccessFormProps {
     };
 }
 
-const initialState = {
+const initialState: ActionState = {
     message: "",
+    success: false,
 };
 
 export function VaultAccessForm({ vault }: VaultAccessFormProps) {
-    const [state, action, isPending] = useActionState(updateVaultSettings, initialState);
+    const [state, action, isPending] = useActionState<ActionState, FormData>(updateVaultSettings, initialState);
     const [accessType, setAccessType] = useState(vault.accessType);
 
     return (
@@ -34,7 +36,7 @@ export function VaultAccessForm({ vault }: VaultAccessFormProps) {
                 <RadioGroup
                     name="accessType"
                     value={accessType}
-                    onValueChange={(val) => setAccessType(val as any)}
+                    onValueChange={(val) => setAccessType(val as "PUBLIC" | "PASSWORD" | "DISCORD_GATED")}
                     className="flex flex-col gap-3"
                 >
                     <label
@@ -103,7 +105,7 @@ export function VaultAccessForm({ vault }: VaultAccessFormProps) {
                             className="bg-zinc-950 border-zinc-800"
                         />
                         <p className="text-xs text-zinc-500">
-                            Right-click your server icon in Discord and select "Copy Server ID".
+                            Right-click your server icon in Discord and select &quot;Copy Server ID&quot;.
                         </p>
                     </div>
                 </div>

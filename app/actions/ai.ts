@@ -19,12 +19,14 @@ export async function magicGenerate(url: string, vaultId: string) {
         let scrapedFavicon = "";
 
         try {
-            const scrapePromise = metadata(normalizedUrl);
+            const scrapePromise = metadata(normalizedUrl, {
+                timeout: 9000
+            });
             const timeoutPromise = new Promise((_, reject) =>
-                setTimeout(() => reject(new Error("Scrape timeout")), 5000)
+                setTimeout(() => reject(new Error("Scrape timeout")), 9000)
             );
 
-            const data = await Promise.race([scrapePromise, timeoutPromise]) as any;
+            const data = await Promise.race([scrapePromise, timeoutPromise]) as { title?: string; description?: string; icon?: string };
             scrapedTitle = data.title || "";
             scrapedDescription = data.description || "";
             scrapedFavicon = data.icon || "";

@@ -1,7 +1,7 @@
 "use server";
 
 import { z } from "zod";
-import { auth, getSession } from "@/lib/auth";
+import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { VaultMember } from "@prisma/client";
 import { redirect } from "next/navigation";
@@ -208,15 +208,15 @@ const updateVaultSettingsSchema = z.object({
     discordGuildId: z.string().nullable().optional(),
 });
 
-export async function updateVaultSettings(prevState: any, formData: FormData) {
+export async function updateVaultSettings(prevState: ActionState, formData: FormData) {
     const session = await getSession();
 
     if (!session?.user) {
-        return { message: "Unauthorized" };
+        return { success: false, message: "Unauthorized" };
     }
 
     if (!session.user.emailVerified) {
-        return { message: "Email not verified" };
+        return { success: false, message: "Email not verified" };
     }
 
     const validatedFields = updateVaultSettingsSchema.safeParse({
@@ -228,7 +228,7 @@ export async function updateVaultSettings(prevState: any, formData: FormData) {
 
     if (!validatedFields.success) {
         console.error("Validation error:", validatedFields.error.flatten());
-        return { message: "Invalid fields" };
+        return { success: false, message: "Invalid fields" };
     }
 
     const { vaultId, accessType, password, discordGuildId } = validatedFields.data;
@@ -238,11 +238,11 @@ export async function updateVaultSettings(prevState: any, formData: FormData) {
     });
 
     if (!vault) {
-        return { message: "Vault not found" };
+        return { success: false, message: "Vault not found" };
     }
 
     if (vault.ownerId !== session.user.id) {
-        return { message: "Unauthorized" };
+        return { success: false, message: "Unauthorized" };
     }
 
     let passwordHash = vault.passwordHash;
@@ -251,11 +251,11 @@ export async function updateVaultSettings(prevState: any, formData: FormData) {
         if (password && password.length > 0) {
             passwordHash = await hash(password, 10);
         } else if (!passwordHash) {
-            return { message: "Password is required for private vaults" };
+            return { success: false, message: "Password is required for private vaults" };
         }
     } else if (accessType === "DISCORD_GATED") {
         if (!discordGuildId || discordGuildId.trim().length === 0) {
-            return { message: "Discord Server ID is required for Discord-gated vaults" };
+            return { success: false, message: "Discord Server ID is required for Discord-gated vaults" };
         }
         passwordHash = null;
     } else {
@@ -274,10 +274,10 @@ export async function updateVaultSettings(prevState: any, formData: FormData) {
     revalidatePath(`/v/${vault.slug}`);
     revalidatePath(`/v/${vault.slug}/settings`);
 
-    return { message: "Settings updated successfully" };
+    return { success: true, message: "Settings updated successfully" };
 }
 
-export async function joinVault(prevState: any, formData: FormData) {
+export async function joinVault(prevState: ActionState, formData: FormData) {
     const session = await getSession();
 
     if (!session?.user) {
@@ -326,9 +326,8 @@ export async function joinVault(prevState: any, formData: FormData) {
                 role: "MEMBER",
             },
         });
-    } catch (error) {
+    } catch {
         // Ignore unique constraint error if already member
-        console.log("User might already be a member", error);
     }
 
     revalidatePath(`/v/${vault.slug}`);
@@ -403,15 +402,55 @@ const updateVaultSchema = z.object({
     description: z.string().max(200, "Description must be less than 200 characters").optional(),
 });
 
-export async function updateVault(prevState: any, formData: FormData) {
+export async function updateDefaultVault(prevState: ActionState, formData: FormData) {
     const session = await getSession();
 
     if (!session?.user) {
-        return { message: "Unauthorized" };
+        return { success: false, message: "Unauthorized" };
     }
 
     if (!session.user.emailVerified) {
-        return { message: "Email not verified" };
+        return { success: false, message: "Email not verified" };
+    }
+
+    const defaultVaultId = formData.get("defaultVaultId") as string | null;
+
+    if (defaultVaultId === undefined) {
+        return { success: false, message: "Missing defaultVaultId" };
+    }
+
+    // If defaultVaultId is provided, ensure it's a valid vault owned by the user
+    if (defaultVaultId) {
+        const vault = await prisma.vault.findUnique({
+            where: { id: defaultVaultId },
+            select: { ownerId: true }
+        });
+
+        if (!vault || vault.ownerId !== session.user.id) {
+            return { success: false, message: "Invalid vault selected as default" };
+        }
+    }
+
+    await prisma.user.update({
+        where: { id: session.user.id },
+        data: {
+            defaultVaultId: defaultVaultId || null, // Set to null if empty string or not provided
+        },
+    });
+
+    revalidatePath("/dashboard");
+    return { success: true, message: "Default vault updated successfully" };
+}
+
+export async function updateVault(prevState: ActionState, formData: FormData) {
+    const session = await getSession();
+
+    if (!session?.user) {
+        return { success: false, message: "Unauthorized" };
+    }
+
+    if (!session.user.emailVerified) {
+        return { success: false, message: "Email not verified" };
     }
 
     const validatedFields = updateVaultSchema.safeParse({
@@ -421,7 +460,7 @@ export async function updateVault(prevState: any, formData: FormData) {
     });
 
     if (!validatedFields.success) {
-        return { message: "Invalid fields" };
+        return { success: false, message: "Invalid fields" };
     }
 
     const { vaultId, name, description } = validatedFields.data;
@@ -431,11 +470,11 @@ export async function updateVault(prevState: any, formData: FormData) {
     });
 
     if (!vault) {
-        return { message: "Vault not found" };
+        return { success: false, message: "Vault not found" };
     }
 
     if (vault.ownerId !== session.user.id) {
-        return { message: "Unauthorized" };
+        return { success: false, message: "Unauthorized" };
     }
 
     await prisma.vault.update({
@@ -450,24 +489,24 @@ export async function updateVault(prevState: any, formData: FormData) {
     revalidatePath(`/v/${vault.slug}/settings`);
     revalidatePath("/dashboard");
 
-    return { message: "Vault updated successfully" };
+    return { success: true, message: "Vault updated successfully" };
 }
 
-export async function deleteVault(prevState: any, formData: FormData) {
+export async function deleteVault(prevState: ActionState, formData: FormData) {
     const session = await getSession();
 
     if (!session?.user) {
-        return { message: "Unauthorized" };
+        return { success: false, message: "Unauthorized" };
     }
 
     if (!session.user.emailVerified) {
-        return { message: "Email not verified" };
+        return { success: false, message: "Email not verified" };
     }
 
     const vaultId = formData.get("vaultId") as string;
 
     if (!vaultId) {
-        return { message: "Missing vault ID" };
+        return { success: false, message: "Missing vault ID" };
     }
 
     const vault = await prisma.vault.findUnique({
@@ -475,11 +514,11 @@ export async function deleteVault(prevState: any, formData: FormData) {
     });
 
     if (!vault) {
-        return { message: "Vault not found" };
+        return { success: false, message: "Vault not found" };
     }
 
     if (vault.ownerId !== session.user.id) {
-        return { message: "Unauthorized" };
+        return { success: false, message: "Unauthorized" };
     }
 
     // Check if this is the default vault
@@ -501,4 +540,5 @@ export async function deleteVault(prevState: any, formData: FormData) {
 
     revalidatePath("/dashboard");
     redirect("/dashboard");
+    return { success: true, message: "Vault deleted" };
 }

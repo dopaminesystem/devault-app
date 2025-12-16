@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { joinVault } from "@/app/actions/vault";
+import { ActionState } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,13 +14,13 @@ type JoinVaultFormProps = {
     vaultName: string;
 };
 
-const initialState = {
+const initialState: ActionState = {
     message: "",
     success: false,
 };
 
 export function JoinVaultForm({ vaultId, vaultName }: JoinVaultFormProps) {
-    const [state, formAction, isPending] = useActionState(joinVault, initialState);
+    const [state, formAction, isPending] = useActionState<ActionState, FormData>(joinVault, initialState);
 
     return (
         <div className="flex min-h-screen items-center justify-center p-4">

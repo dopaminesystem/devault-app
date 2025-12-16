@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button"
 import { FaDiscord } from "react-icons/fa"
 import {
     AlertDialog,
-    AlertDialogAction,
     AlertDialogCancel,
     AlertDialogContent,
     AlertDialogDescription,
@@ -30,7 +29,7 @@ export default function SignUpForm() {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
 
-    const [enableState, enableAction, enablePending] = useActionState(enableEmailSignInAction, { error: "", success: false })
+    const [, enableAction, enablePending] = useActionState(enableEmailSignInAction, { error: "", success: false })
 
     const router = useRouter()
 

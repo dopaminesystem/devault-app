@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { User, Settings, Shield, Link as LinkIcon, ArrowLeft } from "lucide-react";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import Link from "next/link";
+import Image from "next/image";
 
 export default async function SettingsPage() {
     const session = await getSession();
@@ -84,7 +85,14 @@ export default async function SettingsPage() {
                             <div className="flex items-center gap-6">
                                 <div className="w-20 h-20 rounded-full bg-zinc-800 border-2 border-zinc-700 flex items-center justify-center overflow-hidden">
                                     {user?.image ? (
-                                        <img src={user.image} alt={user.name || "User"} className="w-full h-full object-cover" />
+                                        <Image
+                                            src={user.image}
+                                            alt={user.name || "User"}
+                                            width={80}
+                                            height={80}
+                                            className="w-full h-full object-cover"
+                                            unoptimized
+                                        />
                                     ) : (
                                         <User size={32} className="text-zinc-500" />
                                     )}

@@ -1,7 +1,8 @@
 "use client";
 
-import { useActionState, useState, useEffect } from "react";
+import { useActionState, useEffect } from "react";
 import { updateCategory } from "@/app/actions/category";
+import { ActionState } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,13 +25,13 @@ interface EditCategoryDialogProps {
     onOpenChange: (open: boolean) => void;
 }
 
-const initialState = {
+const initialState: ActionState = {
     message: "",
     success: false,
 };
 
 export function EditCategoryDialog({ category, open, onOpenChange }: EditCategoryDialogProps) {
-    const [state, action, isPending] = useActionState(updateCategory, initialState);
+    const [state, action, isPending] = useActionState<ActionState, FormData>(updateCategory, initialState);
 
     useEffect(() => {
         if (state.success && open) {

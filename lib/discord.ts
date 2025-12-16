@@ -62,7 +62,7 @@ export async function isDiscordMembership(userId: string, guildId: string, roleI
         }
 
         const guilds = await response.json();
-        const isMember = guilds.some((g: any) => g.id === guildId);
+        const isMember = guilds.some((g: { id: string }) => g.id === guildId);
 
         if (!isMember) {
             return false;

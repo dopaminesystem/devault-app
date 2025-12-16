@@ -1,4 +1,5 @@
 import { Plus, Globe, Edit2 } from 'lucide-react';
+import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { BookmarkWithCategory } from "@/lib/types";
@@ -51,11 +52,13 @@ export function BookmarkGrid({
                             <div className="flex items-start justify-between">
                                 <div className="w-10 h-10 rounded-lg bg-zinc-950/50 border border-zinc-800/50 flex items-center justify-center group-hover:border-zinc-700 transition-colors">
                                     {/* ⚡ PERF: Lazy load favicons for bookmarks below the fold */}
-                                    <img
+                                    <Image
                                         src={faviconUrl}
                                         alt="icon"
-                                        loading="lazy"
+                                        width={20}
+                                        height={20}
                                         className="w-5 h-5 opacity-70 group-hover:opacity-100 transition-opacity grayscale group-hover:grayscale-0"
+                                        unoptimized
                                     />
                                 </div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState, useEffect } from "react";
+import { useActionState, useEffect } from "react";
 import { updateBookmark } from "@/app/actions/bookmark";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

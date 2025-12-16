@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { updateVault } from "@/app/actions/vault";
+import { ActionState } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,12 +18,13 @@ interface EditVaultFormProps {
     };
 }
 
-const initialState = {
+const initialState: ActionState = {
     message: "",
+    success: false,
 };
 
 export function EditVaultForm({ vault }: EditVaultFormProps) {
-    const [state, action, isPending] = useActionState(updateVault, initialState);
+    const [state, action, isPending] = useActionState<ActionState, FormData>(updateVault, initialState);
 
     return (
         <form action={action} className="space-y-6">
