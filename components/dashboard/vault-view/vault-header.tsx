@@ -167,8 +167,10 @@ export function VaultHeader({
             <ShareModal
                 open={showShareModal}
                 onOpenChange={setShowShareModal}
+                vaultId={vaultId}
                 vaultSlug={vaultSlug}
                 accessType={accessType}
+                isOwner={isOwner}
             />
         </>
     );
