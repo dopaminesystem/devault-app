@@ -149,6 +149,7 @@ export async function createBookmark(prevState: ActionState, formData: FormData)
             // Or use "General" / AI.
 
             let targetCategoryName = newCategoryName || categoryName || "General";
+            let aiSuggestedTags: string[] = [];
 
             // AI Magic Fallback only if we really have no category
             if (!categoryId && !newCategoryName && !categoryName) {
@@ -160,8 +161,16 @@ export async function createBookmark(prevState: ActionState, formData: FormData)
                     const categoryNames = existingCategories.map(c => c.name).filter(n => n !== "General");
                     const { enrichBookmark } = await import("@/lib/ai");
                     const aiSuggestion = await enrichBookmark(url, title || url, description || "", categoryNames);
-                    if (aiSuggestion) targetCategoryName = aiSuggestion.category;
+                    if (aiSuggestion) {
+                        targetCategoryName = aiSuggestion.category;
+                        aiSuggestedTags = aiSuggestion.tags || [];
+                    }
                 } catch { }
+            }
+
+            // Use AI tags if user didn't provide any
+            if (tagsArray.length === 0 && aiSuggestedTags.length > 0) {
+                tagsArray.push(...aiSuggestedTags);
             }
 
             // Find or create "General" or AI suggestion or Legacy name
