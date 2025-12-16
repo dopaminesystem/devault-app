@@ -34,6 +34,8 @@ export default async function DashboardPage() {
         }
     });
 
+    const hasOwnedVault = vaults.some(v => v.ownerId === session.user.id);
+
     return (
         <div className="min-h-screen bg-zinc-950 text-zinc-100 font-sans selection:bg-indigo-500/30 relative overflow-hidden">
             {/* Decorative Gradients */}
@@ -63,7 +65,7 @@ export default async function DashboardPage() {
                 {vaults.length === 0 ? (
                     <VaultEmptyState />
                 ) : (
-                    <VaultGrid vaults={vaults} />
+                    <VaultGrid vaults={vaults} hasOwnedVault={hasOwnedVault} />
                 )}
             </div>
         </div>

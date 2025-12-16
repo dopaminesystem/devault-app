@@ -65,6 +65,18 @@ export function BookmarkSheet({ isOpen, onClose, vaultId, categories: initialCat
         }, 300);
     }, [onClose]);
 
+    // Populate form fields when editing an existing bookmark
+    useEffect(() => {
+        if (bookmarkToEdit) {
+            setUrl(bookmarkToEdit.url);
+            setTitle(bookmarkToEdit.title || "");
+            setDescription(bookmarkToEdit.description || "");
+            setTags(bookmarkToEdit.tags?.join(", ") || "");
+            setSelectedCategoryId(bookmarkToEdit.categoryId);
+            setNewCategoryName("");
+        }
+    }, [bookmarkToEdit]);
+
     useEffect(() => {
         if (state?.success) {
             handleClose();

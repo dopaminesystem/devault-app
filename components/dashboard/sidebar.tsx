@@ -107,9 +107,9 @@ export function Sidebar({
                                             e.stopPropagation();
                                             onOpenSettings(cat);
                                         }}
-                                        className="absolute right-2 opacity-0 group-hover:opacity-100 text-zinc-500 hover:text-zinc-300 transition-all p-1 hover:bg-zinc-800 rounded"
+                                        className="absolute right-2 opacity-0 group-hover:opacity-100 text-zinc-500 hover:text-zinc-300 transition-all p-1.5 hover:bg-zinc-800 rounded"
                                     >
-                                        <Settings size={12} />
+                                        <Settings size={16} />
                                     </button>
                                 )}
                             </div>

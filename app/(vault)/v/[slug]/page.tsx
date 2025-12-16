@@ -8,6 +8,39 @@ import { getSession } from "@/lib/auth";
 import { VaultMember } from "@prisma/client";
 import ClientVaultView from "./client-vault-view";
 import { prisma } from "@/lib/prisma";
+import { Metadata } from "next";
+
+// Dynamic OG metadata for each vault
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+    const { slug } = await params;
+
+    const vault = await prisma.vault.findUnique({
+        where: { slug },
+        select: { name: true, description: true }
+    });
+
+    if (!vault) {
+        return {
+            title: "Vault Not Found | Devault",
+            description: "The vault you are looking for does not exist."
+        };
+    }
+
+    return {
+        title: `${vault.name} | Devault`,
+        description: vault.description || `Explore ${vault.name} on Devault - a curated collection of bookmarks.`,
+        openGraph: {
+            title: `${vault.name} | Devault`,
+            description: vault.description || `Explore ${vault.name} on Devault - a curated collection of bookmarks.`,
+            type: "website",
+        },
+        twitter: {
+            card: "summary_large_image",
+            title: `${vault.name} | Devault`,
+            description: vault.description || `Explore ${vault.name} on Devault`,
+        }
+    };
+}
 
 export default async function VaultPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;

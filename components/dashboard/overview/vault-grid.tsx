@@ -7,9 +7,10 @@ import { Globe, Lock, Shield } from "lucide-react";
 
 interface VaultGridProps {
     vaults: Vault[];
+    hasOwnedVault: boolean;
 }
 
-export function VaultGrid({ vaults }: VaultGridProps) {
+export function VaultGrid({ vaults, hasOwnedVault }: VaultGridProps) {
     return (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {vaults.map((vault: Vault) => (
@@ -52,8 +53,8 @@ export function VaultGrid({ vaults }: VaultGridProps) {
                 </Card>
             ))}
 
-            {/* Add New Vault Card */}
-            {vaults.length < 1 ? (
+            {/* Add New Vault Card - Show if user doesn't own a vault yet */}
+            {!hasOwnedVault ? (
                 <CreateVaultDialog />
             ) : (
                 <div className="flex flex-col items-center justify-center p-6 rounded-xl border border-dashed border-zinc-800 bg-zinc-900/10 gap-4 h-full min-h-[200px] opacity-60 cursor-not-allowed relative overflow-hidden group">
