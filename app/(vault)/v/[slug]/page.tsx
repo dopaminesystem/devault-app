@@ -1,5 +1,6 @@
 import { getVault, getVaultPageData } from "@/app/actions/vault";
 import { JoinVaultForm } from "@/components/vault/join-vault-form";
+import { DiscordReconnectPrompt } from "@/components/vault/discord-reconnect-prompt";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Lock } from "lucide-react";
@@ -98,6 +99,16 @@ export default async function VaultPage({ params }: { params: Promise<{ slug: st
 
         if (vaultCheck && vaultCheck.accessType === "PASSWORD") {
             return <JoinVaultForm vaultId={vaultCheck.id} vaultName={vaultCheck.name} />;
+        }
+
+        // Show Discord reconnect prompt for Discord-gated vaults when reconnection is needed
+        if (vaultCheck && vaultCheck.accessType === "DISCORD_GATED" && result.discordReason && result.discordReason !== "success") {
+            return (
+                <DiscordReconnectPrompt
+                    vaultName={vaultCheck.name}
+                    reason={result.discordReason}
+                />
+            );
         }
 
         return (

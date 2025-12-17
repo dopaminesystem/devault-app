@@ -3,8 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { DefaultVaultForm } from "@/components/user/default-vault-form";
 import { Button } from "@/components/ui/button";
-import { ConnectDiscordButton } from "@/components/user/connect-discord-button";
-import { FaDiscord } from "react-icons/fa";
+import { DiscordConnectionCard } from "@/components/user/discord-connection-card";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { User, Settings, Shield, Link as LinkIcon, ArrowLeft } from "lucide-react";
 import { SignOutButton } from "@/components/auth/sign-out-button";
@@ -141,29 +140,10 @@ export default async function SettingsPage() {
                             </div>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <div className="flex items-center justify-between p-4 rounded-xl border border-zinc-800 bg-zinc-900/50">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-10 h-10 rounded-lg bg-[#5865F2]/20 flex items-center justify-center">
-                                        <FaDiscord className="h-6 w-6 text-[#5865F2]" />
-                                    </div>
-                                    <div>
-                                        <p className="font-medium text-zinc-200">Discord</p>
-                                        <p className="text-sm text-zinc-500">
-                                            {discordAccount
-                                                ? "Connected as " + discordAccount.providerId
-                                                : "Connect to save bookmarks directly from Discord."}
-                                        </p>
-                                    </div>
-                                </div>
-                                {discordAccount ? (
-                                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/10 text-green-400 text-xs font-medium border border-green-500/20">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-                                        Connected
-                                    </div>
-                                ) : (
-                                    <ConnectDiscordButton />
-                                )}
-                            </div>
+                            <DiscordConnectionCard
+                                isConnected={!!discordAccount}
+                                tokenExpiresAt={discordAccount?.accessTokenExpiresAt}
+                            />
                         </CardContent>
                     </Card>
                     {/* Danger Zone */}
