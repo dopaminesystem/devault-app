@@ -62,7 +62,6 @@ export async function signUpAction(
                             success: false,
                             error: "AccountExistsViaProvider",
                             message: "An account with this email already exists via Discord",
-                            // We can use this in UI to show the dialog
                         };
                     }
                 }
@@ -136,7 +135,6 @@ export async function enableEmailSignInAction(
     }
 
     try {
-        // Get current session
         const session = await getSession();
 
         if (!session?.user) {
@@ -146,7 +144,6 @@ export async function enableEmailSignInAction(
             };
         }
 
-        // Verify email matches
         if (session.user.email?.toLowerCase() !== email) {
             return {
                 success: false,
@@ -154,7 +151,7 @@ export async function enableEmailSignInAction(
             };
         }
 
-        // Use better-auth's linkAccount to add credential provider
+        // Link email/password credentials to existing OAuth account
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await (auth.api as any).linkAccount({
             body: {
@@ -174,7 +171,6 @@ export async function enableEmailSignInAction(
 
         const err = error as { message?: string; body?: { message?: string } };
 
-        // Handle specific better-auth errors
         if (err?.message?.includes("already linked") || err?.body?.message?.includes("already linked")) {
             return {
                 success: false,

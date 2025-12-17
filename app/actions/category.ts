@@ -34,7 +34,6 @@ export async function createCategory(prevState: ActionState, formData: FormData)
 
     const { vaultId, name } = validatedFields.data;
 
-    // Check access
     const vault = await prisma.vault.findUnique({
         where: { id: vaultId },
         include: { members: true },
@@ -56,7 +55,7 @@ export async function createCategory(prevState: ActionState, formData: FormData)
             data: {
                 vaultId,
                 name,
-                order: 0, // Default order, can be updated later
+                order: 0,
             },
         });
 
@@ -76,7 +75,7 @@ export async function getCategories(vaultId: string) {
                 vaultId,
             },
             orderBy: {
-                createdAt: "asc", // Or order field if we implement reordering
+                createdAt: "asc",
             },
             include: {
                 _count: {
