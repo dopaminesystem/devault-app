@@ -13,7 +13,6 @@ export async function magicGenerate(url: string, vaultId: string) {
     try {
         const normalizedUrl = normalizeUrl(url);
 
-        // 1. Scrape Metadata (Fail-Fast: 5s)
         let scrapedTitle = "";
         let scrapedDescription = "";
         let scrapedFavicon = "";
@@ -31,17 +30,15 @@ export async function magicGenerate(url: string, vaultId: string) {
             scrapedDescription = data.description || "";
             scrapedFavicon = data.icon || "";
         } catch {
-            // Metadata scrape failed or timed out - continue with empty values
+            // Scrape failed - continue with empty values
         }
 
-        // 2. Fetch Existing Categories for Context
         const existingCategories = await prisma.category.findMany({
             where: { vaultId },
             select: { name: true }
         });
         const categoryNames = existingCategories.map(c => c.name);
 
-        // 3. AI Enrichment (Scraped Data -> AI -> Final Data)
         const aiResult = await enrichBookmark(
             normalizedUrl,
             scrapedTitle,
@@ -49,7 +46,7 @@ export async function magicGenerate(url: string, vaultId: string) {
             categoryNames
         );
 
-        // 4. Return Final Logic (AI > Scraped > Empty)
+        // Priority: AI result > scraped data > empty
         return {
             title: aiResult?.title || scrapedTitle || "",
             description: aiResult?.description || scrapedDescription || "",

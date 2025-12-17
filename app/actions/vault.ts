@@ -20,12 +20,8 @@ const createVaultSchema = z.object({
 import { getBookmarks } from "@/app/actions/bookmark";
 import { getCategories } from "@/app/actions/category";
 
-/**
- * ⚡ PERF: Fetch all vault page data in parallel
- * Extracts data fetching logic from the page component for reusability and cleanliness
- */
+/** Fetch all vault page data in parallel for optimal performance */
 export async function getVaultPageData(vaultId: string, userId?: string) {
-    // Run these 3 independent queries in parallel
     const [bookmarksResult, categoriesResult, userVaults] = await Promise.all([
         getBookmarks(vaultId),
         getCategories(vaultId),
@@ -83,7 +79,7 @@ export async function createVault(prevState: ActionState, formData: FormData): P
     const { name, slug, description } = validatedFields.data;
 
     try {
-        // Enforce 1 vault per user limit
+        // Enforce 1 vault per user limit (free tier)
         const existingVault = await prisma.vault.findFirst({
             where: {
                 ownerId: session.user.id,
@@ -97,7 +93,6 @@ export async function createVault(prevState: ActionState, formData: FormData): P
             };
         }
 
-        // Check if slug is unique
         const existingSlug = await prisma.vault.findUnique({
             where: {
                 slug,
@@ -129,7 +124,7 @@ export async function createVault(prevState: ActionState, formData: FormData): P
             },
         });
 
-        // Check if user has a default vault, if not set this one
+        // Set as default vault if user doesn't have one
         const user = await prisma.user.findUnique({
             where: { id: session.user.id },
             select: { defaultVaultId: true }
@@ -152,7 +147,6 @@ export async function createVault(prevState: ActionState, formData: FormData): P
 
     revalidatePath("/dashboard");
     redirect("/dashboard");
-    // This part is unreachable due to redirect, but good for type safety if redirect wasn't here
     return { success: true, message: "Vault created" };
 }
 
@@ -171,7 +165,6 @@ export async function getVault(slug: string) {
         return { error: "Vault not found" };
     }
 
-    // Check access
     const isOwner = session?.user?.id === vault.ownerId;
     const isMember = vault.members.some((m: VaultMember) => m.userId === session?.user?.id);
 
@@ -308,7 +301,6 @@ export async function joinVault(prevState: ActionState, formData: FormData) {
     }
 
     if (!vault.passwordHash) {
-        // Should not happen if logic is correct, but safe fallback
         return { success: false, message: "Vault configuration error" };
     }
 
@@ -327,17 +319,14 @@ export async function joinVault(prevState: ActionState, formData: FormData) {
             },
         });
     } catch {
-        // Ignore unique constraint error if already member
+        // Ignore if already a member
     }
 
     revalidatePath(`/v/${vault.slug}`);
     return { success: true, message: "Joined successfully" };
 }
 
-/**
- * ⚡ PERF: Subscribe to a PUBLIC vault (no password required)
- * Uses upsert for single-query operation - idempotent and fast
- */
+/** Subscribe to a PUBLIC vault using idempotent upsert */
 export async function subscribeToVault(vaultId: string): Promise<ActionState> {
     const session = await getSession();
 
@@ -349,7 +338,6 @@ export async function subscribeToVault(vaultId: string): Promise<ActionState> {
         return { success: false, message: "Please verify your email first" };
     }
 
-    // ⚡ PERF: Use select to only fetch needed fields
     const vault = await prisma.vault.findUnique({
         where: { id: vaultId },
         select: { id: true, slug: true, accessType: true, ownerId: true }
@@ -363,14 +351,12 @@ export async function subscribeToVault(vaultId: string): Promise<ActionState> {
         return { success: false, message: "This vault is not public" };
     }
 
-    // Don't allow owner to subscribe to their own vault
     if (vault.ownerId === session.user.id) {
         return { success: false, message: "You already own this vault" };
     }
 
     try {
-        // ⚡ PERF: Use upsert for single-query idempotent operation
-        // This handles both "already subscribed" and "new subscription" cases
+        // Upsert handles both new and existing subscriptions in one query
         await prisma.vaultMember.upsert({
             where: {
                 vaultId_userId: {
@@ -378,7 +364,7 @@ export async function subscribeToVault(vaultId: string): Promise<ActionState> {
                     userId: session.user.id
                 }
             },
-            update: {}, // No update needed if exists
+            update: {},
             create: {
                 vaultId,
                 userId: session.user.id,
@@ -396,9 +382,7 @@ export async function subscribeToVault(vaultId: string): Promise<ActionState> {
     }
 }
 
-/**
- * Unsubscribe from a vault (for non-owner members only)
- */
+/** Unsubscribe from a vault (for non-owner members only) */
 export async function unsubscribeFromVault(vaultId: string): Promise<ActionState> {
     const session = await getSession();
 
@@ -415,7 +399,6 @@ export async function unsubscribeFromVault(vaultId: string): Promise<ActionState
         return { success: false, message: "Vault not found" };
     }
 
-    // Owner cannot unsubscribe from their own vault
     if (vault.ownerId === session.user.id) {
         return { success: false, message: "You cannot unsubscribe from your own vault" };
     }
@@ -462,7 +445,6 @@ export async function updateDefaultVault(prevState: ActionState, formData: FormD
         return { success: false, message: "Missing defaultVaultId" };
     }
 
-    // If defaultVaultId is provided, ensure it's a valid vault owned by the user
     if (defaultVaultId) {
         const vault = await prisma.vault.findUnique({
             where: { id: defaultVaultId },
@@ -477,7 +459,7 @@ export async function updateDefaultVault(prevState: ActionState, formData: FormD
     await prisma.user.update({
         where: { id: session.user.id },
         data: {
-            defaultVaultId: defaultVaultId || null, // Set to null if empty string or not provided
+            defaultVaultId: defaultVaultId || null,
         },
     });
 
@@ -564,7 +546,7 @@ export async function deleteVault(prevState: ActionState, formData: FormData) {
         return { success: false, message: "Unauthorized" };
     }
 
-    // Check if this is the default vault
+    // Clear default vault reference if this is the user's default
     const user = await prisma.user.findUnique({
         where: { id: session.user.id },
         select: { defaultVaultId: true }

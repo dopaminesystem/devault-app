@@ -11,7 +11,6 @@ const updateDefaultVaultSchema = z.object({
     vaultId: z.string().min(1, "Vault ID is required"),
 });
 
-// This function logic matches updateDefaultVaultSchema
 export async function updateDefaultVault(prevState: ActionState, formData: FormData) {
     const session = await getSession();
 
@@ -34,7 +33,6 @@ export async function updateDefaultVault(prevState: ActionState, formData: FormD
     const { vaultId } = validation.data;
 
     try {
-        // Verify user has access to the vault
         const vault = await prisma.vault.findUnique({
             where: { id: vaultId },
             include: { members: true },
@@ -45,14 +43,12 @@ export async function updateDefaultVault(prevState: ActionState, formData: FormD
         }
 
         const isOwner = vault.ownerId === session.user.id;
-        // Fix any type here
         const isMember = vault.members.some((m: { userId: string }) => m.userId === session.user.id);
 
         if (!isOwner && !isMember) {
             return { success: false, message: "You do not have access to this vault" };
         }
 
-        // Update user's default vault
         await prisma.user.update({
             where: { id: session.user.id },
             data: { defaultVaultId: vaultId },

@@ -49,9 +49,7 @@ export async function createBookmark(prevState: ActionState, formData: FormData)
         return { success: false, message: "Email not verified" };
     }
 
-    // Check Free Tier Limit (100 bookmarks total)
-    // NOTE: This assumes all users are on free tier currently. 
-    // If premium exists, check subscription status here.
+    // Free tier limit: 100 bookmarks per user
     const totalBookmarks = await prisma.bookmark.count({
         where: {
             category: {
@@ -88,7 +86,6 @@ export async function createBookmark(prevState: ActionState, formData: FormData)
 
     const { vaultId, url, title, description, tags, category: categoryName } = validatedFields.data;
 
-    // Check access
     const vault = await prisma.vault.findUnique({
         where: { id: vaultId },
         include: { members: true },
@@ -104,23 +101,25 @@ export async function createBookmark(prevState: ActionState, formData: FormData)
         return { success: false, message: "You do not have permission to add bookmarks to this vault" };
     }
 
-    // Parse tags
     const tagsArray = tags
         ? tags.split(",").map((tag) => tag.trim()).filter((tag) => tag.length > 0)
         : [];
 
     try {
-        // DUAL FIELD LOGIC (Option 2)
+        /*
+         * Category Resolution Logic:
+         * Priority 1: Use provided categoryId (existing category selected)
+         * Priority 2: Create category from newCategoryName (user typed new name)
+         * Priority 3: AI suggestion based on URL/content, falling back to "General"
+         */
         const categoryId = formData.get("categoryId") as string;
         const newCategoryName = formData.get("newCategoryName") as string;
 
         let info_categoryId: string | null = categoryId || null;
 
-        // If no ID provided, but we have a new name, create it
         if (!info_categoryId && newCategoryName) {
             const targetName = newCategoryName.trim();
 
-            // Reuse existing if found by name (safety check)
             const existing = await prisma.category.findFirst({
                 where: { vaultId, name: targetName }
             });
@@ -128,7 +127,6 @@ export async function createBookmark(prevState: ActionState, formData: FormData)
             if (existing) {
                 info_categoryId = existing.id;
             } else {
-                // Create real new one
                 const lastCategory = await prisma.category.findFirst({
                     where: { vaultId },
                     orderBy: { order: 'desc' },
@@ -145,13 +143,10 @@ export async function createBookmark(prevState: ActionState, formData: FormData)
                 info_categoryId = newCat.id;
             }
         } else if (!info_categoryId) {
-            // Fallback: If logic 1 & 2 failed, maybe Zod 'category' field was used (e.g. from old code path or fallback)
-            // Or use "General" / AI.
-
+            // AI fallback: suggest category and tags when nothing is provided
             let targetCategoryName = newCategoryName || categoryName || "General";
             let aiSuggestedTags: string[] = [];
 
-            // AI Magic Fallback only if we really have no category
             if (!categoryId && !newCategoryName && !categoryName) {
                 try {
                     const existingCategories = await prisma.category.findMany({
@@ -168,12 +163,10 @@ export async function createBookmark(prevState: ActionState, formData: FormData)
                 } catch { }
             }
 
-            // Use AI tags if user didn't provide any
             if (tagsArray.length === 0 && aiSuggestedTags.length > 0) {
                 tagsArray.push(...aiSuggestedTags);
             }
 
-            // Find or create "General" or AI suggestion or Legacy name
             let cat = await prisma.category.findFirst({ where: { vaultId, name: targetCategoryName } });
             if (!cat) {
                 const lastCategory = await prisma.category.findFirst({ where: { vaultId }, orderBy: { order: 'desc' } });
@@ -260,36 +253,25 @@ export async function updateBookmark(prevState: ActionState, formData: FormData)
         return { success: false, message: "Unauthorized" };
     }
 
-    // Parse tags
     const tagsArray = tags
         ? tags.split(",").map((tag) => tag.trim()).filter((tag) => tag.length > 0)
         : [];
 
-    // DUAL FIELD LOGIC for Update
-    // 1. If categoryId provided -> link to it.
-    // 2. If newCategoryName provided -> create & link.
-    // 3. Else -> keep existing.
-
-    // Note: Zod parses them as optional strings logic above, but createBookmark handled it manually from formData
-    // because Zod schema names might not match form names perfectly in my previous step diffs. 
-    // Let's rely on manually getting from formData for consistency with createBookmark change
-
+    /*
+     * Category Resolution: categoryId → newCategoryName → keep existing
+     */
     const targetCategoryId = formData.get("categoryId") as string;
     const targetCategoryName = formData.get("newCategoryName") as string;
 
     let finalCategoryId = bookmark.categoryId;
 
     if (targetCategoryId) {
-        // Option A: User picked an existing category
-        // Verify it belongs to same vault
         const cat = await prisma.category.findUnique({ where: { id: targetCategoryId } });
         if (cat && cat.vaultId === bookmark.category.vaultId) {
             finalCategoryId = targetCategoryId;
         }
     } else if (targetCategoryName) {
-        // Option B: User typed a new name
         const vaultId = bookmark.category.vaultId;
-        // Reuse existing if found by name (safety check)
         const existing = await prisma.category.findFirst({
             where: { vaultId, name: targetCategoryName.trim() }
         });
@@ -297,7 +279,6 @@ export async function updateBookmark(prevState: ActionState, formData: FormData)
         if (existing) {
             finalCategoryId = existing.id;
         } else {
-            // Create real new one
             const lastCategory = await prisma.category.findFirst({
                 where: { vaultId },
                 orderBy: { order: 'desc' },

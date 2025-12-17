@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { LimitAlertModal } from './modals/limit-alert-modal';
 import { LoginModal } from './modals/login-modal';
 
-// ⚡ PERF: Module-level constant (created once, not on every render)
+// Module-level constant to avoid recreation on each render
 const VAULT_STYLES = [
     { icon: Box, color: 'bg-emerald-500', shadow: 'shadow-[0_0_10px_rgba(16,185,129,0.5)]' },
     { icon: Briefcase, color: 'bg-blue-500', shadow: 'shadow-[0_0_10px_rgba(59,130,246,0.5)]' },
@@ -36,7 +36,6 @@ export function VaultSwitcher({
     const [showLimitAlert, setShowLimitAlert] = useState(false);
     const [showLoginModal, setShowLoginModal] = useState(false);
 
-    // ⚡ PERF: useCallback to prevent function recreation
     const handleVaultChange = useCallback((vault: Vault) => {
         if (onVaultChange) {
             onVaultChange(vault);
@@ -54,7 +53,6 @@ export function VaultSwitcher({
         }
     };
 
-    // ⚡ PERF: useMemo for computed values
     const { ActiveIcon } = useMemo(() => {
         const idx = activeVault ? vaults.findIndex(v => v.id === activeVault.id) : -1;
         const style = getVaultStyle(idx >= 0 ? idx : 0);
@@ -88,7 +86,6 @@ export function VaultSwitcher({
                 <ChevronsUpDown size={14} className="text-zinc-500" />
             </button>
 
-            {/* Dropdown Menu */}
             {isOpen && (
                 <div className="absolute top-full left-0 w-full mt-2 bg-zinc-950/95 border border-zinc-800 rounded-xl shadow-2xl backdrop-blur-xl z-50 overflow-hidden animation-in fade-in zoom-in-95 duration-200 p-1">
                     <div className="px-2 py-1.5 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">
@@ -125,10 +122,7 @@ export function VaultSwitcher({
                 </div>
             )}
 
-            {/* Limit Alert Modal */}
             <LimitAlertModal open={showLimitAlert} onOpenChange={setShowLimitAlert} />
-
-            {/* Login Modal */}
             <LoginModal
                 open={showLoginModal}
                 onOpenChange={setShowLoginModal}
