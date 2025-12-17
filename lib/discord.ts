@@ -78,7 +78,21 @@ async function getValidAccessToken(account: {
     return account.accessToken;
 }
 
-export async function isDiscordMembership(userId: string, guildId: string, roleId?: string) {
+export type DiscordMembershipResult = {
+    hasAccess: boolean;
+    reason: "no_discord_account" | "token_expired" | "not_in_guild" | "no_role" | "api_error" | "success";
+    needsReconnect: boolean;
+};
+
+/**
+ * Checks Discord guild membership with detailed result for UI feedback.
+ * Returns reason for failure so we can prompt user to reconnect if needed.
+ */
+export async function checkDiscordMembership(
+    userId: string,
+    guildId: string,
+    roleId?: string
+): Promise<DiscordMembershipResult> {
     // 1. Get the user's Discord Account
     const account = await prisma.account.findFirst({
         where: {
@@ -95,7 +109,7 @@ export async function isDiscordMembership(userId: string, guildId: string, roleI
     });
 
     if (!account) {
-        return false;
+        return { hasAccess: false, reason: "no_discord_account", needsReconnect: true };
     }
 
     // Strategy 1: Use Bot Token (Preferred - doesn't rely on user's token)
@@ -108,34 +122,29 @@ export async function isDiscordMembership(userId: string, guildId: string, roleI
             });
 
             if (response.status === 404) {
-                return false;
+                return { hasAccess: false, reason: "not_in_guild", needsReconnect: false };
             }
 
-            if (!response.ok) {
-                console.error("Failed to fetch guild member with bot token", await response.text());
-                // Fallback to user token if bot fails
-            } else {
+            if (response.ok) {
                 const member = await response.json();
-                if (roleId) {
-                    return member.roles.includes(roleId);
+                if (roleId && !member.roles.includes(roleId)) {
+                    return { hasAccess: false, reason: "no_role", needsReconnect: false };
                 }
-                return true;
+                return { hasAccess: true, reason: "success", needsReconnect: false };
             }
+            // If bot fails, fall through to user token strategy
         } catch (error) {
             console.error("Discord Bot API error:", error);
-            // Fallback to user token
         }
     }
 
     // Strategy 2: Use User Access Token (Fallback)
-    // Get a valid token, refreshing if necessary
     const accessToken = await getValidAccessToken(account);
     if (!accessToken) {
-        return false;
+        return { hasAccess: false, reason: "token_expired", needsReconnect: true };
     }
 
     try {
-        // Check if user is in the guild
         const response = await fetch(`https://discord.com/api/users/@me/guilds`, {
             headers: {
                 Authorization: `Bearer ${accessToken}`,
@@ -143,15 +152,20 @@ export async function isDiscordMembership(userId: string, guildId: string, roleI
         });
 
         if (!response.ok) {
-            console.error("Failed to fetch user guilds", await response.text());
-            return false;
+            const errorText = await response.text();
+            console.error("Failed to fetch user guilds", errorText);
+            // If 401/403, likely scope issue - need reconnect
+            if (response.status === 401 || response.status === 403) {
+                return { hasAccess: false, reason: "token_expired", needsReconnect: true };
+            }
+            return { hasAccess: false, reason: "api_error", needsReconnect: false };
         }
 
         const guilds = await response.json();
         const isMember = guilds.some((g: { id: string }) => g.id === guildId);
 
         if (!isMember) {
-            return false;
+            return { hasAccess: false, reason: "not_in_guild", needsReconnect: false };
         }
 
         if (roleId) {
@@ -163,16 +177,25 @@ export async function isDiscordMembership(userId: string, guildId: string, roleI
 
             if (!memberResponse.ok) {
                 console.error("Failed to fetch guild member", await memberResponse.text());
-                return false;
+                return { hasAccess: false, reason: "api_error", needsReconnect: false };
             }
 
             const member = await memberResponse.json();
-            return member.roles.includes(roleId);
+            if (!member.roles.includes(roleId)) {
+                return { hasAccess: false, reason: "no_role", needsReconnect: false };
+            }
         }
 
-        return true;
+        return { hasAccess: true, reason: "success", needsReconnect: false };
     } catch (error) {
         console.error("Discord API error:", error);
-        return false;
+        return { hasAccess: false, reason: "api_error", needsReconnect: false };
     }
 }
+
+/** Original boolean function - kept for backward compatibility */
+export async function isDiscordMembership(userId: string, guildId: string, roleId?: string): Promise<boolean> {
+    const result = await checkDiscordMembership(userId, guildId, roleId);
+    return result.hasAccess;
+}
+

@@ -7,7 +7,7 @@ import { VaultMember } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { hash, compare } from "bcryptjs";
-import { isDiscordMembership } from "@/lib/discord";
+import { checkDiscordMembership } from "@/lib/discord";
 
 import { ActionState } from "@/lib/types";
 
@@ -185,10 +185,17 @@ export async function getVault(slug: string) {
             return { error: "Unauthorized" };
         }
 
-        const hasAccess = await isDiscordMembership(session.user.id, vault.discordGuildId);
-        if (hasAccess) {
+        const discordResult = await checkDiscordMembership(session.user.id, vault.discordGuildId);
+        if (discordResult.hasAccess) {
             return { vault };
         }
+
+        // Return detailed error for Discord-gated vaults
+        return {
+            error: "Access denied",
+            discordReason: discordResult.reason,
+            needsReconnect: discordResult.needsReconnect
+        };
     }
 
     return { error: "Access denied" };
