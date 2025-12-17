@@ -32,27 +32,36 @@ const accessOptions = [
         icon: Globe,
         label: "Public",
         description: "Anyone with the link can view",
-        color: "border-emerald-500/50 bg-emerald-500/10",
+        defaultColor: "border-zinc-800 bg-zinc-900/50",
+        hoverColor: "hover:border-emerald-500/50 hover:bg-emerald-500/10",
         activeColor: "border-emerald-500 bg-emerald-500/20 ring-2 ring-emerald-500/30",
-        iconColor: "text-emerald-400"
+        iconDefaultColor: "text-zinc-500",
+        iconHoverColor: "group-hover:text-emerald-400",
+        iconActiveColor: "text-emerald-400"
     },
     {
         type: "PASSWORD" as AccessType,
         icon: Lock,
         label: "Password",
         description: "Require password to access",
-        color: "border-amber-500/50 bg-amber-500/10",
+        defaultColor: "border-zinc-800 bg-zinc-900/50",
+        hoverColor: "hover:border-amber-500/50 hover:bg-amber-500/10",
         activeColor: "border-amber-500 bg-amber-500/20 ring-2 ring-amber-500/30",
-        iconColor: "text-amber-400"
+        iconDefaultColor: "text-zinc-500",
+        iconHoverColor: "group-hover:text-amber-400",
+        iconActiveColor: "text-amber-400"
     },
     {
         type: "DISCORD_GATED" as AccessType,
         icon: Shield,
         label: "Discord",
         description: "Only server members",
-        color: "border-indigo-500/50 bg-indigo-500/10",
+        defaultColor: "border-zinc-800 bg-zinc-900/50",
+        hoverColor: "hover:border-indigo-500/50 hover:bg-indigo-500/10",
         activeColor: "border-indigo-500 bg-indigo-500/20 ring-2 ring-indigo-500/30",
-        iconColor: "text-indigo-400"
+        iconDefaultColor: "text-zinc-500",
+        iconHoverColor: "group-hover:text-indigo-400",
+        iconActiveColor: "text-indigo-400"
     }
 ];
 
@@ -127,10 +136,12 @@ export function ShareModal({ open, onOpenChange, vaultId, vaultSlug, accessType,
                                         <button
                                             key={option.type}
                                             onClick={() => setSelectedType(option.type)}
-                                            className={`flex flex-col items-center gap-1.5 p-3 rounded-lg border transition-all ${isActive ? option.activeColor : `${option.color} hover:opacity-80`
+                                            className={`group flex flex-col items-center gap-1.5 p-3 rounded-lg border transition-all ${isActive
+                                                ? option.activeColor
+                                                : `${option.defaultColor} ${option.hoverColor}`
                                                 }`}
                                         >
-                                            <Icon size={20} className={option.iconColor} />
+                                            <Icon size={20} className={isActive ? option.iconActiveColor : `${option.iconDefaultColor} ${option.iconHoverColor}`} />
                                             <span className="text-xs font-medium text-zinc-200">{option.label}</span>
                                         </button>
                                     );
