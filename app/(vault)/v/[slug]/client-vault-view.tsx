@@ -15,6 +15,63 @@ import { VaultEmptyState } from '@/components/dashboard/vault-view/vault-empty-s
 import { CreateCategoryDialog } from '@/components/dashboard/create-category-dialog';
 import { CategorySettingsDialog } from '@/components/dashboard/category-settings-dialog';
 
+/**
+ * BookmarkContent - Renders the appropriate view based on bookmarks and viewMode.
+ * Extracted to follow SRP and eliminate nested ternary in ClientVaultView.
+ */
+function BookmarkContent({
+    bookmarks,
+    viewMode,
+    canEdit,
+    search,
+    setSearch,
+    onOpenNew,
+    onOpenDetail,
+    onEdit,
+}: {
+    bookmarks: BookmarkWithCategory[];
+    viewMode: 'grid' | 'list';
+    canEdit: boolean;
+    search: string;
+    setSearch: (s: string) => void;
+    onOpenNew: () => void;
+    onOpenDetail: (b: BookmarkWithCategory) => void;
+    onEdit: (b: BookmarkWithCategory) => void;
+}) {
+    if (bookmarks.length === 0) {
+        return (
+            <VaultEmptyState
+                search={search}
+                setSearch={setSearch}
+                canEdit={canEdit}
+                onOpenNew={onOpenNew}
+            />
+        );
+    }
+
+    if (viewMode === 'grid') {
+        return (
+            <BookmarkGrid
+                bookmarks={bookmarks}
+                canEdit={canEdit}
+                onOpenNew={onOpenNew}
+                onOpenDetail={onOpenDetail}
+                onEdit={onEdit}
+            />
+        );
+    }
+
+    return (
+        <BookmarkList
+            bookmarks={bookmarks}
+            canEdit={canEdit}
+            onOpenNew={onOpenNew}
+            onOpenDetail={onOpenDetail}
+            onEdit={onEdit}
+        />
+    );
+}
+
 interface ClientVaultViewProps {
     vault: Vault;
     allVaults: Vault[];
@@ -160,38 +217,19 @@ export default function ClientVaultView({
                     />
 
                     {/* Content Grid/List */}
-                    {filteredBookmarks.length > 0 ? (
-                        viewMode === 'grid' ? (
-                            <BookmarkGrid
-                                bookmarks={filteredBookmarks}
-                                canEdit={canEdit}
-                                onOpenNew={() => setIsNewBookmarkOpen(true)}
-                                onOpenDetail={openDetail}
-                                onEdit={(b) => {
-                                    setEditingBookmark(b);
-                                    setIsNewBookmarkOpen(true);
-                                }}
-                            />
-                        ) : (
-                            <BookmarkList
-                                bookmarks={filteredBookmarks}
-                                canEdit={canEdit}
-                                onOpenNew={() => setIsNewBookmarkOpen(true)}
-                                onOpenDetail={openDetail}
-                                onEdit={(b) => {
-                                    setEditingBookmark(b);
-                                    setIsNewBookmarkOpen(true);
-                                }}
-                            />
-                        )
-                    ) : (
-                        <VaultEmptyState
-                            search={search}
-                            setSearch={setSearch}
-                            canEdit={canEdit}
-                            onOpenNew={() => setIsNewBookmarkOpen(true)}
-                        />
-                    )}
+                    <BookmarkContent
+                        bookmarks={filteredBookmarks}
+                        viewMode={viewMode}
+                        canEdit={canEdit}
+                        search={search}
+                        setSearch={setSearch}
+                        onOpenNew={() => setIsNewBookmarkOpen(true)}
+                        onOpenDetail={openDetail}
+                        onEdit={(b) => {
+                            setEditingBookmark(b);
+                            setIsNewBookmarkOpen(true);
+                        }}
+                    />
 
                 </main>
 
