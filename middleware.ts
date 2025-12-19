@@ -10,14 +10,10 @@ function isMobileUserAgent(userAgent: string | null): boolean {
 }
 
 export default async function authMiddleware(request: NextRequest) {
-    const userAgent = request.headers.get("user-agent");
     const pathname = request.nextUrl.pathname;
-    const isLocalhost = request.nextUrl.hostname === "localhost" || request.nextUrl.hostname === "127.0.0.1";
 
-    // Block mobile users in production only (allow mobile on localhost for development)
-    if (isMobileUserAgent(userAgent) && !pathname.startsWith("/mobile-blocked") && !isLocalhost) {
-        return NextResponse.redirect(new URL("/mobile-blocked", request.url));
-    }
+    // Mobile blocking disabled - experimental mobile mode is now enabled
+    // Mobile users will see an experimental banner instead
 
     // Only check auth for dashboard routes
     if (pathname.startsWith("/dashboard")) {

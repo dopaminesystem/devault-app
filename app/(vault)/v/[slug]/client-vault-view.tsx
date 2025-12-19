@@ -119,6 +119,7 @@ export default function ClientVaultView({
 
                 {/* Main Content Area */}
                 <main className="flex-1 px-6 pt-12 pb-10 min-w-0">
+                    {/* Mobile Header */}
                     <div className="flex items-center gap-4 mb-4 lg:hidden">
                         <MobileSidebar
                             vaults={allVaults}
@@ -132,6 +133,12 @@ export default function ClientVaultView({
                             isLoggedIn={isLoggedIn}
                         />
                         <h2 className="text-lg font-bold text-zinc-100 truncate">{vault.name}</h2>
+                    </div>
+
+                    {/* Experimental Mobile Mode Banner */}
+                    <div className="lg:hidden mb-4 px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs flex items-center gap-2">
+                        <span className="inline-block w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                        <span>Mobile mode is experimental. Some features may not work as expected.</span>
                     </div>
 
                     <VaultHeader

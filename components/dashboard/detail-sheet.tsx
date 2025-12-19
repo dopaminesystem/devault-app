@@ -74,22 +74,26 @@ export function DetailSheet({ bookmark, isOpen, onClose, onEdit, isOwner }: Deta
                     <div className="flex items-center gap-2 text-xs font-medium text-zinc-500 uppercase tracking-wider">
                         <Globe size={12} /> Target URL
                     </div>
-                    <div className="p-3 bg-zinc-900/50 border border-zinc-800 rounded-lg group relative">
-                        <a
-                            href={bookmark.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-sm font-mono text-zinc-300 break-all hover:text-indigo-400 transition-colors cursor-pointer"
-                        >
+                    <a
+                        href={bookmark.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-3 bg-zinc-900/50 border border-zinc-800 rounded-lg group relative block hover:bg-zinc-800/50 hover:border-zinc-700 transition-colors cursor-pointer"
+                    >
+                        <span className="text-sm font-mono text-zinc-300 break-all group-hover:text-indigo-400 transition-colors">
                             {bookmark.url}
-                        </a>
+                        </span>
                         <button
-                            onClick={() => navigator.clipboard.writeText(bookmark.url)}
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                navigator.clipboard.writeText(bookmark.url);
+                            }}
                             className="absolute right-2 top-2 p-1.5 bg-zinc-800 rounded-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-zinc-700"
                         >
-                            <Copy size={12} className="text-zinc-400" />
+                            <Copy size={16} className="text-zinc-400 cursor-pointer" />
                         </button>
-                    </div>
+                    </a>
                 </div>
                 <div className="space-y-3">
                     <div className="flex items-center gap-2 text-xs font-medium text-zinc-500 uppercase tracking-wider">

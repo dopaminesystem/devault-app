@@ -115,7 +115,7 @@ function SidebarContent({
                     Categories
                     <button
                         onClick={onOpenCreateCategory}
-                        className="hover:text-zinc-300 transition-colors"
+                        className="hover:text-zinc-300 transition-colors "
                     >
                         <Plus size={12} />
                     </button>
@@ -129,7 +129,7 @@ function SidebarContent({
                                     onSelectCategory(cat.name);
                                     onAction?.();
                                 }}
-                                className={`w-full justify-start gap-3 hover:bg-transparent ${selectedCategory === cat.name
+                                className={`cursor-pointer w-full justify-start gap-3 hover:bg-transparent ${selectedCategory === cat.name
                                     ? 'bg-zinc-900 text-zinc-100'
                                     : 'text-zinc-400 group-hover:text-zinc-200'
                                     }`}
@@ -143,7 +143,7 @@ function SidebarContent({
                                         e.stopPropagation();
                                         onOpenSettings(cat);
                                     }}
-                                    className="absolute right-2 opacity-0 group-hover:opacity-100 text-zinc-500 hover:text-zinc-300 transition-all p-1.5 rounded"
+                                    className="cursor-pointer absolute right-2 opacity-0 group-hover:opacity-100 text-zinc-500 hover:text-zinc-300 transition-all p-1.5 rounded"
                                 >
                                     <Settings size={16} />
                                 </button>
