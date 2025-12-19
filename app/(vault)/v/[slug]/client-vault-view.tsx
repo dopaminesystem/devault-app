@@ -8,6 +8,7 @@ import { DetailSheet } from '@/components/dashboard/detail-sheet';
 import { BookmarkSheet } from '@/components/dashboard/bookmark-sheet';
 import { BookmarkWithCategory } from '@/lib/types';
 import { VaultHeader } from '@/components/dashboard/vault-view/vault-header';
+import { MobileSidebar } from '@/components/dashboard/sidebar';
 import { BookmarkGrid } from '@/components/dashboard/vault-view/bookmark-grid';
 import { BookmarkList } from '@/components/dashboard/vault-view/bookmark-list';
 import { VaultEmptyState } from '@/components/dashboard/vault-view/vault-empty-state';
@@ -118,6 +119,20 @@ export default function ClientVaultView({
 
                 {/* Main Content Area */}
                 <main className="flex-1 px-6 pt-12 pb-10 min-w-0">
+                    <div className="flex items-center gap-4 mb-4 lg:hidden">
+                        <MobileSidebar
+                            vaults={allVaults}
+                            activeVault={vault}
+                            categories={initialCategories}
+                            selectedCategory={activeCategoryFilter}
+                            onSelectCategory={setActiveCategoryFilter}
+                            totalBookmarks={initialBookmarks.length}
+                            onOpenCreateCategory={() => setIsCreateCategoryOpen(true)}
+                            onOpenSettings={isOwner ? setEditingCategory : undefined}
+                            isLoggedIn={isLoggedIn}
+                        />
+                        <h2 className="text-lg font-bold text-zinc-100 truncate">{vault.name}</h2>
+                    </div>
 
                     <VaultHeader
                         vaultName={vault.name}

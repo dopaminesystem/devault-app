@@ -67,6 +67,26 @@ export function BookmarkSheet({ isOpen, onClose, vaultId, categories: initialCat
         }, 300);
     }, [onClose]);
 
+    // Sync form state when bookmarkToEdit changes (e.g., switching from create to edit mode)
+    useEffect(() => {
+        if (bookmarkToEdit) {
+            setUrl(bookmarkToEdit.url);
+            setTitle(bookmarkToEdit.title ?? "");
+            setDescription(bookmarkToEdit.description ?? "");
+            setTags(bookmarkToEdit.tags?.join(", ") ?? "");
+            setSelectedCategoryId(bookmarkToEdit.categoryId ?? null);
+            setNewCategoryName("");
+        } else if (isOpen) {
+            // Reset to empty when opening for new bookmark
+            setUrl("");
+            setTitle("");
+            setDescription("");
+            setTags("");
+            setSelectedCategoryId(null);
+            setNewCategoryName("");
+        }
+    }, [bookmarkToEdit, isOpen]);
+
     // Close sheet on success
     useEffect(() => {
         if (state?.success) {

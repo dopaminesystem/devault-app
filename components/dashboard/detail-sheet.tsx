@@ -75,7 +75,14 @@ export function DetailSheet({ bookmark, isOpen, onClose, onEdit, isOwner }: Deta
                         <Globe size={12} /> Target URL
                     </div>
                     <div className="p-3 bg-zinc-900/50 border border-zinc-800 rounded-lg group relative">
-                        <p className="text-sm font-mono text-zinc-300 break-all">{bookmark.url}</p>
+                        <a
+                            href={bookmark.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm font-mono text-zinc-300 break-all hover:text-indigo-400 transition-colors cursor-pointer"
+                        >
+                            {bookmark.url}
+                        </a>
                         <button
                             onClick={() => navigator.clipboard.writeText(bookmark.url)}
                             className="absolute right-2 top-2 p-1.5 bg-zinc-800 rounded-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-zinc-700"

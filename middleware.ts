@@ -12,9 +12,10 @@ function isMobileUserAgent(userAgent: string | null): boolean {
 export default async function authMiddleware(request: NextRequest) {
     const userAgent = request.headers.get("user-agent");
     const pathname = request.nextUrl.pathname;
+    const isLocalhost = request.nextUrl.hostname === "localhost" || request.nextUrl.hostname === "127.0.0.1";
 
-    // Block mobile users (except on mobile-blocked page itself)
-    if (isMobileUserAgent(userAgent) && !pathname.startsWith("/mobile-blocked")) {
+    // Block mobile users in production only (allow mobile on localhost for development)
+    if (isMobileUserAgent(userAgent) && !pathname.startsWith("/mobile-blocked") && !isLocalhost) {
         return NextResponse.redirect(new URL("/mobile-blocked", request.url));
     }
 
