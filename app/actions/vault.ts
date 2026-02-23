@@ -3,7 +3,6 @@
 import { z } from "zod";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { VaultMember } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { hash, compare } from "bcryptjs";
@@ -166,7 +165,7 @@ export async function getVault(slug: string) {
     }
 
     const isOwner = session?.user?.id === vault.ownerId;
-    const isMember = vault.members.some((m: VaultMember) => m.userId === session?.user?.id);
+    const isMember = vault.members.some((m: { userId: string }) => m.userId === session?.user?.id);
 
     if (vault.accessType === "PUBLIC") {
         return { vault };
@@ -541,9 +540,10 @@ export async function deleteVault(prevState: ActionState, formData: FormData) {
         return { success: false, message: "Missing vault ID" };
     }
 
-    const vault = await prisma.vault.findUnique({
-        where: { id: vaultId },
-    });
+    const [vault, user] = await Promise.all([
+        prisma.vault.findUnique({ where: { id: vaultId }, select: { ownerId: true } }),
+        prisma.user.findUnique({ where: { id: session.user.id }, select: { defaultVaultId: true } }),
+    ]);
 
     if (!vault) {
         return { success: false, message: "Vault not found" };
@@ -554,11 +554,6 @@ export async function deleteVault(prevState: ActionState, formData: FormData) {
     }
 
     // Clear default vault reference if this is the user's default
-    const user = await prisma.user.findUnique({
-        where: { id: session.user.id },
-        select: { defaultVaultId: true }
-    });
-
     if (user?.defaultVaultId === vaultId) {
         await prisma.user.update({
             where: { id: session.user.id },

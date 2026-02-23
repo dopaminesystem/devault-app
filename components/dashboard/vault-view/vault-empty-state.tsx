@@ -39,7 +39,7 @@ export function VaultEmptyState({
             ) : (
                 <div
                     onClick={() => canEdit && onOpenNew()}
-                    className={`group relative w-full max-w-md flex flex-col items-center justify-center p-12 border-2 border-dashed border-zinc-800 rounded-3xl bg-zinc-900/10 transition-all text-center space-y-4 ${canEdit ? 'hover:bg-zinc-900/30 hover:border-zinc-700 cursor-pointer' : 'cursor-default opacity-50'
+                    className={`group relative w-full max-w-md flex flex-col items-center justify-center p-12 border-2 border-dashed border-zinc-800 rounded-3xl bg-zinc-900/10 transition-all duration-300 text-center space-y-4 ${canEdit ? 'hover:bg-zinc-900/30 hover:border-zinc-700 cursor-pointer' : 'cursor-default opacity-50'
                         }`}
                 >
                     <div className="w-20 h-20 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center group-hover:scale-110 transition-transform shadow-2xl">

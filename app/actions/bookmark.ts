@@ -241,7 +241,10 @@ export async function updateBookmark(prevState: ActionState, formData: FormData)
 
     const bookmark = await prisma.bookmark.findUnique({
         where: { id: bookmarkId },
-        include: { category: { include: { vault: { include: { members: true } } } } },
+        select: {
+            categoryId: true,
+            category: { select: { vaultId: true, vault: { select: { ownerId: true, slug: true } } } }
+        },
     });
 
     if (!bookmark) {
@@ -331,7 +334,7 @@ export async function deleteBookmark(prevState: ActionState, formData: FormData)
 
     const bookmark = await prisma.bookmark.findUnique({
         where: { id: bookmarkId },
-        include: { category: { include: { vault: { include: { members: true } } } } },
+        select: { category: { select: { vault: { select: { ownerId: true, slug: true } } } } },
     });
 
     if (!bookmark) {

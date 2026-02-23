@@ -59,9 +59,9 @@ export function BookmarkCard({ bookmark, categories, canEdit }: BookmarkCardProp
 
     return (
         <>
-            <Card className="flex flex-col h-full overflow-hidden hover:shadow-md transition-shadow group relative">
+            <Card className="flex flex-col h-full overflow-hidden transition-all duration-300 hover:shadow-md group relative">
                 {canEdit && (
-                    <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button variant="secondary" size="icon" className="h-8 w-8 rounded-full shadow-sm">

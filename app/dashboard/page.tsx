@@ -1,4 +1,5 @@
 import { getSession } from "@/lib/auth";
+import { Vault } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -34,13 +35,13 @@ export default async function DashboardPage() {
         }
     });
 
-    const hasOwnedVault = vaults.some(v => v.ownerId === session.user.id);
+    const hasOwnedVault = vaults.some((v: Vault) => v.ownerId === session.user.id);
 
     return (
-        <div className="min-h-screen bg-zinc-950 text-zinc-100 font-sans selection:bg-indigo-500/30 relative overflow-hidden">
+        <div className="min-h-screen bg-ds-canvas text-ds-text-primary font-sans selection:bg-[--ds-selection] relative overflow-hidden">
             {/* Decorative Gradients */}
-            <div className="fixed top-0 left-0 w-full h-[500px] bg-gradient-to-b from-indigo-950/20 to-transparent pointer-events-none" />
-            <div className="fixed bottom-0 right-0 w-[500px] h-[500px] bg-radial-gradient from-blue-900/10 to-transparent rounded-full blur-3xl pointer-events-none" />
+            <div className="fixed top-0 left-0 w-full h-[500px] bg-[--ds-gradient-hero] pointer-events-none" />
+            <div className="fixed bottom-0 right-0 w-[500px] h-[500px] bg-radial-gradient from-[--ds-brand-subtle] to-transparent rounded-full blur-3xl pointer-events-none" />
 
 
 

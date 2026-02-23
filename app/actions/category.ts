@@ -4,7 +4,6 @@ import { z } from "zod";
 import { ActionState } from "@/lib/types";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { VaultMember } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
 const createCategorySchema = z.object({
@@ -36,7 +35,7 @@ export async function createCategory(prevState: ActionState, formData: FormData)
 
     const vault = await prisma.vault.findUnique({
         where: { id: vaultId },
-        include: { members: true },
+        select: { ownerId: true, slug: true, members: { where: { userId: session.user.id }, select: { userId: true }, take: 1 } },
     });
 
     if (!vault) {
@@ -44,7 +43,7 @@ export async function createCategory(prevState: ActionState, formData: FormData)
     }
 
     const isOwner = vault.ownerId === session.user.id;
-    const isMember = vault.members.some((m: VaultMember) => m.userId === session.user.id);
+    const isMember = vault.members.length > 0;
 
     if (!isOwner && !isMember) {
         return { success: false, message: "You do not have permission to add categories to this vault" };
@@ -119,7 +118,7 @@ export async function updateCategory(prevState: ActionState, formData: FormData)
 
     const category = await prisma.category.findUnique({
         where: { id: categoryId },
-        include: { vault: { include: { members: true } } },
+        select: { vault: { select: { ownerId: true, slug: true, members: { where: { userId: session.user.id }, select: { userId: true }, take: 1 } } } },
     });
 
     if (!category) {
@@ -127,7 +126,7 @@ export async function updateCategory(prevState: ActionState, formData: FormData)
     }
 
     const isOwner = category.vault.ownerId === session.user.id;
-    const isMember = category.vault.members.some((m: VaultMember) => m.userId === session.user.id);
+    const isMember = category.vault.members.length > 0;
 
     if (!isOwner && !isMember) {
         return { success: false, message: "Unauthorized" };
@@ -161,7 +160,7 @@ export async function deleteCategory(prevState: ActionState, formData: FormData)
 
     const category = await prisma.category.findUnique({
         where: { id: categoryId },
-        include: { vault: { include: { members: true } } },
+        select: { vault: { select: { ownerId: true, slug: true, members: { where: { userId: session.user.id }, select: { userId: true }, take: 1 } } } },
     });
 
     if (!category) {
@@ -169,7 +168,7 @@ export async function deleteCategory(prevState: ActionState, formData: FormData)
     }
 
     const isOwner = category.vault.ownerId === session.user.id;
-    const isMember = category.vault.members.some((m: VaultMember) => m.userId === session.user.id);
+    const isMember = category.vault.members.length > 0;
 
     if (!isOwner && !isMember) {
         return { success: false, message: "Unauthorized" };

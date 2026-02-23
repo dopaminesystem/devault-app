@@ -74,7 +74,122 @@
   --sidebar-ring: oklch(0.439 0 0);
 }
 
+/* ===== LAYER 1: PRIMITIVE TOKENS ===== */
+:root {
+  /* Zinc scale */
+  --prim-zinc-950: #09090b;
+  --prim-zinc-900: #18181b;
+  --prim-zinc-800: #27272a;
+  --prim-zinc-700: #3f3f46;
+  --prim-zinc-600: #52525b;
+  --prim-zinc-500: #71717a;
+  --prim-zinc-400: #a1a1aa;
+  --prim-zinc-300: #d4d4d8;
+  --prim-zinc-200: #e4e4e7;
+  --prim-zinc-100: #f4f4f5;
+
+  /* Brand (Indigo) */
+  --prim-brand-500: #6366f1;
+  --prim-brand-400: #818cf8;
+  --prim-brand-300: #a5b4fc;
+  --prim-brand-200: #c7d2fe;
+  --prim-brand-950: #1e1b4b;
+
+  /* Accent (Emerald) */
+  --prim-accent-500: #22c55e;
+  --prim-accent-400: #4ade80;
+
+  /* Functional */
+  --prim-red-500: #ef4444;
+  --prim-amber-400: #fbbf24;
+  --prim-white: #ffffff;
+}
+
+/* ===== LAYER 2: SEMANTIC TOKENS ===== */
+:root {
+  /* Canvas & surfaces */
+  --ds-canvas:          var(--prim-zinc-950);
+  --ds-surface:         var(--prim-zinc-900);
+  --ds-surface-raised:  color-mix(in srgb, var(--prim-zinc-900) 40%, transparent);
+  --ds-surface-hovered: color-mix(in srgb, var(--prim-zinc-900) 60%, transparent);
+  --ds-overlay:         color-mix(in srgb, var(--prim-zinc-950) 80%, transparent);
+
+  /* Borders */
+  --ds-border:         color-mix(in srgb, var(--prim-zinc-800) 60%, transparent);
+  --ds-border-subtle:  color-mix(in srgb, var(--prim-zinc-800) 50%, transparent);
+  --ds-border-strong:  var(--prim-zinc-700);
+  --ds-border-accent:  color-mix(in srgb, var(--prim-brand-500) 30%, transparent);
+
+  /* Text */
+  --ds-text-primary:   var(--prim-zinc-100);
+  --ds-text-secondary: var(--prim-zinc-400);
+  --ds-text-tertiary:  var(--prim-zinc-500);
+  --ds-text-muted:     var(--prim-zinc-600);
+
+  /* Brand / interactive */
+  --ds-brand:           var(--prim-brand-500);
+  --ds-brand-subtle:    color-mix(in srgb, var(--prim-brand-500) 10%, transparent);
+  --ds-brand-text:      var(--prim-brand-400);
+  --ds-brand-text-dim:  var(--prim-brand-300);
+
+  /* Feedback */
+  --ds-success:  var(--prim-accent-500);
+  --ds-danger:   var(--prim-red-500);
+  --ds-warning:  var(--prim-amber-400);
+
+  /* Decorative gradients */
+  --ds-gradient-hero:   from-indigo-950/20 to-transparent;
+  --ds-selection:       color-mix(in srgb, var(--prim-brand-500) 30%, transparent);
+}
+
+/* ===== LAYER 3: COMPONENT TOKENS ===== */
+:root {
+  /* Card */
+  --comp-card-bg:          var(--ds-surface-raised);
+  --comp-card-border:      var(--ds-border);
+  --comp-card-bg-hover:    var(--ds-surface-hovered);
+  --comp-card-border-hover: var(--ds-border-strong);
+
+  /* Panel (auth/modal surfaces) */
+  --comp-panel-bg:     var(--ds-overlay);
+  --comp-panel-border: var(--ds-border-subtle);
+
+  /* Input */
+  --comp-input-bg:          var(--ds-surface-raised);
+  --comp-input-border:      var(--ds-border);
+  --comp-input-ring:        color-mix(in srgb, var(--prim-brand-500) 50%, transparent);
+  --comp-input-placeholder: var(--ds-text-muted);
+
+  /* Button */
+  --comp-btn-primary-bg:      var(--prim-zinc-100);
+  --comp-btn-primary-text:    var(--prim-zinc-950);
+  --comp-btn-outline-bg:      var(--ds-surface-raised);
+  --comp-btn-outline-border:  var(--ds-border);
+  --comp-btn-outline-text:    var(--ds-text-secondary);
+
+  /* Sidebar */
+  --comp-sidebar-active-bg:     color-mix(in srgb, var(--prim-brand-500) 10%, transparent);
+  --comp-sidebar-active-text:   var(--ds-brand-text);
+  --comp-sidebar-inactive-text: var(--ds-text-secondary);
+}
+
 @theme inline {
+  /* Expose design system tokens */
+  --color-ds-canvas:          var(--ds-canvas);
+  --color-ds-surface:         var(--ds-surface);
+  --color-ds-surface-raised:  var(--ds-surface-raised);
+  --color-ds-surface-hovered: var(--ds-surface-hovered);
+  --color-ds-border:          var(--ds-border);
+  --color-ds-border-strong:   var(--ds-border-strong);
+  --color-ds-border-subtle:   var(--ds-border-subtle);
+  --color-ds-overlay:         var(--ds-overlay);
+  --color-ds-text-primary:    var(--ds-text-primary);
+  --color-ds-text-secondary:  var(--ds-text-secondary);
+  --color-ds-text-muted:      var(--ds-text-muted);
+  --color-ds-brand:           var(--ds-brand);
+  --color-ds-brand-text:      var(--ds-brand-text);
+  --color-ds-brand-subtle:    var(--ds-brand-subtle);
+
   --font-sans: 'Geist', 'Geist Fallback';
   --font-mono: 'Geist Mono', 'Geist Mono Fallback';
   --color-background: var(--background);

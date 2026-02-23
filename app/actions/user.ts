@@ -35,7 +35,7 @@ export async function updateDefaultVault(prevState: ActionState, formData: FormD
     try {
         const vault = await prisma.vault.findUnique({
             where: { id: vaultId },
-            include: { members: true },
+            select: { ownerId: true, members: { where: { userId: session.user.id }, select: { userId: true }, take: 1 } },
         });
 
         if (!vault) {
@@ -43,7 +43,7 @@ export async function updateDefaultVault(prevState: ActionState, formData: FormD
         }
 
         const isOwner = vault.ownerId === session.user.id;
-        const isMember = vault.members.some((m: { userId: string }) => m.userId === session.user.id);
+        const isMember = vault.members.length > 0;
 
         if (!isOwner && !isMember) {
             return { success: false, message: "You do not have access to this vault" };

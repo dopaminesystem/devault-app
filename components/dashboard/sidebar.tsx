@@ -39,7 +39,7 @@ export function MobileSidebar(props: SidebarProps) {
                     <span className="sr-only">Toggle Sidebar</span>
                 </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-[300px] bg-zinc-950 border-r border-zinc-900 p-0">
+            <SheetContent side="left" className="w-[300px] bg-ds-canvas border-r border-ds-border p-0">
                 <div className="pt-8 pl-6 h-full overflow-y-auto">
                     <SidebarContent {...props} onAction={() => setOpen(false)} />
                 </div>
@@ -97,13 +97,13 @@ function SidebarContent({
                         onAction?.();
                     }}
                     className={`w-full justify-start gap-3 ${selectedCategory === null
-                        ? 'bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 hover:text-indigo-300'
-                        : 'text-zinc-400 hover:text-zinc-100'
+                        ? 'bg-ds-brand-subtle text-ds-brand-text hover:bg-ds-brand-subtle hover:text-[--ds-brand-text-dim]'
+                        : 'text-ds-text-secondary hover:text-ds-text-primary'
                         }`}
                 >
                     <Layout size={16} />
                     All Bookmarks
-                    <span className={`ml-auto text-[10px] ${selectedCategory === null ? 'text-indigo-400' : 'text-zinc-600'}`}>
+                    <span className={`ml-auto text-[10px] ${selectedCategory === null ? 'text-ds-brand-text' : 'text-ds-text-muted'}`}>
                         {totalBookmarks}
                     </span>
                 </Button>
@@ -111,18 +111,18 @@ function SidebarContent({
 
             {/* Categories */}
             <div className="space-y-1">
-                <h3 className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider px-3 mb-2 flex items-center justify-between">
+                <h3 className="text-[10px] font-semibold text-ds-text-tertiary uppercase tracking-wider px-3 mb-2 flex items-center justify-between">
                     Categories
                     <button
                         onClick={onOpenCreateCategory}
-                        className="hover:text-zinc-300 transition-colors "
+                        className="hover:text-ds-text-primary transition-colors "
                     >
                         <Plus size={12} />
                     </button>
                 </h3>
                 {categories.length > 0 ? (
                     categories.map(cat => (
-                        <div key={cat.id} className="group flex items-center relative rounded-md hover:bg-zinc-900/50 cursor-pointer">
+                        <div key={cat.id} className="group flex items-center relative rounded-md hover:bg-ds-surface-hovered cursor-pointer">
                             <Button
                                 variant="ghost"
                                 onClick={() => {
@@ -130,11 +130,11 @@ function SidebarContent({
                                     onAction?.();
                                 }}
                                 className={`cursor-pointer w-full justify-start gap-3 hover:bg-transparent ${selectedCategory === cat.name
-                                    ? 'bg-zinc-900 text-zinc-100'
-                                    : 'text-zinc-400 group-hover:text-zinc-200'
+                                    ? 'bg-ds-surface text-ds-text-primary'
+                                    : 'text-ds-text-secondary group-hover:text-ds-text-primary'
                                     }`}
                             >
-                                <Folder size={16} className={`transition-colors ${selectedCategory === cat.name ? 'text-indigo-400 fill-indigo-500/20' : 'text-zinc-600 group-hover:text-zinc-500'}`} />
+                                <Folder size={16} className={`transition-colors ${selectedCategory === cat.name ? 'text-ds-brand-text fill-[--comp-sidebar-active-bg]' : 'text-ds-text-muted group-hover:text-ds-text-tertiary'}`} />
                                 <span className="truncate">{cat.name}</span>
                             </Button>
                             {onOpenSettings && (
@@ -161,7 +161,7 @@ function SidebarContent({
                     <Button
                         variant="ghost"
                         onClick={handleSignOut}
-                        className="w-full justify-start gap-3 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900/50"
+                        className="w-full justify-start gap-3 text-ds-text-secondary hover:text-ds-text-primary hover:bg-ds-surface-hovered"
                     >
                         <LogOut size={16} />
                         Sign Out
