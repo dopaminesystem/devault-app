@@ -24,6 +24,9 @@ const nextConfig: NextConfig = {
     ],
   },
   serverExternalPackages: ["metadata-scraper", "keyv"],
+  experimental: {
+    optimizePackageImports: ["lucide-react"],
+  },
 };
 
 export default nextConfig;

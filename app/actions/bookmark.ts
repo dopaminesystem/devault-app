@@ -49,24 +49,6 @@ export async function createBookmark(prevState: ActionState, formData: FormData)
         return { success: false, message: "Email not verified" };
     }
 
-    // Free tier limit: 100 bookmarks per user
-    const totalBookmarks = await prisma.bookmark.count({
-        where: {
-            category: {
-                vault: {
-                    ownerId: session.user.id
-                }
-            }
-        }
-    });
-
-    if (totalBookmarks >= 100) {
-        return {
-            success: false,
-            message: "Free tier limit reached (100 bookmarks). Please upgrade to add more."
-        };
-    }
-
     const rawUrl = formData.get("url") as string;
     const normalizedUrl = rawUrl ? normalizeUrl(rawUrl) : "";
 
@@ -86,10 +68,29 @@ export async function createBookmark(prevState: ActionState, formData: FormData)
 
     const { vaultId, url, title, description, tags, category: categoryName } = validatedFields.data;
 
-    const vault = await prisma.vault.findUnique({
-        where: { id: vaultId },
-        include: { members: true },
-    });
+    // Parallelize independent DB queries: free tier check and vault details
+    const [totalBookmarks, vault] = await Promise.all([
+        prisma.bookmark.count({
+            where: {
+                category: {
+                    vault: {
+                        ownerId: session.user.id
+                    }
+                }
+            }
+        }),
+        prisma.vault.findUnique({
+            where: { id: vaultId },
+            include: { members: true },
+        })
+    ]);
+
+    if (totalBookmarks >= 100) {
+        return {
+            success: false,
+            message: "Free tier limit reached (100 bookmarks). Please upgrade to add more."
+        };
+    }
 
     if (!vault) {
         return { success: false, message: "Vault not found" };
@@ -153,7 +154,7 @@ export async function createBookmark(prevState: ActionState, formData: FormData)
                         where: { vaultId },
                         select: { name: true }
                     });
-                    const categoryNames = existingCategories.map(c => c.name).filter(n => n !== "General");
+                    const categoryNames = existingCategories.map((c: { name: string }) => c.name).filter((n: string) => n !== "General");
                     const { enrichBookmark } = await import("@/lib/ai");
                     const aiSuggestion = await enrichBookmark(url, title || url, description || "", categoryNames);
                     if (aiSuggestion) {

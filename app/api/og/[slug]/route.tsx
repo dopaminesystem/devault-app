@@ -1,8 +1,6 @@
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
 
-export const runtime = 'edge';
-
 // Vault OG image generation by slug
 // Example: /api/og/hisyam → generates OG for vault "hisyam"
 export async function GET(
