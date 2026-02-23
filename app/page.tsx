@@ -1,6 +1,6 @@
-import { LandingNavbar } from "@/components/landing/landing-navbar"
-import { LandingHero } from "@/components/landing/landing-hero"
-import { LandingFeatures } from "@/components/landing/landing-features"
+import { LandingFeatures } from "@/components/landing/landing-features";
+import { LandingHero } from "@/components/landing/landing-hero";
+import { LandingNavbar } from "@/components/landing/landing-navbar";
 
 export default function LandingPage() {
   return (
@@ -14,12 +14,11 @@ export default function LandingPage() {
 
         <LandingHero />
         <LandingFeatures />
-
       </main>
 
       <footer className="py-8 text-center border-t border-white/5 bg-zinc-950/50 backdrop-blur-md">
         <p className="text-xs text-zinc-600">Vault for everyone.</p>
       </footer>
     </div>
-  )
+  );
 }

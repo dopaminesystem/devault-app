@@ -1,26 +1,26 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import { prisma } from "./prisma";
-import { env } from "./env";
-import { headers } from "next/headers";
 import { nextCookies } from "better-auth/next-js";
+import { headers } from "next/headers";
+import { env } from "./env";
+import { prisma } from "./prisma";
 
 export const auth = betterAuth({
-    database: prismaAdapter(prisma, {
-        provider: "postgresql",
-    }),
-    emailAndPassword: {
-        enabled: true,
-    },
-    emailVerification: {
-        sendOnSignUp: true,
-        autoSignInAfterVerification: true,
-        sendVerificationEmail: async ({ user, url }) => {
-            const { sendEmail } = await import("./email");
-            void sendEmail({
-                to: user.email,
-                subject: "Verify your email address",
-                html: `
+  database: prismaAdapter(prisma, {
+    provider: "postgresql",
+  }),
+  emailAndPassword: {
+    enabled: true,
+  },
+  emailVerification: {
+    sendOnSignUp: true,
+    autoSignInAfterVerification: true,
+    sendVerificationEmail: async ({ user, url }) => {
+      const { sendEmail } = await import("./email");
+      void sendEmail({
+        to: user.email,
+        subject: "Verify your email address",
+        html: `
                     <div style="font-family: sans-serif; font-size: 16px; color: #333;">
                         <h1>Verify your email address in Devault</h1>
                         <p>Click the link below to verify your email address:</p>
@@ -28,25 +28,24 @@ export const auth = betterAuth({
                         <p style="margin-top: 20px; font-size: 14px; color: #666;">If you didn't request this, please ignore this email.</p>
                     </div>
                 `,
-            });
-        },
-        afterEmailVerification: async (user) => {
-            console.log(`✅ Email verified for user: ${user.email}`);
-        },
+      });
     },
-    socialProviders: {
-        discord: {
-            clientId: env.DISCORD_CLIENT_ID,
-            clientSecret: env.DISCORD_CLIENT_SECRET,
-            scope: ["identify", "email", "guilds", "guilds.members.read"],
-        },
+    afterEmailVerification: async (user) => {
+      console.log(`✅ Email verified for user: ${user.email}`);
     },
-    plugins: [nextCookies()],
+  },
+  socialProviders: {
+    discord: {
+      clientId: env.DISCORD_CLIENT_ID,
+      clientSecret: env.DISCORD_CLIENT_SECRET,
+      scope: ["identify", "email", "guilds", "guilds.members.read"],
+    },
+  },
+  plugins: [nextCookies()],
 });
 
 export async function getSession() {
-    return await auth.api.getSession({
-        headers: await headers(),
-    });
+  return await auth.api.getSession({
+    headers: await headers(),
+  });
 }
-

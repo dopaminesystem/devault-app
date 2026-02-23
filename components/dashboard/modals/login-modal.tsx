@@ -3,48 +3,52 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogFooter,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 
 interface LoginModalProps {
-    open: boolean;
-    onOpenChange: (open: boolean) => void;
-    title?: string;
-    description?: string;
-    callbackUrl?: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  title?: string;
+  description?: string;
+  callbackUrl?: string;
 }
 
 export function LoginModal({
-    open,
-    onOpenChange,
-    title = "Sign in to continue",
-    description = "Create a free account to start saving bookmarks",
-    callbackUrl = "/dashboard"
+  open,
+  onOpenChange,
+  title = "Sign in to continue",
+  description = "Create a free account to start saving bookmarks",
+  callbackUrl = "/dashboard",
 }: LoginModalProps) {
-    const signInUrl = callbackUrl ? `/sign-in?callbackURL=${encodeURIComponent(callbackUrl)}` : "/sign-in";
-    const signUpUrl = callbackUrl ? `/sign-up?callbackURL=${encodeURIComponent(callbackUrl)}` : "/sign-up";
+  const signInUrl = callbackUrl
+    ? `/sign-in?callbackURL=${encodeURIComponent(callbackUrl)}`
+    : "/sign-in";
+  const signUpUrl = callbackUrl
+    ? `/sign-up?callbackURL=${encodeURIComponent(callbackUrl)}`
+    : "/sign-up";
 
-    return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                    <DialogTitle>{title}</DialogTitle>
-                    <DialogDescription>{description}</DialogDescription>
-                </DialogHeader>
-                <DialogFooter className="gap-2 sm:gap-0">
-                    <Button variant="outline" asChild>
-                        <Link href={signInUrl}>Sign In</Link>
-                    </Button>
-                    <Button asChild>
-                        <Link href={signUpUrl}>Create Account</Link>
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
-    );
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>{description}</DialogDescription>
+        </DialogHeader>
+        <DialogFooter className="gap-2 sm:gap-0">
+          <Button variant="outline" asChild>
+            <Link href={signInUrl}>Sign In</Link>
+          </Button>
+          <Button asChild>
+            <Link href={signUpUrl}>Create Account</Link>
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
 }
