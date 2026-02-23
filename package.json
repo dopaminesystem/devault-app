@@ -62,12 +62,6 @@
     "typescript": "^5"
   },
   "pnpm": {
-    "ignoredBuiltDependencies": [
-      "@prisma/engines",
-      "prisma",
-      "sharp",
-      "unrs-resolver"
-    ],
     "onlyBuiltDependencies": [
       "@prisma/engines",
       "prisma",
