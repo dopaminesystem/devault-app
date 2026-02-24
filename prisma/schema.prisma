@@ -25,6 +25,8 @@ model User {
   defaultVaultId String?
   defaultVault   Vault?  @relation("UserDefaultVault", fields: [defaultVaultId], references: [id])
 
+  // ⚡ PERF: Index on defaultVaultId for faster default vault lookups
+  @@index([defaultVaultId])
   @@map("user")
 }
 
@@ -120,6 +122,8 @@ model VaultMember {
   user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([vaultId, userId])
+  // ⚡ PERF: Index on userId for faster member lookups
+  @@index([userId])
   @@map("vault_member")
 }
 
@@ -140,6 +144,8 @@ model Category {
 
   // ⚡ PERF: Index on vaultId for faster category lookups by vault
   @@index([vaultId])
+  // ⚡ PERF: Composite index for fast category resolution by name
+  @@index([vaultId, name])
   @@map("category")
 }
 
@@ -161,6 +167,8 @@ model Bookmark {
   // ⚡ PERF: Index on categoryId for faster bookmark lookups by category
   // This is the most queried foreign key in the application
   @@index([categoryId])
+  // ⚡ PERF: Composite index for fast sorting by creation date
+  @@index([categoryId, createdAt(sort: Desc)])
   @@map("bookmark")
 }
 
