@@ -5,10 +5,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useState } from "react";
 import { FaDiscord } from "react-icons/fa";
-import { signInAction } from "@/app/actions/auth";
-import { Button } from "@/components/ui/button";
-import { authClient } from "@/lib/auth-client";
-import { TOKENS } from "@/lib/constants";
+import { signInAction } from "@/modules/auth/actions/auth.actions";
+import { Button } from "@/shared/components/ui/button";
+import { authClient } from "@/shared/auth/auth-client";
+import { TOKENS } from "@/shared/config/constants";
 
 export default function SignInForm() {
   const [isRegister, setIsRegister] = useState(false);

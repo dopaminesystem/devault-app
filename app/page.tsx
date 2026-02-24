@@ -1,6 +1,6 @@
-import { LandingFeatures } from "@/components/landing/landing-features";
-import { LandingHero } from "@/components/landing/landing-hero";
-import { LandingNavbar } from "@/components/landing/landing-navbar";
+import { LandingFeatures } from "@/shared/components/landing/landing-features";
+import { LandingHero } from "@/shared/components/landing/landing-hero";
+import { LandingNavbar } from "@/shared/components/landing/landing-navbar";
 
 export default function LandingPage() {
   return (

@@ -2,13 +2,13 @@ import { ArrowLeft, Link as LinkIcon, Settings, Shield, User } from "lucide-reac
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { SignOutButton } from "@/components/auth/sign-out-button";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { DefaultVaultForm } from "@/components/user/default-vault-form";
-import { DiscordConnectionCard } from "@/components/user/discord-connection-card";
-import { getSession } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { SignOutButton } from "@/modules/auth/components/sign-out-button";
+import { Button } from "@/shared/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card";
+import { DefaultVaultForm } from "@/modules/auth/components/default-vault-form";
+import { DiscordConnectionCard } from "@/modules/auth/components/discord-connection-card";
+import { getSession } from "@/shared/auth/auth";
+import { prisma } from "@/shared/db/prisma";
 
 export default async function SettingsPage() {
   const session = await getSession();

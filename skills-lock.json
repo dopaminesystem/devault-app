@@ -1,6 +1,11 @@
 {
   "version": 1,
   "skills": {
+    "architecture-patterns": {
+      "source": "wshobson/agents",
+      "sourceType": "github",
+      "computedHash": "67711f2580e7196ad1730ca61513783f31943fb56fa5e308373f2dfd38ee15f4"
+    },
     "better-auth-best-practices": {
       "source": "better-auth/skills",
       "sourceType": "github",

@@ -2,14 +2,14 @@ import type { VaultMember } from "@prisma/client";
 import { Lock } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getVault, getVaultPageData } from "@/app/actions/vault";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { DiscordReconnectPrompt } from "@/components/vault/discord-reconnect-prompt";
-import { JoinVaultForm } from "@/components/vault/join-vault-form";
-import { getSession } from "@/lib/auth";
-import { SITE_CONFIG } from "@/lib/constants";
-import { prisma } from "@/lib/prisma";
+import { getVault, getVaultPageData } from "@/modules/vault/actions/vault.actions";
+import { Button } from "@/shared/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card";
+import { DiscordReconnectPrompt } from "@/modules/vault/components/discord-reconnect-prompt";
+import { JoinVaultForm } from "@/modules/vault/components/join-vault-form";
+import { getSession } from "@/shared/auth/auth";
+import { SITE_CONFIG } from "@/shared/config/constants";
+import { prisma } from "@/shared/db/prisma";
 import ClientVaultView from "./client-vault-view";
 
 // Dynamic OG metadata for each vault

@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/shared/db/prisma";
 
 // Lightweight data endpoint for OG image generation
 // This runs on Node.js runtime (not Edge) so it can use Prisma

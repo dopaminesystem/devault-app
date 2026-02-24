@@ -2,14 +2,14 @@ import type { Vault } from "@prisma/client";
 import { Settings as SettingsIcon } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { SignOutButton } from "@/components/auth/sign-out-button";
-import { VerifyEmailView } from "@/components/auth/verify-email-view";
-import { VaultEmptyState } from "@/components/dashboard/overview/vault-empty-state";
+import { SignOutButton } from "@/modules/auth/components/sign-out-button";
+import { VerifyEmailView } from "@/modules/auth/components/verify-email-view";
+import { VaultEmptyState } from "@/shared/components/dashboard/overview/vault-empty-state";
 // Sub-components
-import { VaultGrid } from "@/components/dashboard/overview/vault-grid";
-import { Button } from "@/components/ui/button";
-import { getSession } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { VaultGrid } from "@/shared/components/dashboard/overview/vault-grid";
+import { Button } from "@/shared/components/ui/button";
+import { getSession } from "@/shared/auth/auth";
+import { prisma } from "@/shared/db/prisma";
 
 export default async function DashboardPage() {
   const session = await getSession();
