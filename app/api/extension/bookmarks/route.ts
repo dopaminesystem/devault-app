@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { getSession } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-import { normalizeUrl } from "@/lib/utils";
+import { getSession } from "@/shared/auth/auth";
+import { prisma } from "@/shared/db/prisma";
+import { normalizeUrl } from "@/shared/utils";
 
 const createBookmarkSchema = z.object({
   url: z.string().url(),

@@ -1,0 +1,106 @@
+"use client";
+
+import { Loader2 } from "lucide-react";
+import { useActionState, useEffect, useState } from "react";
+import { createCategory } from "@/modules/vault/actions/category.actions";
+import { Button } from "@/shared/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/shared/components/ui/dialog";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
+
+interface CreateCategoryDialogProps {
+  vaultId: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+const initialState = {
+  message: "",
+  success: false,
+};
+
+export function CreateCategoryDialog({ vaultId, open, onOpenChange }: CreateCategoryDialogProps) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Create Category</DialogTitle>
+          <DialogDescription>Create a new category to organize your bookmarks.</DialogDescription>
+        </DialogHeader>
+        <CreateCategoryFormContent
+          vaultId={vaultId}
+          onSuccess={() => onOpenChange(false)}
+          onCancel={() => onOpenChange(false)}
+        />
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+import type { ActionState } from "@/shared/types";
+
+// ... existing imports
+
+function CreateCategoryFormContent({
+  vaultId,
+  onSuccess,
+  onCancel,
+}: {
+  vaultId: string;
+  onSuccess: () => void;
+  onCancel: () => void;
+}) {
+  const [state, formAction, isPending] = useActionState<ActionState, FormData>(
+    createCategory,
+    initialState,
+  );
+  const [name, setName] = useState("");
+
+  // Close on success
+  useEffect(() => {
+    if (state?.success) {
+      onSuccess();
+    }
+  }, [state?.success, onSuccess]);
+
+  return (
+    <form action={formAction}>
+      <input type="hidden" name="vaultId" value={vaultId} />
+      <div className="grid gap-4 py-4">
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="name" className="text-right">
+            Name
+          </Label>
+          <Input
+            id="name"
+            name="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="col-span-3"
+            placeholder="e.g. Design Resources"
+            autoFocus
+          />
+        </div>
+      </div>
+      {state?.message && !state.success && (
+        <p className="text-sm text-red-500 mb-4">{state.message}</p>
+      )}
+      <DialogFooter>
+        <Button type="button" variant="secondary" onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button type="submit" disabled={isPending || !name.trim()}>
+          {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          Create
+        </Button>
+      </DialogFooter>
+    </form>
+  );
+}

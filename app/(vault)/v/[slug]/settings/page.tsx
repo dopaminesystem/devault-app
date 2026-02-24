@@ -1,13 +1,19 @@
 import { ArrowLeft, Settings, Shield, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getVault } from "@/app/actions/vault";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { DeleteVaultForm } from "@/components/vault/delete-vault-form";
-import { EditVaultForm } from "@/components/vault/edit-vault-form";
-import { VaultAccessForm } from "@/components/vault/vault-access-form";
-import { getSession } from "@/lib/auth";
+import { getVault } from "@/modules/vault/actions/vault.actions";
+import { DeleteVaultForm } from "@/modules/vault/components/delete-vault-form";
+import { EditVaultForm } from "@/modules/vault/components/edit-vault-form";
+import { VaultAccessForm } from "@/modules/vault/components/vault-access-form";
+import { getSession } from "@/shared/auth/auth";
+import { Button } from "@/shared/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
 
 export default async function VaultSettingsPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;

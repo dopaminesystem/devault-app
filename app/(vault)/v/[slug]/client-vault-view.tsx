@@ -2,17 +2,17 @@
 
 import type { Category, Vault } from "@prisma/client";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { BookmarkSheet } from "@/components/dashboard/bookmark-sheet";
-import { CategorySettingsDialog } from "@/components/dashboard/category-settings-dialog";
-import { CreateCategoryDialog } from "@/components/dashboard/create-category-dialog";
-import { DetailSheet } from "@/components/dashboard/detail-sheet";
-import { MobileSidebar, Sidebar } from "@/components/dashboard/sidebar";
-import { BookmarkGrid } from "@/components/dashboard/vault-view/bookmark-grid";
-import { BookmarkList } from "@/components/dashboard/vault-view/bookmark-list";
-import { VaultEmptyState } from "@/components/dashboard/vault-view/vault-empty-state";
-import { VaultHeader } from "@/components/dashboard/vault-view/vault-header";
-import { useDebounce } from "@/hooks/use-debounce";
-import type { BookmarkWithCategory } from "@/lib/types";
+import { BookmarkSheet } from "@/shared/components/dashboard/bookmark-sheet";
+import { CategorySettingsDialog } from "@/shared/components/dashboard/category-settings-dialog";
+import { CreateCategoryDialog } from "@/shared/components/dashboard/create-category-dialog";
+import { DetailSheet } from "@/shared/components/dashboard/detail-sheet";
+import { MobileSidebar, Sidebar } from "@/shared/components/dashboard/sidebar";
+import { BookmarkGrid } from "@/shared/components/dashboard/vault-view/bookmark-grid";
+import { BookmarkList } from "@/shared/components/dashboard/vault-view/bookmark-list";
+import { VaultEmptyState } from "@/shared/components/dashboard/vault-view/vault-empty-state";
+import { VaultHeader } from "@/shared/components/dashboard/vault-view/vault-header";
+import { useDebounce } from "@/shared/hooks/use-debounce";
+import type { BookmarkWithCategory } from "@/shared/types";
 
 /**
  * BookmarkContent - Renders the appropriate view based on bookmarks and viewMode.
