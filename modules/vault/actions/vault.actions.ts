@@ -32,11 +32,11 @@ export async function getVaultPageData(vaultId: string, userId?: string) {
     getCategories(vaultId),
     userId
       ? prisma.vault.findMany({
-        where: {
-          OR: [{ ownerId: userId }, { members: { some: { userId: userId } } }],
-        },
-        orderBy: { createdAt: "desc" },
-      })
+          where: {
+            OR: [{ ownerId: userId }, { members: { some: { userId: userId } } }],
+          },
+          orderBy: { createdAt: "desc" },
+        })
       : Promise.resolve([]),
   ]);
 

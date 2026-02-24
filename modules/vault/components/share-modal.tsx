@@ -143,10 +143,11 @@ export function ShareModal({
                       type="button"
                       key={option.type}
                       onClick={() => setSelectedType(option.type)}
-                      className={`group flex flex-col items-center gap-1.5 p-3 rounded-lg border transition-all ${isActive
+                      className={`group flex flex-col items-center gap-1.5 p-3 rounded-lg border transition-all ${
+                        isActive
                           ? option.activeColor
                           : `${option.defaultColor} ${option.hoverColor}`
-                        }`}
+                      }`}
                     >
                       <Icon
                         size={20}
