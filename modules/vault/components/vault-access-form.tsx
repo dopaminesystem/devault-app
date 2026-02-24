@@ -2,7 +2,7 @@
 
 import { Loader2 } from "lucide-react";
 import { useActionState, useState } from "react";
-import { updateVaultSettings } from "@/modules/vault/actions/vault.actions";
+import { updateVaultSettings } from "@/modules/vault/actions/vault-owner.actions";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";

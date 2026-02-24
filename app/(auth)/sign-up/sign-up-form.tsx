@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useState } from "react";
 import { FaDiscord } from "react-icons/fa";
 import { enableEmailSignInAction, signUpAction } from "@/modules/auth/actions/auth.actions";
+import { authClient } from "@/shared/auth/auth-client";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -16,7 +17,6 @@ import {
   AlertDialogTitle,
 } from "@/shared/components/ui/alert-dialog";
 import { Button } from "@/shared/components/ui/button";
-import { authClient } from "@/shared/auth/auth-client";
 import { TOKENS } from "@/shared/config/constants";
 
 export default function SignUpForm() {

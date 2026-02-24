@@ -2,7 +2,7 @@
 
 import { Lock } from "lucide-react";
 import { useActionState } from "react";
-import { joinVault } from "@/modules/vault/actions/vault.actions";
+import { joinVault } from "@/modules/vault/actions/vault-member.actions";
 import { Button } from "@/shared/components/ui/button";
 import {
   Card,

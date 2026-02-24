@@ -3,8 +3,8 @@
 import { AlertCircle, Send } from "lucide-react";
 import { useActionState } from "react";
 import { resendVerificationEmailAction } from "@/modules/auth/actions/auth.actions";
-import { useActionToast } from "@/shared/hooks/use-action-toast";
 import { useSession } from "@/shared/auth/auth-client";
+import { useActionToast } from "@/shared/hooks/use-action-toast";
 
 const initialState = { success: false, error: "", message: "" };
 

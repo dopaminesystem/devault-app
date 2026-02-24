@@ -1,9 +1,15 @@
 import type { Vault } from "@prisma/client";
 import { Globe, Lock, Shield } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/shared/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { CreateVaultDialog } from "@/modules/vault/components/create-vault-dialog";
+import { Button } from "@/shared/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
 
 interface VaultGridProps {
   vaults: Vault[];

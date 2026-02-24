@@ -4,11 +4,11 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { SignOutButton } from "@/modules/auth/components/sign-out-button";
 import { VerifyEmailView } from "@/modules/auth/components/verify-email-view";
+import { getSession } from "@/shared/auth/auth";
 import { VaultEmptyState } from "@/shared/components/dashboard/overview/vault-empty-state";
 // Sub-components
 import { VaultGrid } from "@/shared/components/dashboard/overview/vault-grid";
 import { Button } from "@/shared/components/ui/button";
-import { getSession } from "@/shared/auth/auth";
 import { prisma } from "@/shared/db/prisma";
 
 export default async function DashboardPage() {

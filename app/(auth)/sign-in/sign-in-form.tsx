@@ -6,8 +6,8 @@ import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useState } from "react";
 import { FaDiscord } from "react-icons/fa";
 import { signInAction } from "@/modules/auth/actions/auth.actions";
-import { Button } from "@/shared/components/ui/button";
 import { authClient } from "@/shared/auth/auth-client";
+import { Button } from "@/shared/components/ui/button";
 import { TOKENS } from "@/shared/config/constants";
 
 export default function SignInForm() {

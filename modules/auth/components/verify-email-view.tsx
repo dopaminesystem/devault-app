@@ -3,8 +3,8 @@
 import { LogOut, Mail, Send } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Button } from "@/shared/components/ui/button";
 import { authClient, useSession } from "@/shared/auth/auth-client";
+import { Button } from "@/shared/components/ui/button";
 
 export function VerifyEmailView() {
   const { data: session } = useSession();

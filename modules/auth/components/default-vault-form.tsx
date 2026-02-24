@@ -5,7 +5,13 @@ import { Loader2 } from "lucide-react";
 import { useActionState } from "react";
 import { updateDefaultVault } from "@/modules/vault/actions/user.actions";
 import { Button } from "@/shared/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
 import { Label } from "@/shared/components/ui/label";
 import {
   Select,

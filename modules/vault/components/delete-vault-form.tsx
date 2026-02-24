@@ -2,7 +2,7 @@
 
 import { Trash2 } from "lucide-react";
 import { useActionState, useState } from "react";
-import { deleteVault } from "@/modules/vault/actions/vault.actions";
+import { deleteVault } from "@/modules/vault/actions/vault-owner.actions";
 import {
   AlertDialog,
   AlertDialogAction,

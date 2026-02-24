@@ -1,7 +1,7 @@
 import { FaDiscord } from "react-icons/fa";
+import { isTokenExpiringSoon } from "@/modules/vault/vault.utils";
 import { DiscordConnectButton } from "@/shared/components/discord/discord-connect-button";
 import { DiscordStatusBadge } from "@/shared/components/discord/discord-status-badge";
-import { isTokenExpiringSoon } from "@/modules/vault/vault.utils";
 
 interface DiscordConnectionCardProps {
   isConnected: boolean;

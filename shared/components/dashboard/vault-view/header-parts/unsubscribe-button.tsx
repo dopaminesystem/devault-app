@@ -2,7 +2,7 @@
 
 import { LogOut } from "lucide-react";
 import { useState, useTransition } from "react";
-import { unsubscribeFromVault } from "@/modules/vault/actions/vault.actions";
+import { unsubscribeFromVault } from "@/modules/vault/actions/vault-member.actions";
 import {
   AlertDialog,
   AlertDialogAction,

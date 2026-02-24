@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useActionState, useState } from "react";
 import { deleteCategory } from "@/modules/vault/actions/category.actions";
+import { CreateCategoryForm } from "@/modules/vault/components/create-category-form";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,7 +23,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
-import { CreateCategoryForm } from "@/modules/vault/components/create-category-form";
 import { cn } from "@/shared/utils";
 import { EditCategoryDialog } from "./edit-category-dialog";
 

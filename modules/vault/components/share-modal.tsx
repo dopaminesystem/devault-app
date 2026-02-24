@@ -4,7 +4,7 @@ import type { AccessType } from "@prisma/client";
 import { Check, Copy, Globe, Loader2, Lock, Shield } from "lucide-react";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
-import { updateVaultSettings } from "@/modules/vault/actions/vault.actions";
+import { updateVaultSettings } from "@/modules/vault/actions/vault-owner.actions";
 import { Button } from "@/shared/components/ui/button";
 import {
   Dialog,
@@ -143,11 +143,10 @@ export function ShareModal({
                       type="button"
                       key={option.type}
                       onClick={() => setSelectedType(option.type)}
-                      className={`group flex flex-col items-center gap-1.5 p-3 rounded-lg border transition-all ${
-                        isActive
+                      className={`group flex flex-col items-center gap-1.5 p-3 rounded-lg border transition-all ${isActive
                           ? option.activeColor
                           : `${option.defaultColor} ${option.hoverColor}`
-                      }`}
+                        }`}
                     >
                       <Icon
                         size={20}

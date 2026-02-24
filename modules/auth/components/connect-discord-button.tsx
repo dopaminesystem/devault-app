@@ -3,8 +3,8 @@
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { FaDiscord } from "react-icons/fa";
-import { Button } from "@/shared/components/ui/button";
 import { authClient } from "@/shared/auth/auth-client";
+import { Button } from "@/shared/components/ui/button";
 
 export function ConnectDiscordButton() {
   const [isPending, setIsPending] = useState(false);

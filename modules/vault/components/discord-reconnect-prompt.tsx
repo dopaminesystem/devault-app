@@ -4,14 +4,20 @@ import { AlertTriangle, Loader2, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { FaDiscord } from "react-icons/fa";
-import { Button } from "@/shared/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card";
-import { authClient } from "@/shared/auth/auth-client";
 import {
   DISCORD_ERROR_MESSAGES,
   type DiscordErrorReason,
   needsDiscordReconnect,
 } from "@/modules/vault/vault.constants";
+import { authClient } from "@/shared/auth/auth-client";
+import { Button } from "@/shared/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
 
 interface DiscordReconnectPromptProps {
   vaultName: string;

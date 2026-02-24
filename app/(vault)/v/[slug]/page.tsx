@@ -3,11 +3,17 @@ import { Lock } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getVault, getVaultPageData } from "@/modules/vault/actions/vault.actions";
-import { Button } from "@/shared/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { DiscordReconnectPrompt } from "@/modules/vault/components/discord-reconnect-prompt";
 import { JoinVaultForm } from "@/modules/vault/components/join-vault-form";
 import { getSession } from "@/shared/auth/auth";
+import { Button } from "@/shared/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
 import { SITE_CONFIG } from "@/shared/config/constants";
 import { prisma } from "@/shared/db/prisma";
 import ClientVaultView from "./client-vault-view";

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect } from "react";
 import { signUpAction } from "@/modules/auth/actions/auth.actions";
+import { authClient } from "@/shared/auth/auth-client";
 import { Button } from "@/shared/components/ui/button";
 import {
   Card,
@@ -16,7 +17,6 @@ import {
 } from "@/shared/components/ui/card";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
-import { authClient } from "@/shared/auth/auth-client";
 import type { ActionState } from "@/shared/types";
 
 const initialState: ActionState = {

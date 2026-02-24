@@ -3,8 +3,8 @@
 import { Loader2, RefreshCw } from "lucide-react";
 import { useState } from "react";
 import { FaDiscord } from "react-icons/fa";
-import { Button } from "@/shared/components/ui/button";
 import { authClient } from "@/shared/auth/auth-client";
+import { Button } from "@/shared/components/ui/button";
 
 interface DiscordConnectButtonProps {
   /** URL to return to after Discord OAuth */
