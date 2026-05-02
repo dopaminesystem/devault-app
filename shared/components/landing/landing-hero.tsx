@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Github, LockKeyhole, Sparkles } from "lucide-react";
+import { ArrowRight, LockKeyhole, Sparkles } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/shared/components/ui/button";
@@ -49,10 +49,7 @@ export function LandingHero() {
               size="lg"
               className="h-12 border-white/15 bg-white/5 px-7 text-zinc-100 hover:bg-white/10"
             >
-              <Link href="https://github.com/dopaminesystem/devault-app" target="_blank">
-                <Github className="size-5" />
-                View source
-              </Link>
+              <Link href="/sign-in">Join early access</Link>
             </Button>
           </div>
 
